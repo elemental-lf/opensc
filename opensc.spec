@@ -69,7 +69,7 @@ for file in docs/*.1 ; do
   iconv -f iso-8859-1 -t utf-8 $file > $file.utf-8 ; mv $file.utf-8 $file
 done
 sh ./bootstrap # for patch0
-# Substitute hardcoded 'lib' in OpenSSL checks for multi-lib platforms. 
+# Substitute hardcoded 'lib' in OpenSSL checks for multi-lib platforms.
 sed -i -e 's!/lib/libcrypto!/%{_lib}/libcrypto!g' configure
 sed -i -e 's!openssldir/lib !openssldir/%{_lib} !g' configure
 
@@ -180,7 +180,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Wed Feb  9 2005 Michael Schwendt <mschwendt[AT]users.sf.net> - 0.9.4-2
-- Substitute hardcoded 'lib' in OpenSSL checks for multi-lib platforms. 
+- Substitute hardcoded 'lib' in OpenSSL checks for multi-lib platforms.
 - Use --with-plugin-dir instead of --with-plugin-path (fixes x86_64).
 
 * Thu Feb  3 2005 Ville Skyttä <ville.skytta at iki.fi> - 0.9.4-1
