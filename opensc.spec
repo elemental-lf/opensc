@@ -6,7 +6,7 @@
 
 Name:           opensc
 Version:        0.9.4
-Release:        1
+Release:        2
 Summary:        OpenSC SmartCard library and applications
 
 Group:          System Environment/Libraries
@@ -76,7 +76,7 @@ sh ./bootstrap # for patch0
 %if %{disable_static}
   --disable-static \
 %endif
-  --with-plugin-path=%{plugindir} \
+  --with-plugin-dir=%{plugindir} \
   --with-pin-entry=%{_bindir}/pinentry
 make %{?_smp_mflags}
 
@@ -176,6 +176,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Wed Feb  9 2005 Michael Schwendt <mschwendt[AT]users.sf.net> - 0.9.4-2
+- Use --with-plugin-dir instead of --with-plugin-path (fixes x86_64).
+
 * Thu Feb  3 2005 Ville Skyttä <ville.skytta at iki.fi> - 0.9.4-1
 - Drop unnecessary Epochs, pre-FC1 compat cruft, and no longer relevant
   --with(out) rpmbuild options.
