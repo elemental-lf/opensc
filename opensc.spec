@@ -6,7 +6,7 @@
 
 Name:           opensc
 Version:        0.9.4
-Release:        2
+Release:        3
 Summary:        OpenSC SmartCard library and applications
 
 Group:          System Environment/Libraries
@@ -14,6 +14,7 @@ License:        LGPL
 URL:            http://www.opensc.org/
 Source0:        http://www.opensc.org/files/opensc-0.9.4.tar.gz
 Patch0:         %{name}-build.patch
+Patch1:         %{name}-lvalue.patch
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildRequires:  pcsc-lite-devel >= 1.1.1 flex pam-devel openldap-devel
@@ -41,20 +42,21 @@ OpenSC Signer is a plugin for web browsers compatible with Mozilla
 plugins that will generate digital signatures using facilities on
 PKI-capable smartcards.
 
-%package        pam
+%package     -n pam_%{name}
 Summary:        OpenSC pluggable authentication module
 Group:          System Environment/Base
-Provides:       pam_opensc = %{version}-%{release}
+Provides:       %{name}-pam = %{version}-%{release}
+Obsoletes:      %{name}-pam < 0.9.4-3
 Requires:       %{name} = %{version}-%{release}
 
-%description    pam
+%description -n pam_%{name}
 OpenSC pluggable authentication module implementing smart card support.
 
 %package        devel
 Summary:        OpenSC development files
 Group:          Development/Libraries
 Requires:       %{name} = %{version}-%{release} pkgconfig
-Requires:       %{name}-pam = %{version}-%{release}
+Requires:       pam_%{name} = %{version}-%{release}
 
 %description    devel
 OpenSC development files.
@@ -63,6 +65,7 @@ OpenSC development files.
 %prep
 %setup -q
 %patch0 -p0
+%patch1 -p0
 cp -p src/pkcs15init/README ./README.pkcs15init
 cp -p src/scconf/README.scconf .
 for file in docs/*.1 ; do
@@ -105,9 +108,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %post -p /sbin/ldconfig
-%post pam -p /sbin/ldconfig
+%post -n pam_%{name} -p /sbin/ldconfig
 %postun -p /sbin/ldconfig
-%postun pam -p /sbin/ldconfig
+%postun -n pam_%{name} -p /sbin/ldconfig
 
 
 %files
@@ -147,7 +150,7 @@ rm -rf $RPM_BUILD_ROOT
 %{plugindir}/opensc-signer.so
 %{_libdir}/opensc/opensc-signer.so
 
-%files pam
+%files -n pam_%{name}
 %defattr(-,root,root,-)
 %doc PAM_README
 /%{_lib}/security/pam_opensc.so
@@ -179,6 +182,10 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Fri Mar 18 2005 Ville Skyttä <ville.skytta at iki.fi> - 0.9.4-3
+- Fix FC4 build.
+- Rename opensc-pam to pam_opensc per package naming guidelines.
+
 * Wed Feb  9 2005 Michael Schwendt <mschwendt[AT]users.sf.net> - 0.9.4-2
 - Substitute hardcoded 'lib' in OpenSSL checks for multi-lib platforms.
 - Use --with-plugin-dir instead of --with-plugin-path (fixes x86_64).
