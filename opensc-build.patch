@@ -1,0 +1,161 @@
+Index: configure.in
+===================================================================
+RCS file: /pub/cvsroot/opensc/configure.in,v
+retrieving revision 1.133
+diff -a -u -r1.133 configure.in
+--- configure.in	5 Aug 2004 22:27:11 -0000	1.133
++++ configure.in	3 Nov 2004 17:04:38 -0000
+@@ -241,7 +241,7 @@
+ AC_SUBST(ENGINE_LINK)
+ AC_CACHE_CHECK([for OpenSSL directory], ac_cv_openssldir, [
+ 	if test "x$tryssldir" = "x" ; then
+-		tryssldir="$trycommandir /usr/ /usr/local/openssl /usr/lib/openssl /usr/local/ssl /usr/lib/ssl /usr/local /usr/pkg /opt /opt/openssl"
++		tryssldir="$trycommondir /usr /usr/local/openssl /usr/lib/openssl /usr/local/ssl /usr/lib/ssl /usr/local /usr/pkg /opt /opt/openssl"
+ 	fi
+ 
+ 	for ssldir in $tryssldir ; do
+@@ -316,11 +316,11 @@
+ }
+ 		],
+ 		[
+-			AC_MSG_RESULT("good, 0.9.7d or later")
++			AC_MSG_RESULT([good, 0.9.7d or later])
+ 			GOOD_OPENSSL=yes
+ 		],
+ 		[
+-			AC_MSG_RESULT("not so good, 0.9.7d or later woudl be better")
++			AC_MSG_RESULT([not so good, 0.9.7d or later would be better])
+ 			GOOD_OPENSSL=no
+ 		]
+ 		)
+@@ -406,11 +406,13 @@
+ 
+ if test "x$SSL_MSG" = "xyes" ; then
+   AC_DEFINE(HAVE_OPENSSL, 1, [Have OpenSSL libraries])
+-  LDFLAGS="-L$ac_cv_openssldir/lib $LDFLAGS"
+-  if test ! -z "$need_dash_r" ; then
++  if test "x$ac_cv_openssldir" != "x/usr"; then
++    LDFLAGS="-L$ac_cv_openssldir/lib $LDFLAGS"
++    if test ! -z "$need_dash_r" ; then
+        LDFLAGS="-R$ac_cv_openssldir/lib $LDFLAGS"
++    fi
++    CPPFLAGS="-I$ac_cv_openssldir/include $saved_CPPFLAGS"
+   fi
+-  CPPFLAGS="-I$ac_cv_openssldir/include $saved_CPPFLAGS"
+ else
+   LIBCRYPTO=""
+   LIBCRYPTOA=""
+Index: src/libopensc/Makefile.am
+===================================================================
+RCS file: /pub/cvsroot/opensc/src/libopensc/Makefile.am,v
+retrieving revision 1.79
+diff -a -u -r1.79 Makefile.am
+--- src/libopensc/Makefile.am	27 Oct 2004 06:41:27 -0000	1.79
++++ src/libopensc/Makefile.am	3 Nov 2004 17:04:39 -0000
+@@ -7,7 +7,7 @@
+ EXTRA_DIST = Makefile.mak libopensc.pc.in
+ 
+ INCLUDES = @CPPFLAGS@ @OPENCT_CFLAGS@ @PCSC_CFLAGS@
+-LDFLAGS = @LDFLAGS@ @OPENCT_LDFLAGS@
++AM_LDFLAGS = @OPENCT_LDFLAGS@
+ 
+ bin_SCRIPTS = opensc-config
+ 
+Index: src/openscd/Makefile.am
+===================================================================
+RCS file: /pub/cvsroot/opensc/src/openscd/Makefile.am,v
+retrieving revision 1.9
+diff -a -u -r1.9 Makefile.am
+--- src/openscd/Makefile.am	30 Jul 2003 09:50:17 -0000	1.9
++++ src/openscd/Makefile.am	3 Nov 2004 17:04:39 -0000
+@@ -5,7 +5,7 @@
+ EXTRA_DIST = test.c
+ 
+ INCLUDES = @CPPFLAGS@ @CFLAGS_ASSUAN@
+-LDFLAGS = @LDFLAGS@ @LIBOPENSC@
++AM_LDFLAGS = @LIBOPENSC@
+ 
+ if HAVE_ASSUAN
+ noinst_PROGRAMS = openscd
+Index: src/pam/Makefile.am
+===================================================================
+RCS file: /pub/cvsroot/opensc/src/pam/Makefile.am,v
+retrieving revision 1.31
+diff -a -u -r1.31 Makefile.am
+--- src/pam/Makefile.am	22 Dec 2003 22:07:02 -0000	1.31
++++ src/pam/Makefile.am	3 Nov 2004 17:04:39 -0000
+@@ -6,7 +6,7 @@
+ 
+ INCLUDES = @CPPFLAGS@ -I${top_srcdir}/src/scam
+ 
+-LDFLAGS = @LDFLAGS@ ${top_builddir}/src/scam/libscam.la
++AM_LDFLAGS = ${top_builddir}/src/scam/libscam.la
+ 
+ if HAVE_PAM
+ lib_LTLIBRARIES = pam_opensc.la
+Index: src/pkcs15init/Makefile.am
+===================================================================
+RCS file: /pub/cvsroot/opensc/src/pkcs15init/Makefile.am,v
+retrieving revision 1.29
+diff -a -u -r1.29 Makefile.am
+--- src/pkcs15init/Makefile.am	16 Jun 2004 20:59:59 -0000	1.29
++++ src/pkcs15init/Makefile.am	3 Nov 2004 17:04:40 -0000
+@@ -4,8 +4,8 @@
+ 
+ MAINTAINERCLEANFILES = Makefile.in
+ 
+-CFLAGS = @CFLAGS@ -DSC_PKCS15_PROFILE_DIRECTORY=\"$(pkgdatadir)\"
+-LDFLAGS = @LDFLAGS@ @LIBOPENSC@
++AM_CFLAGS = -DSC_PKCS15_PROFILE_DIRECTORY=\"$(pkgdatadir)\"
++AM_LDFLAGS = @LIBOPENSC@
+ 
+ PROFILES = \
+ 	cyberflex.profile \
+Index: src/sia/Makefile.am
+===================================================================
+RCS file: /pub/cvsroot/opensc/src/sia/Makefile.am,v
+retrieving revision 1.13
+diff -a -u -r1.13 Makefile.am
+--- src/sia/Makefile.am	30 Jul 2003 09:50:17 -0000	1.13
++++ src/sia/Makefile.am	3 Nov 2004 17:04:40 -0000
+@@ -6,7 +6,7 @@
+ 
+ INCLUDES = @CPPFLAGS@ -I${top_srcdir}/src/scam
+ 
+-LDFLAGS = @LDFLAGS@ @LIBDL@ ${top_builddir}/src/scam/libscam.la
++AM_LDFLAGS = @LIBDL@ ${top_builddir}/src/scam/libscam.la
+ 
+ SRC = sia_opensc.c sia_support.c sia_support.h
+ 
+Index: src/tests/Makefile.am
+===================================================================
+RCS file: /pub/cvsroot/opensc/src/tests/Makefile.am,v
+retrieving revision 1.19
+diff -a -u -r1.19 Makefile.am
+--- src/tests/Makefile.am	30 Jul 2003 09:50:18 -0000	1.19
++++ src/tests/Makefile.am	3 Nov 2004 17:04:40 -0000
+@@ -6,7 +6,7 @@
+ 
+ EXTRA_DIST = Makefile.mak
+ 
+-LDFLAGS = @LDFLAGS@ @LIBOPENSC@
++AM_LDFLAGS = @LIBOPENSC@
+ 
+ noinst_PROGRAMS = base64 lottery p15dump pintest prngtest
+ 
+Index: src/tools/Makefile.am
+===================================================================
+RCS file: /pub/cvsroot/opensc/src/tools/Makefile.am,v
+retrieving revision 1.35
+diff -a -u -r1.35 Makefile.am
+--- src/tools/Makefile.am	21 Jul 2004 22:02:37 -0000	1.35
++++ src/tools/Makefile.am	3 Nov 2004 17:04:41 -0000
+@@ -4,7 +4,7 @@
+ 
+ EXTRA_DIST = Makefile.mak
+ 
+-LDFLAGS = @LDFLAGS@ @LIBOPENSC@
++AM_LDFLAGS = @LIBOPENSC@
+ 
+ if HAVE_SSL
+ PROGRAMS_SSL = cryptoflex-tool pkcs15-init
