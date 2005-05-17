@@ -5,32 +5,28 @@
 %define plugindir %{_libdir}/mozilla/plugins
 
 Name:           opensc
-Version:        0.9.4
-Release:        3
-Summary:        OpenSC SmartCard library and applications
+Version:        0.9.6
+Release:        2
+Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
 License:        LGPL
 URL:            http://www.opensc.org/
-Source0:        http://www.opensc.org/files/opensc-0.9.4.tar.gz
-Patch0:         %{name}-build.patch
-Patch1:         %{name}-lvalue.patch
+Source0:        http://www.opensc.org/files/%{name}-%{version}.tar.gz
+Patch0:         %{name}-lvalue.patch
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildRequires:  pcsc-lite-devel >= 1.1.1 flex pam-devel openldap-devel
 BuildRequires:  readline-devel libtermcap-devel openct-devel
 BuildRequires:  openssl-devel >= 0.9.7a libassuan-devel XFree86-devel
-# libtool (+ pulled in automake and autoconf) for patch0
-BuildRequires:  libtool
-Requires:       openct
 
 %description
-OpenSC is a package for for accessing SmartCard devices.  Basic
+OpenSC is a package for for accessing smart card devices.  Basic
 functionality (e.g. SELECT FILE, READ BINARY) should work on any ISO
-7816-4 compatible SmartCard.  Encryption and decryption using private
-keys on the SmartCard is possible with PKCS #15 compatible cards, such
-as the FINEID (Finnish Electronic IDentity) card. Swedish Posten eID
-cards have also been confirmed to work.
+7816-4 compatible smart card.  Encryption and decryption using private
+keys on the smart card is possible with PKCS #15 compatible cards,
+such as the FINEID (Finnish Electronic IDentity) card.  Swedish Posten
+eID cards have also been confirmed to work.
 
 %package     -n mozilla-opensc-signer
 Summary:        Digital signature plugin for web browsers
@@ -40,17 +36,17 @@ Requires:       %{plugindir} pinentry
 %description -n mozilla-opensc-signer
 OpenSC Signer is a plugin for web browsers compatible with Mozilla
 plugins that will generate digital signatures using facilities on
-PKI-capable smartcards.
+PKI-capable smart cards.
 
 %package     -n pam_%{name}
-Summary:        OpenSC pluggable authentication module
+Summary:        Pluggable authentication module using smart cards
 Group:          System Environment/Base
 Provides:       %{name}-pam = %{version}-%{release}
-Obsoletes:      %{name}-pam < 0.9.4-3
+Obsoletes:      %{name}-pam < 0.9.6-2
 Requires:       %{name} = %{version}-%{release}
 
 %description -n pam_%{name}
-OpenSC pluggable authentication module implementing smart card support.
+Pluggable authentication module implementing smart card support.
 
 %package        devel
 Summary:        OpenSC development files
@@ -65,16 +61,14 @@ OpenSC development files.
 %prep
 %setup -q
 %patch0 -p0
-%patch1 -p0
 cp -p src/pkcs15init/README ./README.pkcs15init
 cp -p src/scconf/README.scconf .
 for file in docs/*.1 ; do
   iconv -f iso-8859-1 -t utf-8 $file > $file.utf-8 ; mv $file.utf-8 $file
 done
-sh ./bootstrap # for patch0
 # Substitute hardcoded 'lib' in OpenSSL checks for multi-lib platforms.
 sed -i -e 's!/lib/libcrypto!/%{_lib}/libcrypto!g' configure
-sed -i -e 's!openssldir/lib !openssldir/%{_lib} !g' configure
+sed -i -e 's!commondir/lib !commondir/%{_lib} !g' configure
 
 
 %build
@@ -90,6 +84,7 @@ make %{?_smp_mflags}
 %install
 rm -rf $RPM_BUILD_ROOT _docs
 make install DESTDIR=$RPM_BUILD_ROOT
+install -Dpm 644 etc/opensc.conf $RPM_BUILD_ROOT%{_sysconfdir}/opensc.conf
 
 # Fixup pam module location.
 install -dm 755 $RPM_BUILD_ROOT/%{_lib}/security
@@ -97,9 +92,7 @@ mv $RPM_BUILD_ROOT%{_libdir}/security/pam_opensc.so \
   $RPM_BUILD_ROOT/%{_lib}/security/pam_opensc.so
 rm -rf $RPM_BUILD_ROOT%{_libdir}/security
 
-# Installing config examples as doc later.
 install -dm 755 _docs/openssh
-mv $RPM_BUILD_ROOT%{_datadir}/opensc/*.conf.example _docs
 install -pm 644 src/openssh/README src/openssh/ask-for-pin.diff _docs/openssh
 
 
@@ -115,8 +108,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root,-)
-%doc ANNOUNCE AUTHORS ChangeLog COPYING NEWS QUICKSTART README.*
-%doc docs/*.html docs/*.css _docs/*.conf.example
+%doc ANNOUNCE NEWS QUICKSTART README.* docs/*.html docs/*.css etc/scldap.conf
+%config(noreplace) %{_sysconfdir}/opensc.conf
 %{_bindir}/cardos-info
 %{_bindir}/cryptoflex-tool
 %{_bindir}/opensc-explorer
@@ -130,7 +123,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/libscconf.so.*
 %{_libdir}/libscldap.so.*
 %dir %{_libdir}/opensc
-%{!?_with_oldssl:%{_libdir}/opensc/engine_*.so}
+%{_libdir}/opensc/engine_*.so
 %dir %{_libdir}/pkcs11
 %{_libdir}/pkcs11/opensc-pkcs11.so
 %{_libdir}/pkcs11/lib*.so.*
@@ -171,17 +164,22 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/pkcs11/pkcs11-spy.so
 %{_libdir}/pkcs11/lib*.so
 %exclude %{_libdir}/pkcs11/*.la
-%{_libdir}/pkgconfig/libopensc.pc
+%{_libdir}/pkgconfig/lib*.pc
 %{_mandir}/man1/opensc-config.1*
 %{_mandir}/man3/*.3*
 %if !%{disable_static}
 %{_libdir}/*.a
-%{_libdir}/opensc/*.a
-%{_libdir}/pkcs11/lib*.a
+%exclude %{_libdir}/opensc/*.a
+%exclude %{_libdir}/pkcs11/*.a
 %endif
 
 
 %changelog
+* Tue Apr 26 2005 Ville Skyttä <ville.skytta at iki.fi> - 0.9.6-2
+- 0.9.6, build patch applied upstream.
+- Package summary and description improvements.
+- Drop explicit openct dependency.
+
 * Fri Mar 18 2005 Ville Skyttä <ville.skytta at iki.fi> - 0.9.4-3
 - Fix FC4 build.
 - Rename opensc-pam to pam_opensc per package naming guidelines.
