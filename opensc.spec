@@ -1,24 +1,21 @@
-# There's something in the opensc static libs that strip(1) invoked in the
-# end of %%install doesn't grok.  Hence, disabled for now.
-%define disable_static 1
-
 %define plugindir %{_libdir}/mozilla/plugins
 
 Name:           opensc
-Version:        0.9.6
-Release:        2
+Version:        0.10.0
+Release:        1%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
 License:        LGPL
 URL:            http://www.opensc.org/
 Source0:        http://www.opensc.org/files/%{name}-%{version}.tar.gz
-Patch0:         %{name}-lvalue.patch
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-BuildRequires:  pcsc-lite-devel >= 1.1.1 flex pam-devel openldap-devel
-BuildRequires:  readline-devel libtermcap-devel openct-devel
-BuildRequires:  openssl-devel >= 0.9.7a libassuan-devel XFree86-devel
+BuildRequires:  pcsc-lite-devel >= 1.1.1
+BuildRequires:  readline-devel
+BuildRequires:  openct-devel
+BuildRequires:  openssl-devel >= 0.9.7a
+BuildRequires:  libtool-ltdl-devel
 
 %description
 OpenSC is a package for for accessing smart card devices.  Basic
@@ -31,28 +28,21 @@ eID cards have also been confirmed to work.
 %package     -n mozilla-opensc-signer
 Summary:        Digital signature plugin for web browsers
 Group:          Applications/Internet
-Requires:       %{plugindir} pinentry
+BuildRequires:  libXt-devel
+BuildRequires:  libassuan-devel
+Requires:       %{plugindir}
+Requires:       %{_bindir}/pinentry
 
 %description -n mozilla-opensc-signer
 OpenSC Signer is a plugin for web browsers compatible with Mozilla
 plugins that will generate digital signatures using facilities on
 PKI-capable smart cards.
 
-%package     -n pam_%{name}
-Summary:        Pluggable authentication module using smart cards
-Group:          System Environment/Base
-Provides:       %{name}-pam = %{version}-%{release}
-Obsoletes:      %{name}-pam < 0.9.6-2
-Requires:       %{name} = %{version}-%{release}
-
-%description -n pam_%{name}
-Pluggable authentication module implementing smart card support.
-
 %package        devel
 Summary:        OpenSC development files
 Group:          Development/Libraries
-Requires:       %{name} = %{version}-%{release} pkgconfig
-Requires:       pam_%{name} = %{version}-%{release}
+Requires:       %{name} = %{version}-%{release}
+Requires:       pkgconfig
 
 %description    devel
 OpenSC development files.
@@ -60,22 +50,13 @@ OpenSC development files.
 
 %prep
 %setup -q
-%patch0 -p0
 cp -p src/pkcs15init/README ./README.pkcs15init
 cp -p src/scconf/README.scconf .
-for file in docs/*.1 ; do
-  iconv -f iso-8859-1 -t utf-8 $file > $file.utf-8 ; mv $file.utf-8 $file
-done
-# Substitute hardcoded 'lib' in OpenSSL checks for multi-lib platforms.
-sed -i -e 's!/lib/libcrypto!/%{_lib}/libcrypto!g' configure
-sed -i -e 's!commondir/lib !commondir/%{_lib} !g' configure
 
 
 %build
 %configure --disable-dependency-tracking \
-%if %{disable_static}
   --disable-static \
-%endif
   --with-plugin-dir=%{plugindir} \
   --with-pin-entry=%{_bindir}/pinentry
 make %{?_smp_mflags}
@@ -83,17 +64,21 @@ make %{?_smp_mflags}
 
 %install
 rm -rf $RPM_BUILD_ROOT _docs
+install -dm 755 $RPM_BUILD_ROOT%{plugindir}
 make install DESTDIR=$RPM_BUILD_ROOT
 install -Dpm 644 etc/opensc.conf $RPM_BUILD_ROOT%{_sysconfdir}/opensc.conf
 
-# Fixup pam module location.
-install -dm 755 $RPM_BUILD_ROOT/%{_lib}/security
-mv $RPM_BUILD_ROOT%{_libdir}/security/pam_opensc.so \
-  $RPM_BUILD_ROOT/%{_lib}/security/pam_opensc.so
-rm -rf $RPM_BUILD_ROOT%{_libdir}/security
-
 install -dm 755 _docs/openssh
 install -pm 644 src/openssh/README src/openssh/ask-for-pin.diff _docs/openssh
+cp -pR doc _docs
+rm -r _docs/doc/{*.sh,*.xsl,old,Makefile*,tools}
+
+find $RPM_BUILD_ROOT%{_libdir} -type f -name "*.la" | xargs rm
+
+rm $RPM_BUILD_ROOT%{plugindir}/opensc-signer.so
+mv $RPM_BUILD_ROOT%{_libdir}/opensc/opensc-signer.so \
+  $RPM_BUILD_ROOT%{plugindir}
+rmdir $RPM_BUILD_ROOT%{_libdir}/opensc
 
 
 %clean
@@ -101,80 +86,70 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %post -p /sbin/ldconfig
-%post -n pam_%{name} -p /sbin/ldconfig
+
 %postun -p /sbin/ldconfig
-%postun -n pam_%{name} -p /sbin/ldconfig
 
 
 %files
 %defattr(-,root,root,-)
-%doc ANNOUNCE NEWS QUICKSTART README.* docs/*.html docs/*.css etc/scldap.conf
+%doc COPYING NEWS README* _docs/doc/
 %config(noreplace) %{_sysconfdir}/opensc.conf
 %{_bindir}/cardos-info
 %{_bindir}/cryptoflex-tool
+%{_bindir}/eidenv
+%{_bindir}/netkey-tool
 %{_bindir}/opensc-explorer
 %{_bindir}/opensc-tool
 %{_bindir}/pkcs11-tool
 %{_bindir}/pkcs15-crypt
 %{_bindir}/pkcs15-init
 %{_bindir}/pkcs15-tool
-%{_libdir}/libopensc.so.*
-%{_libdir}/libpkcs15init.so.*
-%{_libdir}/libscconf.so.*
-%{_libdir}/libscldap.so.*
-%dir %{_libdir}/opensc
-%{_libdir}/opensc/engine_*.so
-%dir %{_libdir}/pkcs11
-%{_libdir}/pkcs11/opensc-pkcs11.so
-%{_libdir}/pkcs11/lib*.so.*
-%{_datadir}/opensc
-%{_mandir}/man1/cardos-info.*
-%{_mandir}/man1/cryptoflex-tool.*
+%{_libdir}/lib*.so.*
+%{_libdir}/opensc-pkcs11.so
+%{_datadir}/opensc/
+%{_mandir}/man1/cardos-info.1*
+%{_mandir}/man1/cryptoflex-tool.1*
+%{_mandir}/man1/netkey-tool.1*
 %{_mandir}/man1/opensc-explorer.*
-%{_mandir}/man1/opensc-tool.*
-%{_mandir}/man1/pkcs11-tool.*
-%{_mandir}/man1/pkcs15-crypt.*
-%{_mandir}/man1/pkcs15-init.*
-%{_mandir}/man1/pkcs15-tool.*
-%{_mandir}/man[57]/*.[57]*
+%{_mandir}/man1/opensc-tool.1*
+%{_mandir}/man1/pkcs11-tool.1*
+%{_mandir}/man1/pkcs15-crypt.1*
+%{_mandir}/man1/pkcs15-init.1*
+%{_mandir}/man1/pkcs15-tool.1*
+%{_mandir}/man5/*.5*
 
 %files -n mozilla-opensc-signer
 %defattr(0755,root,root,0755)
 %{plugindir}/opensc-signer.so
-%{_libdir}/opensc/opensc-signer.so
-
-%files -n pam_%{name}
-%defattr(-,root,root,-)
-%doc PAM_README
-/%{_lib}/security/pam_opensc.so
-%{_libdir}/libscam.so.*
 
 %files devel
 %defattr(-,root,root,-)
-%doc CodingStyle _docs/openssh
+%doc _docs/openssh/
 %{_bindir}/opensc-config
-%{_includedir}/opensc
-%exclude %{_libdir}/*.la
-%{_libdir}/libopensc.so
-%{_libdir}/libpkcs15init.so
-%{_libdir}/libscam.so
-%{_libdir}/libscconf.so
-%{_libdir}/libscldap.so
-%exclude %{_libdir}/opensc/*.la
-%{_libdir}/pkcs11/pkcs11-spy.so
-%{_libdir}/pkcs11/lib*.so
-%exclude %{_libdir}/pkcs11/*.la
+%{_includedir}/opensc/
+%{_libdir}/lib*.so
+%{_libdir}/pkcs11-spy.so
 %{_libdir}/pkgconfig/lib*.pc
 %{_mandir}/man1/opensc-config.1*
 %{_mandir}/man3/*.3*
-%if !%{disable_static}
-%{_libdir}/*.a
-%exclude %{_libdir}/opensc/*.a
-%exclude %{_libdir}/pkcs11/*.a
-%endif
 
 
 %changelog
+* Wed Nov  9 2005 Ville Skyttä <ville.skytta at iki.fi> - 0.10.0-1
+- 0.10.0.
+- Adapt to modularized X.Org.
+
+* Wed Oct 26 2005 Ville Skyttä <ville.skytta at iki.fi> - 0.10.0-0.1.rc2
+- 0.10.0-rc2.
+- Install signer plugin only to plugin dir.
+
+* Sat Oct 22 2005 Ville Skyttä <ville.skytta at iki.fi> - 0.10.0-0.1.rc1
+- 0.10.0-rc1.
+
+* Wed Oct 19 2005 Ville Skyttä <ville.skytta at iki.fi> - 0.10.0-0.1.beta2.rc1
+- 0.10.0-beta2-rc1.
+- Specfile cleanups.
+
 * Tue Apr 26 2005 Ville Skyttä <ville.skytta at iki.fi> - 0.9.6-2
 - 0.9.6, build patch applied upstream.
 - Package summary and description improvements.
