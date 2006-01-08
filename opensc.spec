@@ -1,14 +1,14 @@
 %define plugindir %{_libdir}/mozilla/plugins
 
 Name:           opensc
-Version:        0.10.0
+Version:        0.10.1
 Release:        1%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
 License:        LGPL
 URL:            http://www.opensc.org/
-Source0:        http://www.opensc.org/files/%{name}-%{version}.tar.gz
+Source0:        http://www.opensc.org/files/opensc/%{name}-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildRequires:  pcsc-lite-devel >= 1.1.1
@@ -135,6 +135,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Sun Jan  8 2006 Ville Skyttä <ville.skytta at iki.fi> - 0.10.1-1
+- 0.10.1.
+
 * Wed Nov  9 2005 Ville Skyttä <ville.skytta at iki.fi> - 0.10.0-1
 - 0.10.0.
 - Adapt to modularized X.Org.
