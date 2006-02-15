@@ -2,13 +2,14 @@
 
 Name:           opensc
 Version:        0.10.1
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
 License:        LGPL
 URL:            http://www.opensc.org/
 Source0:        http://www.opensc.org/files/opensc/%{name}-%{version}.tar.gz
+Patch0:         %{name}-0.10.1-rpath64.patch
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildRequires:  pcsc-lite-devel >= 1.1.1
@@ -50,6 +51,8 @@ OpenSC development files.
 
 %prep
 %setup -q
+# patch0: --disable-rpath doesn't seem to do what it implies
+%patch0 -p1
 cp -p src/pkcs15init/README ./README.pkcs15init
 cp -p src/scconf/README.scconf .
 
@@ -135,6 +138,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Wed Feb 15 2006 Ville Skyttä <ville.skytta at iki.fi> - 0.10.1-2
+- Avoid standard rpaths on lib64 archs.
+
 * Sun Jan  8 2006 Ville Skyttä <ville.skytta at iki.fi> - 0.10.1-1
 - 0.10.1.
 
