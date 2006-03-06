@@ -2,7 +2,7 @@
 
 Name:           opensc
 Version:        0.10.1
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
@@ -138,6 +138,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Mon Mar  6 2006 Ville Skyttä <ville.skytta at iki.fi> - 0.10.1-3
+- Rebuild.
+
 * Wed Feb 15 2006 Ville Skyttä <ville.skytta at iki.fi> - 0.10.1-2
 - Avoid standard rpaths on lib64 archs.
 
