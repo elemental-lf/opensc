@@ -1,15 +1,14 @@
 %define plugindir %{_libdir}/mozilla/plugins
 
 Name:           opensc
-Version:        0.10.1
-Release:        3%{?dist}
+Version:        0.11.0
+Release:        0.1.rc1%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
 License:        LGPL
-URL:            http://www.opensc.org/
-Source0:        http://www.opensc.org/files/opensc/%{name}-%{version}.tar.gz
-Patch0:         %{name}-0.10.1-rpath64.patch
+URL:            http://www.opensc-project.org/
+Source0:        http://www.opensc-project.org/files/opensc/testing/%{name}-%{version}-rc1.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildRequires:  pcsc-lite-devel >= 1.1.1
@@ -17,6 +16,7 @@ BuildRequires:  readline-devel
 BuildRequires:  openct-devel
 BuildRequires:  openssl-devel >= 0.9.7a
 BuildRequires:  libtool-ltdl-devel
+BuildRequires:  libtool
 
 %description
 OpenSC is a package for for accessing smart card devices.  Basic
@@ -50,9 +50,8 @@ OpenSC development files.
 
 
 %prep
-%setup -q
-# patch0: --disable-rpath doesn't seem to do what it implies
-%patch0 -p1
+%setup -q -n %{name}-%{version}-rc1
+sh bootstrap # avoid standard rpaths on lib64 archs
 cp -p src/pkcs15init/README ./README.pkcs15init
 cp -p src/scconf/README.scconf .
 
@@ -74,14 +73,12 @@ install -Dpm 644 etc/opensc.conf $RPM_BUILD_ROOT%{_sysconfdir}/opensc.conf
 install -dm 755 _docs/openssh
 install -pm 644 src/openssh/README src/openssh/ask-for-pin.diff _docs/openssh
 cp -pR doc _docs
-rm -r _docs/doc/{*.sh,*.xsl,old,Makefile*,tools}
+rm -r _docs/doc/{*.sh,*.xsl,api,Makefile*,tools}
 
 find $RPM_BUILD_ROOT%{_libdir} -type f -name "*.la" | xargs rm
 
 rm $RPM_BUILD_ROOT%{plugindir}/opensc-signer.so
-mv $RPM_BUILD_ROOT%{_libdir}/opensc/opensc-signer.so \
-  $RPM_BUILD_ROOT%{plugindir}
-rmdir $RPM_BUILD_ROOT%{_libdir}/opensc
+mv $RPM_BUILD_ROOT%{_libdir}/opensc-signer.so $RPM_BUILD_ROOT%{plugindir}
 
 
 %clean
@@ -103,6 +100,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/netkey-tool
 %{_bindir}/opensc-explorer
 %{_bindir}/opensc-tool
+%{_bindir}/piv-tool
 %{_bindir}/pkcs11-tool
 %{_bindir}/pkcs15-crypt
 %{_bindir}/pkcs15-init
@@ -138,6 +136,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Sat Apr 22 2006 Ville Skyttä <ville.skytta at iki.fi> - 0.11.0-0.1.rc1
+- 0.11.0-rc1.
+
 * Mon Mar  6 2006 Ville Skyttä <ville.skytta at iki.fi> - 0.10.1-3
 - Rebuild.
 
