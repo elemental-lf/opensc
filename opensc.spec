@@ -2,13 +2,13 @@
 
 Name:           opensc
 Version:        0.11.0
-Release:        0.1.rc1%{?dist}
+Release:        0.1.rc2%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
 License:        LGPL
 URL:            http://www.opensc-project.org/
-Source0:        http://www.opensc-project.org/files/opensc/testing/%{name}-%{version}-rc1.tar.gz
+Source0:        http://www.opensc-project.org/files/opensc/testing/%{name}-%{version}-rc2.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildRequires:  pcsc-lite-devel >= 1.1.1
@@ -50,7 +50,7 @@ OpenSC development files.
 
 
 %prep
-%setup -q -n %{name}-%{version}-rc1
+%setup -q -n %{name}-%{version}-rc2
 sh bootstrap # avoid standard rpaths on lib64 archs
 cp -p src/pkcs15init/README ./README.pkcs15init
 cp -p src/scconf/README.scconf .
@@ -136,6 +136,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Thu Apr 27 2006 Ville Skyttä <ville.skytta at iki.fi> - 0.11.0-0.1.rc2
+- 0.11.0-rc2.
+
 * Sat Apr 22 2006 Ville Skyttä <ville.skytta at iki.fi> - 0.11.0-0.1.rc1
 - 0.11.0-rc1.
 
