@@ -2,12 +2,12 @@
 
 Name:           opensc
 Version:        0.11.0
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
 License:        LGPL
-URL:            http://www.opensc-project.org/
+URL:            http://www.opensc-project.org/opensc/
 Source0:        http://www.opensc-project.org/files/opensc/%{name}-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -54,6 +54,7 @@ OpenSC development files.
 sh bootstrap # avoid standard rpaths on lib64 archs
 cp -p src/pkcs15init/README ./README.pkcs15init
 cp -p src/scconf/README.scconf .
+sed -i -e 's|/usr/local/towitoko/lib/|%{_libdir}/ctapi/|' etc/opensc.conf.in
 
 
 %build
@@ -136,6 +137,10 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Sun May  7 2006 Ville Skyttä <ville.skytta at iki.fi> - 0.11.0-2
+- Sync example paths in openct.conf with ctapi-common.
+- Update URL.
+
 * Thu May  4 2006 Ville Skyttä <ville.skytta at iki.fi> - 0.11.0-1
 - 0.11.0.
 
