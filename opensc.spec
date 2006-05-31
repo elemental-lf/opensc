@@ -1,14 +1,15 @@
 %define plugindir %{_libdir}/mozilla/plugins
 
 Name:           opensc
-Version:        0.11.0
-Release:        2%{?dist}
+Version:        0.11.1
+Release:        1%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
 License:        LGPL
 URL:            http://www.opensc-project.org/opensc/
 Source0:        http://www.opensc-project.org/files/opensc/%{name}-%{version}.tar.gz
+Patch0:         %{name}-0.11.1-develconfig.patch
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildRequires:  pcsc-lite-devel >= 1.1.1
@@ -51,10 +52,12 @@ OpenSC development files.
 
 %prep
 %setup -q
+%patch0 -p1
 sh bootstrap # avoid standard rpaths on lib64 archs
 cp -p src/pkcs15init/README ./README.pkcs15init
 cp -p src/scconf/README.scconf .
-sed -i -e 's|/usr/local/towitoko/lib/|%{_libdir}/ctapi/|' etc/opensc.conf.in
+# No %{_libdir} here to avoid multilib conflicts; it's just an example
+sed -i -e 's|/usr/local/towitoko/lib/|/usr/lib/ctapi/|' etc/opensc.conf.in
 
 
 %build
@@ -137,6 +140,10 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Wed May 31 2006 Ville Skyttä <ville.skytta at iki.fi> - 0.11.1-1
+- 0.11.1.
+- Avoid some multilib conflicts.
+
 * Sun May  7 2006 Ville Skyttä <ville.skytta at iki.fi> - 0.11.0-2
 - Sync example paths in openct.conf with ctapi-common.
 - Update URL.

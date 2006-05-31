@@ -1,0 +1,23 @@
+--- opensc-0.11.1/src/libopensc/opensc-config.in~	2005-12-29 14:36:30.000000000 +0200
++++ opensc-0.11.1/src/libopensc/opensc-config.in	2006-05-31 22:26:57.000000000 +0300
+@@ -14,8 +14,8 @@
+ exec_prefix=@exec_prefix@
+ exec_prefix_set=no
+ 
+-opensc_libs="@OPENSC_LIBS@"
+-opensc_cflags="@OPENSC_CFLAGS@"
++opensc_libs="`pkg-config libopensc --libs`"
++opensc_cflags="`pkg-config libopensc --cflags`"
+ 
+ 
+ usage()
+--- opensc-0.11.1/src/libopensc/libopensc.pc.in~	2005-12-29 14:36:30.000000000 +0200
++++ opensc-0.11.1/src/libopensc/libopensc.pc.in	2006-05-31 22:26:54.000000000 +0300
+@@ -6,6 +6,6 @@
+ Name: libopensc
+ Description: libopensc
+ Version: @VERSION@
+-Libs: -L${libdir} -lopensc -lscconf
++Libs: -L${libdir} -lopensc
+ Cflags: -I${includedir}
+ 
