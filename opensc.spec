@@ -2,7 +2,7 @@
 
 Name:           opensc
 Version:        0.11.1
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
@@ -140,6 +140,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Sat Sep  2 2006 Ville Skyttä <ville.skytta at iki.fi> - 0.11.1-2
+- Rebuild.
+
 * Wed May 31 2006 Ville Skyttä <ville.skytta at iki.fi> - 0.11.1-1
 - 0.11.1.
 - Avoid some multilib conflicts.
