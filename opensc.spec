@@ -1,14 +1,15 @@
 %define plugindir %{_libdir}/mozilla/plugins
 
 Name:           opensc
-Version:        0.11.1
-Release:        6%{?dist}
+Version:        0.11.2
+Release:        0.1.pre3%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
 License:        LGPL
 URL:            http://www.opensc-project.org/opensc/
-Source0:        http://www.opensc-project.org/files/opensc/%{name}-%{version}.tar.gz
+#Source0:        http://www.opensc-project.org/files/opensc/%{name}-%{version}.tar.gz
+Source0:        http://www.opensc-project.org/files/opensc/testing/%{name}-%{version}-pre3.tar.gz
 Patch0:         %{name}-0.11.1-develconfig.patch
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -31,7 +32,7 @@ eID cards have also been confirmed to work.
 Summary:        Digital signature plugin for web browsers
 Group:          Applications/Internet
 BuildRequires:  libXt-devel
-BuildRequires:  libassuan-devel
+BuildRequires:  libassuan-static
 Requires:       %{plugindir}
 Requires:       %{_bindir}/pinentry
 
@@ -51,9 +52,10 @@ OpenSC development files.
 
 
 %prep
-%setup -q
+%setup -q -n %{name}-%{version}-pre3
 %patch0 -p1
-sh bootstrap # avoid standard rpaths on lib64 archs
+sed -i -e 's|"/lib /usr/lib\b|"/%{_lib} %{_libdir}|' configure # lib64 rpaths
+sed -i -e 's|-ltermcap|-lncurses|' configure
 cp -p src/pkcs15init/README ./README.pkcs15init
 cp -p src/scconf/README.scconf .
 # No %{_libdir} here to avoid multilib conflicts; it's just an example
@@ -140,6 +142,12 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Sun Dec  3 2006 Ville Skyttä <ville.skytta at iki.fi> - 0.11.2-0.1.pre3
+- 0.11.2-pre3.
+- Build with new libassuan.
+- Don't run autotools during build.
+- Adjust to readline/termcap/ncurses changes.
+
 * Sat Oct 14 2006 Ville Skyttä <ville.skytta at iki.fi> - 0.11.1-6
 - Rebuild with new libassuan.
 
