@@ -2,14 +2,13 @@
 
 Name:           opensc
 Version:        0.11.2
-Release:        0.3.rc2%{?dist}
+Release:        1%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
 License:        LGPL
 URL:            http://www.opensc-project.org/opensc/
-#Source0:        http://www.opensc-project.org/files/opensc/%{name}-%{version}.tar.gz
-Source0:        http://www.opensc-project.org/files/opensc/testing/%{name}-%{version}-rc2.tar.gz
+Source0:        http://www.opensc-project.org/files/opensc/%{name}-%{version}.tar.gz
 Patch0:         %{name}-0.11.1-develconfig.patch
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -52,7 +51,7 @@ OpenSC development files.
 
 
 %prep
-%setup -q -n %{name}-%{version}-rc2
+%setup -q
 %patch0 -p1
 sed -i -e 's|"/lib /usr/lib\b|"/%{_lib} %{_libdir}|' configure # lib64 rpaths
 sed -i -e 's|-ltermcap|-lncurses|' configure
@@ -142,6 +141,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Sat May  5 2007 Ville Skyttä <ville.skytta at iki.fi> - 0.11.2-1
+- 0.11.2.
+
 * Tue Apr 24 2007 Ville Skyttä <ville.skytta at iki.fi> - 0.11.2-0.3.rc2
 - 0.11.2-rc2.
 
