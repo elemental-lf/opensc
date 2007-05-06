@@ -2,7 +2,7 @@
 
 Name:           opensc
 Version:        0.11.2
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
@@ -14,6 +14,8 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildRequires:  pcsc-lite-devel >= 1.1.1
 BuildRequires:  readline-devel
+# ncurses-devel for < F7 (not pulled in by readline-devel)
+BuildRequires:  ncurses-devel
 BuildRequires:  openct-devel
 BuildRequires:  openssl-devel >= 0.9.7a
 BuildRequires:  libtool-ltdl-devel
@@ -141,6 +143,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Sun May  6 2007 Ville Skyttä <ville.skytta at iki.fi> - 0.11.2-2
+- Add explicit build dependency on ncurses-devel.
+
 * Sat May  5 2007 Ville Skyttä <ville.skytta at iki.fi> - 0.11.2-1
 - 0.11.2.
 
