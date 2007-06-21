@@ -1,14 +1,15 @@
 %define plugindir %{_libdir}/mozilla/plugins
 
 Name:           opensc
-Version:        0.11.2
-Release:        2%{?dist}
+Version:        0.11.3
+Release:        0.1.pre1%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
 License:        LGPL
 URL:            http://www.opensc-project.org/opensc/
-Source0:        http://www.opensc-project.org/files/opensc/%{name}-%{version}.tar.gz
+#Source0:        http://www.opensc-project.org/files/opensc/%{name}-%{version}.tar.gz
+Source0:        http://www.opensc-project.org/files/opensc/testing/opensc-0.11.3-pre1.tar.gz
 Patch0:         %{name}-0.11.1-develconfig.patch
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -53,10 +54,10 @@ OpenSC development files.
 
 
 %prep
-%setup -q
+%setup -q -n %{name}-%{version}-pre1
 %patch0 -p1
 sed -i -e 's|"/lib /usr/lib\b|"/%{_lib} %{_libdir}|' configure # lib64 rpaths
-sed -i -e 's|-ltermcap|-lncurses|' configure
+f=doc/ChangeLog ; iconv -f iso-8859-1 -t utf-8 $f > $f.utf8 ; mv $f.utf8 $f
 cp -p src/pkcs15init/README ./README.pkcs15init
 cp -p src/scconf/README.scconf .
 # No %{_libdir} here to avoid multilib conflicts; it's just an example
@@ -113,6 +114,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/pkcs15-init
 %{_bindir}/pkcs15-tool
 %{_libdir}/lib*.so.*
+%{_libdir}/onepin-opensc-pkcs11.so
 %{_libdir}/opensc-pkcs11.so
 %{_datadir}/opensc/
 %{_mandir}/man1/cardos-info.1*
@@ -143,6 +145,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Thu Jun 21 2007 Ville Skyttä <ville.skytta at iki.fi> - 0.11.3-0.1.pre1
+- 0.11.3-pre1.
+
 * Sun May  6 2007 Ville Skyttä <ville.skytta at iki.fi> - 0.11.2-2
 - Add explicit build dependency on ncurses-devel.
 
