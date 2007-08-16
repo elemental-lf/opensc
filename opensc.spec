@@ -2,11 +2,11 @@
 
 Name:           opensc
 Version:        0.11.3
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
-License:        LGPL
+License:        LGPLv2+
 URL:            http://www.opensc-project.org/opensc/
 Source0:        http://www.opensc-project.org/files/opensc/%{name}-%{version}.tar.gz
 Patch0:         %{name}-0.11.1-develconfig.patch
@@ -146,6 +146,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Thu Aug 16 2007 Ville Skyttä <ville.skytta at iki.fi> - 0.11.3-3
+- License: LGPLv2+
+
 * Thu Jul 26 2007 Ville Skyttä <ville.skytta at iki.fi> - 0.11.3-2
 - Fix pkcs11-tool usage message crash (#249702).
 
