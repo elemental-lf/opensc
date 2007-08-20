@@ -1,16 +1,16 @@
 %define plugindir %{_libdir}/mozilla/plugins
 
 Name:           opensc
-Version:        0.11.3
-Release:        3%{?dist}
+Version:        0.11.4
+Release:        0.1.rc1%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
 License:        LGPLv2+
 URL:            http://www.opensc-project.org/opensc/
-Source0:        http://www.opensc-project.org/files/opensc/%{name}-%{version}.tar.gz
+#Source0:        http://www.opensc-project.org/files/opensc/%{name}-%{version}.tar.gz
+Source0:        http://www.opensc-project.org/files/opensc/testing/%{name}-%{version}-rc1.tar.gz
 Patch0:         %{name}-0.11.1-develconfig.patch
-Patch1:         %{name}-0.11.3-p11t-249702.patch
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildRequires:  pcsc-lite-devel >= 1.1.1
@@ -54,9 +54,8 @@ OpenSC development files.
 
 
 %prep
-%setup -q
+%setup -q -n %{name}-%{version}-rc1
 %patch0 -p1
-%patch1 -p0
 sed -i -e 's|"/lib /usr/lib\b|"/%{_lib} %{_libdir}|' configure # lib64 rpaths
 f=doc/ChangeLog ; iconv -f iso-8859-1 -t utf-8 $f > $f.utf8 ; mv $f.utf8 $f
 cp -p src/pkcs15init/README ./README.pkcs15init
@@ -146,7 +145,8 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
-* Thu Aug 16 2007 Ville Skyttä <ville.skytta at iki.fi> - 0.11.3-3
+* Mon Aug 20 2007 Ville Skyttä <ville.skytta at iki.fi> - 0.11.4-0.1.rc1
+- 0.11.4-rc1, pkcs11-tool usage message fix applied upstream.
 - License: LGPLv2+
 
 * Thu Jul 26 2007 Ville Skyttä <ville.skytta at iki.fi> - 0.11.3-2
