@@ -2,7 +2,7 @@
 
 Name:           opensc
 Version:        0.11.4
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
@@ -144,6 +144,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Wed Dec 05 2007 Release Engineering <rel-eng at fedoraproject dot org> - 0.11.4-3
+ - Rebuild for deps
+
 * Wed Dec  5 2007 Ville Skyttä <ville.skytta at iki.fi> - 0.11.4-2
 - Rebuild.
 
