@@ -2,7 +2,7 @@
 
 Name:           opensc
 Version:        0.11.4
-Release:        4%{?dist}
+Release:        5%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
@@ -33,7 +33,7 @@ eID cards have also been confirmed to work.
 Summary:        Digital signature plugin for web browsers
 Group:          Applications/Internet
 BuildRequires:  libXt-devel
-BuildRequires:  libassuan-static
+BuildRequires:  libassuan-devel
 Requires:       %{plugindir}
 Requires:       pinentry-gui
 
@@ -144,6 +144,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Thu Apr 10 2008 Hans de Goede <j.w.r.degoede@hhs.nl> - 0.11.4-5
+- BuildRequire libassuan-devel instead of libassuan-static (bz 441812)
+
 * Tue Feb 19 2008 Fedora Release Engineering <rel-eng@fedoraproject.org> - 0.11.4-4
 - Autorebuild for GCC 4.3
 
