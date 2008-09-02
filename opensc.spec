@@ -1,15 +1,15 @@
 %define plugindir %{_libdir}/mozilla/plugins
 
 Name:           opensc
-Version:        0.11.4
-Release:        5%{?dist}
+Version:        0.11.6
+Release:        1%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
 License:        LGPLv2+
 URL:            http://www.opensc-project.org/opensc/
 Source0:        http://www.opensc-project.org/files/opensc/%{name}-%{version}.tar.gz
-Patch0:         %{name}-0.11.1-develconfig.patch
+Patch1:         %{name}-0.11.6-develconfig.patch
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildRequires:  pcsc-lite-devel >= 1.1.1
@@ -54,9 +54,8 @@ OpenSC development files.
 
 %prep
 %setup -q
-%patch0 -p1
+%patch1 -p1 -b .config
 sed -i -e 's|"/lib /usr/lib\b|"/%{_lib} %{_libdir}|' configure # lib64 rpaths
-f=doc/ChangeLog ; iconv -f iso-8859-1 -t utf-8 $f > $f.utf8 ; mv $f.utf8 $f
 cp -p src/pkcs15init/README ./README.pkcs15init
 cp -p src/scconf/README.scconf .
 # No %{_libdir} here to avoid multilib conflicts; it's just an example
@@ -64,9 +63,12 @@ sed -i -e 's|/usr/local/towitoko/lib/|/usr/lib/ctapi/|' etc/opensc.conf.in
 
 
 %build
-%configure --disable-dependency-tracking \
-  --disable-static \
-  --with-plugin-dir=%{plugindir} \
+%configure  --disable-static \
+  --enable-nsplugin \
+  --enable-pcsc \
+  --enable-openct \
+  --enable-doc \
+  --with-plugindir=%{plugindir} \
   --with-pin-entry=%{_bindir}/pinentry
 make %{?_smp_mflags}
 
@@ -77,16 +79,14 @@ install -dm 755 $RPM_BUILD_ROOT%{plugindir}
 make install DESTDIR=$RPM_BUILD_ROOT
 install -Dpm 644 etc/opensc.conf $RPM_BUILD_ROOT%{_sysconfdir}/opensc.conf
 
-install -dm 755 _docs/openssh
-install -pm 644 src/openssh/README src/openssh/ask-for-pin.diff _docs/openssh
-cp -pR doc _docs
-rm -r _docs/doc/{*.sh,*.xsl,api,Makefile*,tools}
-
 find $RPM_BUILD_ROOT%{_libdir} -type f -name "*.la" | xargs rm
 
 rm $RPM_BUILD_ROOT%{plugindir}/opensc-signer.so
 mv $RPM_BUILD_ROOT%{_libdir}/opensc-signer.so $RPM_BUILD_ROOT%{plugindir}
 
+mkdir apidocdir
+mv $RPM_BUILD_ROOT%{_datadir}/doc/%{name}/api.html apidocdir
+mv -T $RPM_BUILD_ROOT%{_datadir}/doc/%{name} docdir
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -99,7 +99,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root,-)
-%doc COPYING NEWS README* _docs/doc/
+%doc COPYING NEWS README*
+%doc docdir/*
 %config(noreplace) %{_sysconfdir}/opensc.conf
 %{_bindir}/cardos-info
 %{_bindir}/cryptoflex-tool
@@ -112,9 +113,12 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/pkcs15-crypt
 %{_bindir}/pkcs15-init
 %{_bindir}/pkcs15-tool
+%{_bindir}/rutoken-tool
 %{_libdir}/lib*.so.*
 %{_libdir}/onepin-opensc-pkcs11.so
 %{_libdir}/opensc-pkcs11.so
+%{_libdir}/pkcs11/onepin-opensc-pkcs11.so
+%{_libdir}/pkcs11/opensc-pkcs11.so
 %{_datadir}/opensc/
 %{_mandir}/man1/cardos-info.1*
 %{_mandir}/man1/cryptoflex-tool.1*
@@ -133,17 +137,21 @@ rm -rf $RPM_BUILD_ROOT
 
 %files devel
 %defattr(-,root,root,-)
-%doc _docs/openssh/
+%doc apidocdir/*
 %{_bindir}/opensc-config
 %{_includedir}/opensc/
 %{_libdir}/lib*.so
 %{_libdir}/pkcs11-spy.so
+%{_libdir}/pkcs11/pkcs11-spy.so
 %{_libdir}/pkgconfig/lib*.pc
 %{_mandir}/man1/opensc-config.1*
 %{_mandir}/man3/*.3*
 
 
 %changelog
+* Tue Sep  2 2008 Tomas Mraz <tmraz@redhat.com> - 0.11.6-1
+- Update to latest upstream, fixes CVE-2008-2235
+
 * Thu Apr 10 2008 Hans de Goede <j.w.r.degoede@hhs.nl> - 0.11.4-5
 - BuildRequire libassuan-devel instead of libassuan-static (bz 441812)
 
