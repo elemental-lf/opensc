@@ -2,7 +2,7 @@
 
 Name:           opensc
 Version:        0.11.6
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
@@ -20,6 +20,8 @@ BuildRequires:  openct-devel
 BuildRequires:  openssl-devel >= 0.9.7a
 BuildRequires:  libtool-ltdl-devel
 BuildRequires:  libtool
+BuildRequires:  pkgconfig
+Requires:	pcsc-lite-libs
 
 %description
 OpenSC is a package for for accessing smart card devices.  Basic
@@ -68,6 +70,7 @@ sed -i -e 's|/usr/local/towitoko/lib/|/usr/lib/ctapi/|' etc/opensc.conf.in
   --enable-pcsc \
   --enable-openct \
   --enable-doc \
+  --with-pcsc-provider=%{_libdir}/libpcsclite.so.1 \
   --with-plugindir=%{plugindir} \
   --with-pin-entry=%{_bindir}/pinentry
 make %{?_smp_mflags}
@@ -149,6 +152,10 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Thu Jan 15 2009 Tomas Mraz <tmraz@redhat.com> - 0.11.6-2
+- Add explicit requires for pcsc-lite-libs. Dlopen libpcsclite with the full
+  soname.
+
 * Tue Sep  2 2008 Tomas Mraz <tmraz@redhat.com> - 0.11.6-1
 - Update to latest upstream, fixes CVE-2008-2235
 
