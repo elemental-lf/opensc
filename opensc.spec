@@ -2,7 +2,7 @@
 
 Name:           opensc
 Version:        0.11.6
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
@@ -152,6 +152,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Thu Feb 26 2009 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.11.6-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_11_Mass_Rebuild
+
 * Thu Jan 15 2009 Tomas Mraz <tmraz@redhat.com> - 0.11.6-2
 - Add explicit requires for pcsc-lite-libs. Dlopen libpcsclite with the full
   soname.
