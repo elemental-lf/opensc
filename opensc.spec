@@ -1,15 +1,15 @@
 %define plugindir %{_libdir}/mozilla/plugins
 
 Name:           opensc
-Version:        0.11.6
-Release:        3%{?dist}
+Version:        0.11.7
+Release:        1%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
 License:        LGPLv2+
 URL:            http://www.opensc-project.org/opensc/
 Source0:        http://www.opensc-project.org/files/opensc/%{name}-%{version}.tar.gz
-Patch1:         %{name}-0.11.6-develconfig.patch
+Patch1:         %{name}-0.11.7-develconfig.patch
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildRequires:  pcsc-lite-devel >= 1.1.1
@@ -152,6 +152,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Fri Feb 27 2009 Tomas Mraz <tmraz@redhat.com> - 0.11.7-1
+- new upstream version - fixes CVE-2009-0368
+
 * Thu Feb 26 2009 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.11.6-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_11_Mass_Rebuild
 
