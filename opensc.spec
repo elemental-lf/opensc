@@ -106,6 +106,7 @@ rm -rf $RPM_BUILD_ROOT
 %doc docdir/*
 %config(noreplace) %{_sysconfdir}/opensc.conf
 %{_bindir}/cardos-info
+%{_bindir}/cardos-tool
 %{_bindir}/cryptoflex-tool
 %{_bindir}/eidenv
 %{_bindir}/netkey-tool
@@ -123,7 +124,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/pkcs11/onepin-opensc-pkcs11.so
 %{_libdir}/pkcs11/opensc-pkcs11.so
 %{_datadir}/opensc/
-%{_mandir}/man1/cardos-info.1*
+%{_mandir}/man1/cardos-tool.1*
 %{_mandir}/man1/cryptoflex-tool.1*
 %{_mandir}/man1/netkey-tool.1*
 %{_mandir}/man1/opensc-explorer.*
