@@ -1,7 +1,7 @@
 %define plugindir %{_libdir}/mozilla/plugins
 
 Name:           opensc
-Version:        0.11.7
+Version:        0.11.8
 Release:        1%{?dist}
 Summary:        Smart card library and applications
 
@@ -153,6 +153,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Mon May 11 2009 Tomas Mraz <tmraz@redhat.com> - 0.11.8-1
+- new upstream version - fixes security issue
+
 * Fri Feb 27 2009 Tomas Mraz <tmraz@redhat.com> - 0.11.7-1
 - new upstream version - fixes CVE-2009-0368
 
