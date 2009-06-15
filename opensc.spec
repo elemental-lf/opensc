@@ -2,7 +2,7 @@
 
 Name:           opensc
 Version:        0.11.8
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
@@ -153,6 +153,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Mon Jun 15 2009 Tomas Mraz <tmraz@redhat.com> - 0.11.8-2
+- Rebuilt with new openct
+
 * Mon May 11 2009 Tomas Mraz <tmraz@redhat.com> - 0.11.8-1
 - new upstream version - fixes security issue
 
