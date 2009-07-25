@@ -2,7 +2,7 @@
 
 Name:           opensc
 Version:        0.11.8
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
@@ -153,6 +153,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Sat Jul 25 2009 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.11.8-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_12_Mass_Rebuild
+
 * Mon Jun 15 2009 Tomas Mraz <tmraz@redhat.com> - 0.11.8-2
 - Rebuilt with new openct
 
