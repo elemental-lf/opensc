@@ -2,7 +2,7 @@
 
 Name:           opensc
 Version:        0.11.8
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
@@ -21,7 +21,7 @@ BuildRequires:  openssl-devel >= 0.9.7a
 BuildRequires:  libtool-ltdl-devel
 BuildRequires:  libtool
 BuildRequires:  pkgconfig
-Requires:	pcsc-lite-libs
+Requires:       pcsc-lite-libs%{?_isa}
 
 %description
 OpenSC is a package for for accessing smart card devices.  Basic
@@ -153,6 +153,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Mon Jul 27 2009 Tomas Mraz <tmraz@redhat.com> - 0.11.8-4
+- Depend on specific arch of pcsc-lite-libs (reported by Kalev Lember)
+
 * Sat Jul 25 2009 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.11.8-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_12_Mass_Rebuild
 
