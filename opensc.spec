@@ -2,7 +2,7 @@
 
 Name:           opensc
 Version:        0.11.8
-Release:        4%{?dist}
+Release:        5%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
@@ -153,6 +153,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Fri Aug 21 2009 Tomas Mraz <tmraz@redhat.com> - 0.11.8-5
+- rebuilt with new openssl
+
 * Mon Jul 27 2009 Tomas Mraz <tmraz@redhat.com> - 0.11.8-4
 - Depend on specific arch of pcsc-lite-libs (reported by Kalev Lember)
 
