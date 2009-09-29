@@ -2,7 +2,7 @@
 
 Name:           opensc
 Version:        0.11.9
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
@@ -70,7 +70,7 @@ sed -i -e 's|/usr/local/towitoko/lib/|/usr/lib/ctapi/|' etc/opensc.conf.in
   --enable-pcsc \
   --enable-openct \
   --enable-doc \
-  --with-pcsc-provider=%{_libdir}/libpcsclite.so.1 \
+  --with-pcsc-provider=libpcsclite.so.1 \
   --with-plugindir=%{plugindir} \
   --with-pin-entry=%{_bindir}/pinentry
 make %{?_smp_mflags}
@@ -81,6 +81,8 @@ rm -rf $RPM_BUILD_ROOT _docs
 install -dm 755 $RPM_BUILD_ROOT%{plugindir}
 make install DESTDIR=$RPM_BUILD_ROOT
 install -Dpm 644 etc/opensc.conf $RPM_BUILD_ROOT%{_sysconfdir}/opensc.conf
+# use NEWS file timestamp as reference for configuration file
+touch -r NEWS $RPM_BUILD_ROOT%{_sysconfdir}/opensc.conf
 
 find $RPM_BUILD_ROOT%{_libdir} -type f -name "*.la" | xargs rm
 
@@ -153,6 +155,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Tue Sep 29 2009 Tomas Mraz <tmraz@redhat.com> - 0.11.9-2
+- fix multilib conflict in the configuration file (#526269)
+
 * Wed Sep 09 2009 Tomas Mraz <tmraz@redhat.com> - 0.11.9-1
 - new upstream version
 
