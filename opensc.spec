@@ -1,8 +1,8 @@
 %define plugindir %{_libdir}/mozilla/plugins
 
 Name:           opensc
-Version:        0.11.9
-Release:        2%{?dist}
+Version:        0.11.11
+Release:        1%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
@@ -120,6 +120,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/pkcs15-init
 %{_bindir}/pkcs15-tool
 %{_bindir}/rutoken-tool
+%{_bindir}/westcos-tool
 %{_libdir}/lib*.so.*
 %{_libdir}/onepin-opensc-pkcs11.so
 %{_libdir}/opensc-pkcs11.so
@@ -135,6 +136,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man1/pkcs15-crypt.1*
 %{_mandir}/man1/pkcs15-init.1*
 %{_mandir}/man1/pkcs15-tool.1*
+%{_mandir}/man1/westcos-tool.1*
 %{_mandir}/man5/*.5*
 
 %files -n mozilla-opensc-signer
@@ -155,6 +157,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Thu Nov 19 2009 Tomas Mraz <tmraz@redhat.com> - 0.11.11-1
+- new upstream version
+
 * Tue Sep 29 2009 Tomas Mraz <tmraz@redhat.com> - 0.11.9-2
 - fix multilib conflict in the configuration file (#526269)
 
