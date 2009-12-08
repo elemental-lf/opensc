@@ -2,7 +2,7 @@
 
 Name:           opensc
 Version:        0.11.11
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
@@ -35,7 +35,7 @@ eID cards have also been confirmed to work.
 Summary:        Digital signature plugin for web browsers
 Group:          Applications/Internet
 BuildRequires:  libXt-devel
-BuildRequires:  libassuan-devel
+BuildRequires:  libassuan-static, libassuan-devel
 Requires:       %{plugindir}
 Requires:       pinentry-gui
 
@@ -157,6 +157,10 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Tue Dec  8 2009 Michael Schwendt <mschwendt@fedoraproject.org> - 0.11.11-2
+- Explicitly BR libassuan-static in accordance with the Packaging
+  Guidelines (libassuan-devel is still static-only).
+
 * Thu Nov 19 2009 Tomas Mraz <tmraz@redhat.com> - 0.11.11-1
 - new upstream version
 
