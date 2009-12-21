@@ -1,8 +1,8 @@
-%define plugindir %{_libdir}/mozilla/plugins
+%global plugindir %{_libdir}/mozilla/plugins
 
 Name:           opensc
-Version:        0.11.11
-Release:        2%{?dist}
+Version:        0.11.12
+Release:        1%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
@@ -12,15 +12,12 @@ Source0:        http://www.opensc-project.org/files/opensc/%{name}-%{version}.ta
 Patch1:         %{name}-0.11.7-develconfig.patch
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-BuildRequires:  pcsc-lite-devel >= 1.1.1
+BuildRequires:  pcsc-lite-devel
 BuildRequires:  readline-devel
-# ncurses-devel for < F7 (not pulled in by readline-devel)
-BuildRequires:  ncurses-devel
 BuildRequires:  openct-devel
-BuildRequires:  openssl-devel >= 0.9.7a
+BuildRequires:  openssl-devel
 BuildRequires:  libtool-ltdl-devel
 BuildRequires:  libtool
-BuildRequires:  pkgconfig
 Requires:       pcsc-lite-libs%{?_isa}
 
 %description
@@ -72,7 +69,7 @@ sed -i -e 's|/usr/local/towitoko/lib/|/usr/lib/ctapi/|' etc/opensc.conf.in
   --enable-doc \
   --with-pcsc-provider=libpcsclite.so.1 \
   --with-plugindir=%{plugindir} \
-  --with-pin-entry=%{_bindir}/pinentry
+  --with-pinentry=%{_bindir}/pinentry
 make %{?_smp_mflags}
 
 
@@ -157,6 +154,11 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Mon Dec 21 2009 Kalev Lember <kalev@smartlink.ee> - 0.11.12-1
+- new upstream version
+- replaced %%define with %%global
+- BR clean up from items not applicable to current Fedora releases
+
 * Tue Dec  8 2009 Michael Schwendt <mschwendt@fedoraproject.org> - 0.11.11-2
 - Explicitly BR libassuan-static in accordance with the Packaging
   Guidelines (libassuan-devel is still static-only).
