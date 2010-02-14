@@ -2,7 +2,7 @@
 
 Name:           opensc
 Version:        0.11.12
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
@@ -10,6 +10,7 @@ License:        LGPLv2+
 URL:            http://www.opensc-project.org/opensc/
 Source0:        http://www.opensc-project.org/files/opensc/%{name}-%{version}.tar.gz
 Patch1:         %{name}-0.11.7-develconfig.patch
+Patch2:         %{name}-0.11.12-no-add-needed.patch
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildRequires:  pcsc-lite-devel
@@ -54,6 +55,7 @@ OpenSC development files.
 %prep
 %setup -q
 %patch1 -p1 -b .config
+%patch2 -p1 -b .no-add-needed
 sed -i -e 's|"/lib /usr/lib\b|"/%{_lib} %{_libdir}|' configure # lib64 rpaths
 cp -p src/pkcs15init/README ./README.pkcs15init
 cp -p src/scconf/README.scconf .
@@ -154,6 +156,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Sun Feb 14 2010 Kalev Lember <kalev@smartlink.ee> - 0.11.12-2
+- Added patch to fix linking with the new --no-add-needed default (#564758)
+
 * Mon Dec 21 2009 Kalev Lember <kalev@smartlink.ee> - 0.11.12-1
 - new upstream version
 - replaced %%define with %%global
