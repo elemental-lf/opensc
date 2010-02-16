@@ -1,8 +1,8 @@
 %global plugindir %{_libdir}/mozilla/plugins
 
 Name:           opensc
-Version:        0.11.12
-Release:        2%{?dist}
+Version:        0.11.13
+Release:        1%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
@@ -156,6 +156,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Tue Feb 16 2010 Kalev Lember <kalev@smartlink.ee> - 0.11.13-1
+- new upstream version
+
 * Sun Feb 14 2010 Kalev Lember <kalev@smartlink.ee> - 0.11.12-2
 - Added patch to fix linking with the new --no-add-needed default (#564758)
 
