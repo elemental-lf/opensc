@@ -2,7 +2,7 @@
 
 Name:           opensc
 Version:        0.11.13
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
@@ -34,7 +34,7 @@ Summary:        Digital signature plugin for web browsers
 Group:          Applications/Internet
 BuildRequires:  libXt-devel
 BuildRequires:  libassuan-static, libassuan-devel
-Requires:       %{plugindir}
+Requires:       mozilla-filesystem%{?_isa}
 Requires:       pinentry-gui
 
 %description -n mozilla-opensc-signer
@@ -156,6 +156,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Wed Jun  9 2010 Tomas Mraz <tmraz@redhat.com> - 0.11.13-2
+- replace file dependency (#601943)
+
 * Tue Feb 16 2010 Kalev Lember <kalev@smartlink.ee> - 0.11.13-1
 - new upstream version
 
