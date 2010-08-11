@@ -2,7 +2,7 @@
 
 Name:           opensc
 Version:        0.11.13
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
@@ -11,6 +11,7 @@ URL:            http://www.opensc-project.org/opensc/
 Source0:        http://www.opensc-project.org/files/opensc/%{name}-%{version}.tar.gz
 Patch1:         %{name}-0.11.7-develconfig.patch
 Patch2:         %{name}-0.11.12-no-add-needed.patch
+Patch3:         opensc-0.11.13-libassuan1.patch
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildRequires:  pcsc-lite-devel
@@ -33,7 +34,11 @@ eID cards have also been confirmed to work.
 Summary:        Digital signature plugin for web browsers
 Group:          Applications/Internet
 BuildRequires:  libXt-devel
-BuildRequires:  libassuan-static, libassuan-devel
+%if 0%{?fedora} > 13
+BuildRequires:	libassuan1-devel libassuan1-static automake
+%else
+BuildRequires:	libassuan-devel libassuan-static
+%endif
 Requires:       mozilla-filesystem%{?_isa}
 Requires:       pinentry-gui
 
@@ -61,6 +66,13 @@ cp -p src/pkcs15init/README ./README.pkcs15init
 cp -p src/scconf/README.scconf .
 # No %{_libdir} here to avoid multilib conflicts; it's just an example
 sed -i -e 's|/usr/local/towitoko/lib/|/usr/lib/ctapi/|' etc/opensc.conf.in
+
+# hacks for libassuan1
+%if 0%{?fedora} > 13
+rm -f m4/libassuan.m4
+%patch3 -p1 -b .libassuan1
+./bootstrap
+%endif
 
 
 %build
@@ -156,6 +168,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Wed Aug 11 2010 Rex Dieter <rdieter@fedoraproject.org> - 0.11.13-3
+- build against libassuan1 (f14+)
+
 * Wed Jun  9 2010 Tomas Mraz <tmraz@redhat.com> - 0.11.13-2
 - replace file dependency (#601943)
 
