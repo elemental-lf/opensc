@@ -2,7 +2,7 @@
 
 Name:           opensc
 Version:        0.11.13
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
@@ -12,6 +12,7 @@ Source0:        http://www.opensc-project.org/files/opensc/%{name}-%{version}.ta
 Patch1:         %{name}-0.11.7-develconfig.patch
 Patch2:         %{name}-0.11.12-no-add-needed.patch
 Patch3:         opensc-0.11.13-libassuan1.patch
+Patch4:         opensc-0.11.13-build-readerstate.patch
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildRequires:  pcsc-lite-devel
@@ -71,6 +72,7 @@ sed -i -e 's|/usr/local/towitoko/lib/|/usr/lib/ctapi/|' etc/opensc.conf.in
 %if 0%{?fedora} > 13
 rm -f m4/libassuan.m4
 %patch3 -p1 -b .libassuan1
+%patch4 -p1 -b .build
 ./bootstrap
 %endif
 
@@ -168,6 +170,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Tue Sep  7 2010 Tomas Mraz <tmraz@redhat.com> - 0.11.13-4
+- fix build with new pcsc-lite
+
 * Wed Aug 11 2010 Rex Dieter <rdieter@fedoraproject.org> - 0.11.13-3
 - build against libassuan1 (f14+)
 
