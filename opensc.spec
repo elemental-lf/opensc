@@ -2,7 +2,7 @@
 
 Name:           opensc
 Version:        0.11.13
-Release:        4%{?dist}
+Release:        5%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
@@ -137,6 +137,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/lib*.so.*
 %{_libdir}/onepin-opensc-pkcs11.so
 %{_libdir}/opensc-pkcs11.so
+%dir %{_libdir}/pkcs11
 %{_libdir}/pkcs11/onepin-opensc-pkcs11.so
 %{_libdir}/pkcs11/opensc-pkcs11.so
 %{_datadir}/opensc/
@@ -170,6 +171,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Tue Oct 19 2010 Tomas Mraz <tmraz@redhat.com> - 0.11.13-5
+- own the _libdir/pkcs11 subdirectory (#644527)
+
 * Tue Sep  7 2010 Tomas Mraz <tmraz@redhat.com> - 0.11.13-4
 - fix build with new pcsc-lite
 
