@@ -2,7 +2,7 @@
 
 Name:           opensc
 Version:        0.11.13
-Release:        5%{?dist}
+Release:        6%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
@@ -13,11 +13,14 @@ Patch1:         %{name}-0.11.7-develconfig.patch
 Patch2:         %{name}-0.11.12-no-add-needed.patch
 Patch3:         opensc-0.11.13-libassuan1.patch
 Patch4:         opensc-0.11.13-build-readerstate.patch
+Patch5:         opensc-0.11.13-serial-overflow.patch
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildRequires:  pcsc-lite-devel
 BuildRequires:  readline-devel
+%if 0%{?fedora} || 0%{?rhel} > 5
 BuildRequires:  openct-devel
+%endif
 BuildRequires:  openssl-devel
 BuildRequires:  libtool-ltdl-devel
 BuildRequires:  libtool
@@ -62,6 +65,8 @@ OpenSC development files.
 %setup -q
 %patch1 -p1 -b .config
 %patch2 -p1 -b .no-add-needed
+%patch5 -p2 -b .overflow
+
 sed -i -e 's|"/lib /usr/lib\b|"/%{_lib} %{_libdir}|' configure # lib64 rpaths
 cp -p src/pkcs15init/README ./README.pkcs15init
 cp -p src/scconf/README.scconf .
@@ -81,7 +86,9 @@ rm -f m4/libassuan.m4
 %configure  --disable-static \
   --enable-nsplugin \
   --enable-pcsc \
+%if 0%{?fedora} || 0%{?rhel} > 5
   --enable-openct \
+%endif
   --enable-doc \
   --with-pcsc-provider=libpcsclite.so.1 \
   --with-plugindir=%{plugindir} \
@@ -171,6 +178,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Tue Dec 21 2010 Tomas Mraz <tmraz@redhat.com> - 0.11.13-6
+- fix buffer overflow on rogue card serial numbers
+
 * Tue Oct 19 2010 Tomas Mraz <tmraz@redhat.com> - 0.11.13-5
 - own the _libdir/pkcs11 subdirectory (#644527)
 
