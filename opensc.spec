@@ -2,7 +2,7 @@
 
 Name:           opensc
 Version:        0.11.13
-Release:        1%{?dist}
+Release:        6%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
@@ -11,11 +11,16 @@ URL:            http://www.opensc-project.org/opensc/
 Source0:        http://www.opensc-project.org/files/opensc/%{name}-%{version}.tar.gz
 Patch1:         %{name}-0.11.7-develconfig.patch
 Patch2:         %{name}-0.11.12-no-add-needed.patch
+Patch3:         opensc-0.11.13-libassuan1.patch
+Patch4:         opensc-0.11.13-build-readerstate.patch
+Patch5:         opensc-0.11.13-serial-overflow.patch
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildRequires:  pcsc-lite-devel
 BuildRequires:  readline-devel
+%if 0%{?fedora} || 0%{?rhel} > 5
 BuildRequires:  openct-devel
+%endif
 BuildRequires:  openssl-devel
 BuildRequires:  libtool-ltdl-devel
 BuildRequires:  libtool
@@ -33,8 +38,12 @@ eID cards have also been confirmed to work.
 Summary:        Digital signature plugin for web browsers
 Group:          Applications/Internet
 BuildRequires:  libXt-devel
-BuildRequires:  libassuan-static, libassuan-devel
-Requires:       %{plugindir}
+%if 0%{?fedora} > 13
+BuildRequires:	libassuan1-devel libassuan1-static automake
+%else
+BuildRequires:	libassuan-devel libassuan-static
+%endif
+Requires:       mozilla-filesystem%{?_isa}
 Requires:       pinentry-gui
 
 %description -n mozilla-opensc-signer
@@ -56,18 +65,30 @@ OpenSC development files.
 %setup -q
 %patch1 -p1 -b .config
 %patch2 -p1 -b .no-add-needed
+%patch5 -p2 -b .overflow
+
 sed -i -e 's|"/lib /usr/lib\b|"/%{_lib} %{_libdir}|' configure # lib64 rpaths
 cp -p src/pkcs15init/README ./README.pkcs15init
 cp -p src/scconf/README.scconf .
 # No %{_libdir} here to avoid multilib conflicts; it's just an example
 sed -i -e 's|/usr/local/towitoko/lib/|/usr/lib/ctapi/|' etc/opensc.conf.in
 
+# hacks for libassuan1
+%if 0%{?fedora} > 13
+rm -f m4/libassuan.m4
+%patch3 -p1 -b .libassuan1
+%patch4 -p1 -b .build
+./bootstrap
+%endif
+
 
 %build
 %configure  --disable-static \
   --enable-nsplugin \
   --enable-pcsc \
+%if 0%{?fedora} || 0%{?rhel} > 5
   --enable-openct \
+%endif
   --enable-doc \
   --with-pcsc-provider=libpcsclite.so.1 \
   --with-plugindir=%{plugindir} \
@@ -123,6 +144,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/lib*.so.*
 %{_libdir}/onepin-opensc-pkcs11.so
 %{_libdir}/opensc-pkcs11.so
+%dir %{_libdir}/pkcs11
 %{_libdir}/pkcs11/onepin-opensc-pkcs11.so
 %{_libdir}/pkcs11/opensc-pkcs11.so
 %{_datadir}/opensc/
@@ -156,6 +178,21 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Tue Dec 21 2010 Tomas Mraz <tmraz@redhat.com> - 0.11.13-6
+- fix buffer overflow on rogue card serial numbers
+
+* Tue Oct 19 2010 Tomas Mraz <tmraz@redhat.com> - 0.11.13-5
+- own the _libdir/pkcs11 subdirectory (#644527)
+
+* Tue Sep  7 2010 Tomas Mraz <tmraz@redhat.com> - 0.11.13-4
+- fix build with new pcsc-lite
+
+* Wed Aug 11 2010 Rex Dieter <rdieter@fedoraproject.org> - 0.11.13-3
+- build against libassuan1 (f14+)
+
+* Wed Jun  9 2010 Tomas Mraz <tmraz@redhat.com> - 0.11.13-2
+- replace file dependency (#601943)
+
 * Tue Feb 16 2010 Kalev Lember <kalev@smartlink.ee> - 0.11.13-1
 - new upstream version
 
