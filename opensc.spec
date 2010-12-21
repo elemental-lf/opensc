@@ -1,8 +1,8 @@
-%define plugindir %{_libdir}/mozilla/plugins
+%global plugindir %{_libdir}/mozilla/plugins
 
 Name:           opensc
-Version:        0.11.11
-Release:        1%{?dist}
+Version:        0.11.13
+Release:        5%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
@@ -10,17 +10,17 @@ License:        LGPLv2+
 URL:            http://www.opensc-project.org/opensc/
 Source0:        http://www.opensc-project.org/files/opensc/%{name}-%{version}.tar.gz
 Patch1:         %{name}-0.11.7-develconfig.patch
+Patch2:         %{name}-0.11.12-no-add-needed.patch
+Patch3:         opensc-0.11.13-libassuan1.patch
+Patch4:         opensc-0.11.13-build-readerstate.patch
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-BuildRequires:  pcsc-lite-devel >= 1.1.1
+BuildRequires:  pcsc-lite-devel
 BuildRequires:  readline-devel
-# ncurses-devel for < F7 (not pulled in by readline-devel)
-BuildRequires:  ncurses-devel
 BuildRequires:  openct-devel
-BuildRequires:  openssl-devel >= 0.9.7a
+BuildRequires:  openssl-devel
 BuildRequires:  libtool-ltdl-devel
 BuildRequires:  libtool
-BuildRequires:  pkgconfig
 Requires:       pcsc-lite-libs%{?_isa}
 
 %description
@@ -35,8 +35,12 @@ eID cards have also been confirmed to work.
 Summary:        Digital signature plugin for web browsers
 Group:          Applications/Internet
 BuildRequires:  libXt-devel
-BuildRequires:  libassuan-devel
-Requires:       %{plugindir}
+%if 0%{?fedora} > 13
+BuildRequires:	libassuan1-devel libassuan1-static automake
+%else
+BuildRequires:	libassuan-devel libassuan-static
+%endif
+Requires:       mozilla-filesystem%{?_isa}
 Requires:       pinentry-gui
 
 %description -n mozilla-opensc-signer
@@ -57,11 +61,20 @@ OpenSC development files.
 %prep
 %setup -q
 %patch1 -p1 -b .config
+%patch2 -p1 -b .no-add-needed
 sed -i -e 's|"/lib /usr/lib\b|"/%{_lib} %{_libdir}|' configure # lib64 rpaths
 cp -p src/pkcs15init/README ./README.pkcs15init
 cp -p src/scconf/README.scconf .
 # No %{_libdir} here to avoid multilib conflicts; it's just an example
 sed -i -e 's|/usr/local/towitoko/lib/|/usr/lib/ctapi/|' etc/opensc.conf.in
+
+# hacks for libassuan1
+%if 0%{?fedora} > 13
+rm -f m4/libassuan.m4
+%patch3 -p1 -b .libassuan1
+%patch4 -p1 -b .build
+./bootstrap
+%endif
 
 
 %build
@@ -72,7 +85,7 @@ sed -i -e 's|/usr/local/towitoko/lib/|/usr/lib/ctapi/|' etc/opensc.conf.in
   --enable-doc \
   --with-pcsc-provider=libpcsclite.so.1 \
   --with-plugindir=%{plugindir} \
-  --with-pin-entry=%{_bindir}/pinentry
+  --with-pinentry=%{_bindir}/pinentry
 make %{?_smp_mflags}
 
 
@@ -124,6 +137,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/lib*.so.*
 %{_libdir}/onepin-opensc-pkcs11.so
 %{_libdir}/opensc-pkcs11.so
+%dir %{_libdir}/pkcs11
 %{_libdir}/pkcs11/onepin-opensc-pkcs11.so
 %{_libdir}/pkcs11/opensc-pkcs11.so
 %{_datadir}/opensc/
@@ -157,6 +171,33 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Tue Oct 19 2010 Tomas Mraz <tmraz@redhat.com> - 0.11.13-5
+- own the _libdir/pkcs11 subdirectory (#644527)
+
+* Tue Sep  7 2010 Tomas Mraz <tmraz@redhat.com> - 0.11.13-4
+- fix build with new pcsc-lite
+
+* Wed Aug 11 2010 Rex Dieter <rdieter@fedoraproject.org> - 0.11.13-3
+- build against libassuan1 (f14+)
+
+* Wed Jun  9 2010 Tomas Mraz <tmraz@redhat.com> - 0.11.13-2
+- replace file dependency (#601943)
+
+* Tue Feb 16 2010 Kalev Lember <kalev@smartlink.ee> - 0.11.13-1
+- new upstream version
+
+* Sun Feb 14 2010 Kalev Lember <kalev@smartlink.ee> - 0.11.12-2
+- Added patch to fix linking with the new --no-add-needed default (#564758)
+
+* Mon Dec 21 2009 Kalev Lember <kalev@smartlink.ee> - 0.11.12-1
+- new upstream version
+- replaced %%define with %%global
+- BR clean up from items not applicable to current Fedora releases
+
+* Tue Dec  8 2009 Michael Schwendt <mschwendt@fedoraproject.org> - 0.11.11-2
+- Explicitly BR libassuan-static in accordance with the Packaging
+  Guidelines (libassuan-devel is still static-only).
+
 * Thu Nov 19 2009 Tomas Mraz <tmraz@redhat.com> - 0.11.11-1
 - new upstream version
 
