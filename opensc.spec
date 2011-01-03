@@ -1,6 +1,6 @@
 Name:           opensc
 Version:        0.12.0
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
@@ -39,6 +39,7 @@ sed -i -e 's|/usr/local/towitoko/lib/|/usr/lib/ctapi/|' etc/opensc.conf.in
 
 %build
 %configure  --disable-static \
+  --disable-assert \
   --enable-pcsc \
   --enable-doc \
   --with-pcsc-provider=libpcsclite.so.1
@@ -113,6 +114,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Mon Jan 03 2011 Kalev Lember <kalev@smartlink.ee> - 0.12.0-2
+- Disabled asserts
+
 * Mon Jan 03 2011 Kalev Lember <kalev@smartlink.ee> - 0.12.0-1
 - Update to 0.12.0
 - Removed and obsoleted mozilla-opensc-signer and opensc-devel subpackages
