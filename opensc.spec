@@ -1,30 +1,23 @@
-%global plugindir %{_libdir}/mozilla/plugins
-
 Name:           opensc
-Version:        0.11.13
-Release:        6%{?dist}
+Version:        0.12.0
+Release:        1%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
 License:        LGPLv2+
 URL:            http://www.opensc-project.org/opensc/
 Source0:        http://www.opensc-project.org/files/opensc/%{name}-%{version}.tar.gz
-Patch1:         %{name}-0.11.7-develconfig.patch
-Patch2:         %{name}-0.11.12-no-add-needed.patch
-Patch3:         opensc-0.11.13-libassuan1.patch
-Patch4:         opensc-0.11.13-build-readerstate.patch
-Patch5:         opensc-0.11.13-serial-overflow.patch
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildRequires:  pcsc-lite-devel
 BuildRequires:  readline-devel
-%if 0%{?fedora} || 0%{?rhel} > 5
-BuildRequires:  openct-devel
-%endif
 BuildRequires:  openssl-devel
 BuildRequires:  libtool-ltdl-devel
-BuildRequires:  libtool
+BuildRequires:  /usr/bin/xsltproc
+BuildRequires:  docbook-style-xsl
 Requires:       pcsc-lite-libs%{?_isa}
+Obsoletes:      mozilla-opensc-signer < 0.12.0
+Obsoletes:      opensc-devel < 0.12.0
 
 %description
 OpenSC is a package for for accessing smart card devices.  Basic
@@ -34,65 +27,21 @@ keys on the smart card is possible with PKCS #15 compatible cards,
 such as the FINEID (Finnish Electronic IDentity) card.  Swedish Posten
 eID cards have also been confirmed to work.
 
-%package     -n mozilla-opensc-signer
-Summary:        Digital signature plugin for web browsers
-Group:          Applications/Internet
-BuildRequires:  libXt-devel
-%if 0%{?fedora} > 13
-BuildRequires:	libassuan1-devel libassuan1-static automake
-%else
-BuildRequires:	libassuan-devel libassuan-static
-%endif
-Requires:       mozilla-filesystem%{?_isa}
-Requires:       pinentry-gui
-
-%description -n mozilla-opensc-signer
-OpenSC Signer is a plugin for web browsers compatible with Mozilla
-plugins that will generate digital signatures using facilities on
-PKI-capable smart cards.
-
-%package        devel
-Summary:        OpenSC development files
-Group:          Development/Libraries
-Requires:       %{name} = %{version}-%{release}
-Requires:       pkgconfig
-
-%description    devel
-OpenSC development files.
-
 
 %prep
 %setup -q
-%patch1 -p1 -b .config
-%patch2 -p1 -b .no-add-needed
-%patch5 -p2 -b .overflow
-
 sed -i -e 's|"/lib /usr/lib\b|"/%{_lib} %{_libdir}|' configure # lib64 rpaths
 cp -p src/pkcs15init/README ./README.pkcs15init
 cp -p src/scconf/README.scconf .
 # No %{_libdir} here to avoid multilib conflicts; it's just an example
 sed -i -e 's|/usr/local/towitoko/lib/|/usr/lib/ctapi/|' etc/opensc.conf.in
 
-# hacks for libassuan1
-%if 0%{?fedora} > 13
-rm -f m4/libassuan.m4
-%patch3 -p1 -b .libassuan1
-%patch4 -p1 -b .build
-./bootstrap
-%endif
-
 
 %build
 %configure  --disable-static \
-  --enable-nsplugin \
   --enable-pcsc \
-%if 0%{?fedora} || 0%{?rhel} > 5
-  --enable-openct \
-%endif
   --enable-doc \
-  --with-pcsc-provider=libpcsclite.so.1 \
-  --with-plugindir=%{plugindir} \
-  --with-pinentry=%{_bindir}/pinentry
+  --with-pcsc-provider=libpcsclite.so.1
 make %{?_smp_mflags}
 
 
@@ -106,12 +55,13 @@ touch -r NEWS $RPM_BUILD_ROOT%{_sysconfdir}/opensc.conf
 
 find $RPM_BUILD_ROOT%{_libdir} -type f -name "*.la" | xargs rm
 
-rm $RPM_BUILD_ROOT%{plugindir}/opensc-signer.so
-mv $RPM_BUILD_ROOT%{_libdir}/opensc-signer.so $RPM_BUILD_ROOT%{plugindir}
-
-mkdir apidocdir
-mv $RPM_BUILD_ROOT%{_datadir}/doc/%{name}/api.html apidocdir
 mv -T $RPM_BUILD_ROOT%{_datadir}/doc/%{name} docdir
+
+# Upstream considers libopensc API internal and no longer ships
+# public headers and pkgconfig files.
+# Remove the symlink as nothing is supposed to link against libopensc.
+rm -f $RPM_BUILD_ROOT%{_libdir}/libopensc.so
+
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -127,7 +77,6 @@ rm -rf $RPM_BUILD_ROOT
 %doc COPYING NEWS README*
 %doc docdir/*
 %config(noreplace) %{_sysconfdir}/opensc.conf
-%{_bindir}/cardos-info
 %{_bindir}/cardos-tool
 %{_bindir}/cryptoflex-tool
 %{_bindir}/eidenv
@@ -144,9 +93,11 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/lib*.so.*
 %{_libdir}/onepin-opensc-pkcs11.so
 %{_libdir}/opensc-pkcs11.so
+%{_libdir}/pkcs11-spy.so
 %dir %{_libdir}/pkcs11
 %{_libdir}/pkcs11/onepin-opensc-pkcs11.so
 %{_libdir}/pkcs11/opensc-pkcs11.so
+%{_libdir}/pkcs11/pkcs11-spy.so
 %{_datadir}/opensc/
 %{_mandir}/man1/cardos-tool.1*
 %{_mandir}/man1/cryptoflex-tool.1*
@@ -160,24 +111,15 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man1/westcos-tool.1*
 %{_mandir}/man5/*.5*
 
-%files -n mozilla-opensc-signer
-%defattr(0755,root,root,0755)
-%{plugindir}/opensc-signer.so
-
-%files devel
-%defattr(-,root,root,-)
-%doc apidocdir/*
-%{_bindir}/opensc-config
-%{_includedir}/opensc/
-%{_libdir}/lib*.so
-%{_libdir}/pkcs11-spy.so
-%{_libdir}/pkcs11/pkcs11-spy.so
-%{_libdir}/pkgconfig/lib*.pc
-%{_mandir}/man1/opensc-config.1*
-%{_mandir}/man3/*.3*
-
 
 %changelog
+* Mon Jan 03 2011 Kalev Lember <kalev@smartlink.ee> - 0.12.0-1
+- Update to 0.12.0
+- Removed and obsoleted mozilla-opensc-signer and opensc-devel subpackages
+- Dropped patches which are now upstreamed
+- It is no longer possible to build in both pcsc-lite and openct support,
+  so opensc now gets built exclusively with pcsc-lite.
+
 * Tue Dec 21 2010 Tomas Mraz <tmraz@redhat.com> - 0.11.13-6
 - fix buffer overflow on rogue card serial numbers
 
