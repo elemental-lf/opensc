@@ -1,6 +1,6 @@
 Name:           opensc
 Version:        0.12.0
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
@@ -76,7 +76,6 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(-,root,root,-)
 %doc COPYING NEWS README*
-%doc docdir/*
 %config(noreplace) %{_sysconfdir}/opensc.conf
 %{_bindir}/cardos-tool
 %{_bindir}/cryptoflex-tool
@@ -114,6 +113,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Tue Apr 12 2011 Tomas Mraz <tmraz@redhat.com> - 0.12.0-4
+- drop multilib conflicting and duplicated doc file (#695368)
+
 * Tue Feb 08 2011 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.12.0-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_15_Mass_Rebuild
 
