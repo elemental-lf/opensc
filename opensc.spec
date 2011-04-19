@@ -47,8 +47,8 @@ make %{?_smp_mflags}
 
 
 %install
-rm -rf $RPM_BUILD_ROOT _docs
-install -dm 755 $RPM_BUILD_ROOT%{plugindir}
+rm -rf $RPM_BUILD_ROOT
+rm -rf _docs
 make install DESTDIR=$RPM_BUILD_ROOT
 install -Dpm 644 etc/opensc.conf $RPM_BUILD_ROOT%{_sysconfdir}/opensc.conf
 # use NEWS file timestamp as reference for configuration file
