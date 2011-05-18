@@ -1,6 +1,6 @@
 Name:           opensc
-Version:        0.12.0
-Release:        4%{?dist}
+Version:        0.12.1
+Release:        1%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
@@ -12,7 +12,6 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires:  pcsc-lite-devel
 BuildRequires:  readline-devel
 BuildRequires:  openssl-devel
-BuildRequires:  libtool-ltdl-devel
 BuildRequires:  /usr/bin/xsltproc
 BuildRequires:  docbook-style-xsl
 Requires:       pcsc-lite-libs%{?_isa}
@@ -88,7 +87,6 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/pkcs15-crypt
 %{_bindir}/pkcs15-init
 %{_bindir}/pkcs15-tool
-%{_bindir}/rutoken-tool
 %{_bindir}/westcos-tool
 %{_libdir}/lib*.so.*
 %{_libdir}/onepin-opensc-pkcs11.so
@@ -101,9 +99,11 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/opensc/
 %{_mandir}/man1/cardos-tool.1*
 %{_mandir}/man1/cryptoflex-tool.1*
+%{_mandir}/man1/eidenv.1*
 %{_mandir}/man1/netkey-tool.1*
 %{_mandir}/man1/opensc-explorer.*
 %{_mandir}/man1/opensc-tool.1*
+%{_mandir}/man1/piv-tool.1*
 %{_mandir}/man1/pkcs11-tool.1*
 %{_mandir}/man1/pkcs15-crypt.1*
 %{_mandir}/man1/pkcs15-init.1*
@@ -113,6 +113,10 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Wed May 18 2011 Kalev Lember <kalev@smartlink.ee> - 0.12.1-1
+- Update to 0.12.1 (#705743)
+- Removed BR libtool-ltdl-devel to build with glibc's libdl instead
+
 * Tue Apr 12 2011 Tomas Mraz <tmraz@redhat.com> - 0.12.0-4
 - drop multilib conflicting and duplicated doc file (#695368)
 
