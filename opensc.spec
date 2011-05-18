@@ -19,12 +19,13 @@ Obsoletes:      mozilla-opensc-signer < 0.12.0
 Obsoletes:      opensc-devel < 0.12.0
 
 %description
-OpenSC is a package for for accessing smart card devices.  Basic
-functionality (e.g. SELECT FILE, READ BINARY) should work on any ISO
-7816-4 compatible smart card.  Encryption and decryption using private
-keys on the smart card is possible with PKCS #15 compatible cards,
-such as the FINEID (Finnish Electronic IDentity) card.  Swedish Posten
-eID cards have also been confirmed to work.
+OpenSC provides a set of libraries and utilities to work with smart cards. Its
+main focus is on cards that support cryptographic operations, and facilitate
+their use in security applications such as authentication, mail encryption and
+digital signatures. OpenSC implements the PKCS#11 API so applications
+supporting this API (such as Mozilla Firefox and Thunderbird) can use it. On
+the card OpenSC implements the PKCS#15 standard and aims to be compatible with
+every software/card that does so, too.
 
 
 %prep
