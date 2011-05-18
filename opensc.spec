@@ -40,14 +40,12 @@ sed -i -e 's|/usr/local/towitoko/lib/|/usr/lib/ctapi/|' etc/opensc.conf.in
 %configure  --disable-static \
   --disable-assert \
   --enable-pcsc \
-  --enable-doc \
   --with-pcsc-provider=libpcsclite.so.1
 make %{?_smp_mflags}
 
 
 %install
 rm -rf $RPM_BUILD_ROOT
-rm -rf _docs
 make install DESTDIR=$RPM_BUILD_ROOT
 install -Dpm 644 etc/opensc.conf $RPM_BUILD_ROOT%{_sysconfdir}/opensc.conf
 # use NEWS file timestamp as reference for configuration file
@@ -55,7 +53,7 @@ touch -r NEWS $RPM_BUILD_ROOT%{_sysconfdir}/opensc.conf
 
 find $RPM_BUILD_ROOT%{_libdir} -type f -name "*.la" | xargs rm
 
-mv -T $RPM_BUILD_ROOT%{_datadir}/doc/%{name} docdir
+rm -rf $RPM_BUILD_ROOT%{_datadir}/doc/opensc
 
 # Upstream considers libopensc API internal and no longer ships
 # public headers and pkgconfig files.
