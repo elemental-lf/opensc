@@ -1,5 +1,5 @@
 Name:           opensc
-Version:        0.12.1
+Version:        0.12.2
 Release:        1%{?dist}
 Summary:        Smart card library and applications
 
@@ -42,7 +42,7 @@ sed -i -e 's|/usr/local/towitoko/lib/|/usr/lib/ctapi/|' etc/opensc.conf.in
   --disable-assert \
   --enable-pcsc \
   --with-pcsc-provider=libpcsclite.so.1
-make %{?_smp_mflags}
+make %{?_smp_mflags} V=1
 
 
 %install
@@ -112,6 +112,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Tue Jul 19 2011 Kalev Lember <kalevlember@gmail.com> - 0.12.2-1
+- Update to 0.12.2 (#722659)
+
 * Wed May 18 2011 Kalev Lember <kalev@smartlink.ee> - 0.12.1-1
 - Update to 0.12.1 (#705743)
 - Removed BR libtool-ltdl-devel to build with glibc's libdl instead
