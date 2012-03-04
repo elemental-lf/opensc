@@ -1,0 +1,11 @@
+--- opensc-0.12.2/src/tools/Makefile.in.orig	2012-03-04 10:44:40.504646428 +0000
++++ opensc-0.12.2/src/tools/Makefile.in	2012-03-04 10:44:52.817647048 +0000
+@@ -232,7 +232,7 @@
+ INSTALL_SCRIPT = @INSTALL_SCRIPT@
+ INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+ LD = @LD@
+-LDFLAGS = @LDFLAGS@
++LDFLAGS = @LDFLAGS@ -ldl
+ LIBOBJS = @LIBOBJS@
+ LIBRARY_BITNESS = @LIBRARY_BITNESS@
+ LIBS = $(top_builddir)/src/common/libcompat.la \

@@ -1,13 +1,13 @@
 Name:           opensc
 Version:        0.12.2
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
 License:        LGPLv2+
 URL:            http://www.opensc-project.org/opensc/
 Source0:        http://www.opensc-project.org/files/opensc/%{name}-%{version}.tar.gz
-BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+Patch0:         opensc-fixdso.patch
 
 BuildRequires:  pcsc-lite-devel
 BuildRequires:  readline-devel
@@ -30,6 +30,8 @@ every software/card that does so, too.
 
 %prep
 %setup -q
+%patch0 -p1 -b .fixdso
+
 sed -i -e 's|"/lib /usr/lib\b|"/%{_lib} %{_libdir}|' configure # lib64 rpaths
 cp -p src/pkcs15init/README ./README.pkcs15init
 cp -p src/scconf/README.scconf .
@@ -46,7 +48,6 @@ make %{?_smp_mflags} V=1
 
 
 %install
-rm -rf $RPM_BUILD_ROOT
 make install DESTDIR=$RPM_BUILD_ROOT
 install -Dpm 644 etc/opensc.conf $RPM_BUILD_ROOT%{_sysconfdir}/opensc.conf
 # use NEWS file timestamp as reference for configuration file
@@ -60,10 +61,6 @@ rm -rf $RPM_BUILD_ROOT%{_datadir}/doc/opensc
 # public headers and pkgconfig files.
 # Remove the symlink as nothing is supposed to link against libopensc.
 rm -f $RPM_BUILD_ROOT%{_libdir}/libopensc.so
-
-
-%clean
-rm -rf $RPM_BUILD_ROOT
 
 
 %post -p /sbin/ldconfig
@@ -112,6 +109,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Sun Mar  4 2012 Peter Robinson <pbrobinson@fedoraproject.org> - 0.12.2-4
+- Add patch for dso
+
 * Fri Jan 13 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.12.2-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_17_Mass_Rebuild
 
