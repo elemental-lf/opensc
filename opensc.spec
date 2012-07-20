@@ -1,6 +1,6 @@
 Name:           opensc
 Version:        0.12.2
-Release:        4%{?dist}
+Release:        5%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
@@ -109,6 +109,9 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libopensc.so
 
 
 %changelog
+* Fri Jul 20 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.12.2-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_18_Mass_Rebuild
+
 * Sun Mar  4 2012 Peter Robinson <pbrobinson@fedoraproject.org> - 0.12.2-4
 - Add patch for dso
 
