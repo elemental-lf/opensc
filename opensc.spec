@@ -1,12 +1,13 @@
 Name:           opensc
 Version:        0.12.2
-Release:        5%{?dist}
+Release:        6%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
 License:        LGPLv2+
 URL:            http://www.opensc-project.org/opensc/
 Source0:        http://www.opensc-project.org/files/opensc/%{name}-%{version}.tar.gz
+Source1:        opensc-module
 Patch0:         opensc-fixdso.patch
 
 BuildRequires:  pcsc-lite-devel
@@ -50,6 +51,7 @@ make %{?_smp_mflags} V=1
 %install
 make install DESTDIR=$RPM_BUILD_ROOT
 install -Dpm 644 etc/opensc.conf $RPM_BUILD_ROOT%{_sysconfdir}/opensc.conf
+install -Dpm 644 %{SOURCE1} $RPM_BUILD_ROOT%{_sysconfdir}/pkcs11/opensc-module
 # use NEWS file timestamp as reference for configuration file
 touch -r NEWS $RPM_BUILD_ROOT%{_sysconfdir}/opensc.conf
 
@@ -72,6 +74,7 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libopensc.so
 %defattr(-,root,root,-)
 %doc COPYING NEWS README*
 %config(noreplace) %{_sysconfdir}/opensc.conf
+%config(noreplace) %{_sysconfdir}/pkcs11/opensc-module
 %{_bindir}/cardos-tool
 %{_bindir}/cryptoflex-tool
 %{_bindir}/eidenv
@@ -109,6 +112,9 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libopensc.so
 
 
 %changelog
+* Fri Jul 27 2012 Tomas Mraz <tmraz@redhat.com> - 0.12.2-6
+- Add a configuration file for p11-kit (#840504)
+
 * Fri Jul 20 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.12.2-5
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_18_Mass_Rebuild
 
