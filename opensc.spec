@@ -1,14 +1,13 @@
 Name:           opensc
-Version:        0.12.2
-Release:        6%{?dist}
+Version:        0.13.0
+Release:        1%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
 License:        LGPLv2+
-URL:            http://www.opensc-project.org/opensc/
-Source0:        http://www.opensc-project.org/files/opensc/%{name}-%{version}.tar.gz
+URL:            https://www.opensc-project.org/
+Source0:        http://downloads.sourceforge.net/project/opensc/OpenSC/opensc-%{version}/%{name}-%{version}.tar.gz
 Source1:        opensc-module
-Patch0:         opensc-fixdso.patch
 
 BuildRequires:  pcsc-lite-devel
 BuildRequires:  readline-devel
@@ -31,12 +30,11 @@ every software/card that does so, too.
 
 %prep
 %setup -q
-%patch0 -p1 -b .fixdso
 
 sed -i -e 's|"/lib /usr/lib\b|"/%{_lib} %{_libdir}|' configure # lib64 rpaths
 cp -p src/pkcs15init/README ./README.pkcs15init
 cp -p src/scconf/README.scconf .
-# No %{_libdir} here to avoid multilib conflicts; it's just an example
+# No {_libdir} here to avoid multilib conflicts; it's just an example
 sed -i -e 's|/usr/local/towitoko/lib/|/usr/lib/ctapi/|' etc/opensc.conf.in
 
 
@@ -78,7 +76,9 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libopensc.so
 %{_bindir}/cardos-tool
 %{_bindir}/cryptoflex-tool
 %{_bindir}/eidenv
+%{_bindir}/iasecc-tool
 %{_bindir}/netkey-tool
+%{_bindir}/openpgp-tool
 %{_bindir}/opensc-explorer
 %{_bindir}/opensc-tool
 %{_bindir}/piv-tool
@@ -86,20 +86,21 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libopensc.so
 %{_bindir}/pkcs15-crypt
 %{_bindir}/pkcs15-init
 %{_bindir}/pkcs15-tool
+%{_bindir}/sc-hsm-tool
 %{_bindir}/westcos-tool
 %{_libdir}/lib*.so.*
-%{_libdir}/onepin-opensc-pkcs11.so
 %{_libdir}/opensc-pkcs11.so
 %{_libdir}/pkcs11-spy.so
 %dir %{_libdir}/pkcs11
-%{_libdir}/pkcs11/onepin-opensc-pkcs11.so
 %{_libdir}/pkcs11/opensc-pkcs11.so
 %{_libdir}/pkcs11/pkcs11-spy.so
 %{_datadir}/opensc/
 %{_mandir}/man1/cardos-tool.1*
 %{_mandir}/man1/cryptoflex-tool.1*
 %{_mandir}/man1/eidenv.1*
+%{_mandir}/man1/iasecc-tool.1*
 %{_mandir}/man1/netkey-tool.1*
+%{_mandir}/man1/openpgp-tool.1*
 %{_mandir}/man1/opensc-explorer.*
 %{_mandir}/man1/opensc-tool.1*
 %{_mandir}/man1/piv-tool.1*
@@ -107,11 +108,17 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libopensc.so
 %{_mandir}/man1/pkcs15-crypt.1*
 %{_mandir}/man1/pkcs15-init.1*
 %{_mandir}/man1/pkcs15-tool.1*
+%{_mandir}/man1/sc-hsm-tool.1*
 %{_mandir}/man1/westcos-tool.1*
 %{_mandir}/man5/*.5*
 
 
 %changelog
+* Thu Jan 03 2013 Milan Broz <mbroz@redhat.com> - 0.13.0-1
+- Update to 0.13.0 (#890770)
+- Remove no longer provided onepin-opensc-pkcs11.so.
+- Add iasecc-tool, openpgp-tool and sc-hsm-tool.
+
 * Fri Jul 27 2012 Tomas Mraz <tmraz@redhat.com> - 0.12.2-6
 - Add a configuration file for p11-kit (#840504)
 
