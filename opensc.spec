@@ -1,6 +1,6 @@
 Name:           opensc
 Version:        0.13.0
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
@@ -8,6 +8,9 @@ License:        LGPLv2+
 URL:            https://www.opensc-project.org/
 Source0:        http://downloads.sourceforge.net/project/opensc/OpenSC/opensc-%{version}/%{name}-%{version}.tar.gz
 Source1:        opensc-module
+
+# Upstream patch for fixing pkcs15 cert length calculation
+Patch0:         0001-pkcs15-regression-in-e35febe-compute-cert-length.patch
 
 BuildRequires:  pcsc-lite-devel
 BuildRequires:  readline-devel
@@ -30,6 +33,7 @@ every software/card that does so, too.
 
 %prep
 %setup -q
+%patch0 -p1 -b .cert_length
 
 sed -i -e 's|"/lib /usr/lib\b|"/%{_lib} %{_libdir}|' configure # lib64 rpaths
 cp -p src/pkcs15init/README ./README.pkcs15init
@@ -114,6 +118,9 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libopensc.so
 
 
 %changelog
+* Sun Jan 13 2013 Kalev Lember <kalevlember@gmail.com> - 0.13.0-2
+- Backport an upstream patch for fixing pkcs15 cert length calculation
+
 * Thu Jan 03 2013 Milan Broz <mbroz@redhat.com> - 0.13.0-1
 - Update to 0.13.0 (#890770)
 - Remove no longer provided onepin-opensc-pkcs11.so.
