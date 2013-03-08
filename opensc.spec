@@ -1,13 +1,13 @@
 Name:           opensc
 Version:        0.13.0
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
 License:        LGPLv2+
 URL:            https://www.opensc-project.org/
 Source0:        http://downloads.sourceforge.net/project/opensc/OpenSC/opensc-%{version}/%{name}-%{version}.tar.gz
-Source1:        opensc-module
+Source1:        opensc.module
 
 # Upstream patch for fixing pkcs15 cert length calculation
 Patch0:         0001-pkcs15-regression-in-e35febe-compute-cert-length.patch
@@ -53,7 +53,7 @@ make %{?_smp_mflags} V=1
 %install
 make install DESTDIR=$RPM_BUILD_ROOT
 install -Dpm 644 etc/opensc.conf $RPM_BUILD_ROOT%{_sysconfdir}/opensc.conf
-install -Dpm 644 %{SOURCE1} $RPM_BUILD_ROOT%{_sysconfdir}/pkcs11/opensc-module
+install -Dpm 644 %{SOURCE1} $RPM_BUILD_ROOT%{_datadir}/share/p11-kit/opensc.module
 # use NEWS file timestamp as reference for configuration file
 touch -r NEWS $RPM_BUILD_ROOT%{_sysconfdir}/opensc.conf
 
@@ -76,7 +76,7 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libopensc.so
 %defattr(-,root,root,-)
 %doc COPYING NEWS README*
 %config(noreplace) %{_sysconfdir}/opensc.conf
-%config(noreplace) %{_sysconfdir}/pkcs11/opensc-module
+%config(noreplace) %{_datadir}/share/p11-kit/opensc.module
 %{_bindir}/cardos-tool
 %{_bindir}/cryptoflex-tool
 %{_bindir}/eidenv
@@ -118,6 +118,10 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libopensc.so
 
 
 %changelog
+* Fri Mar 08 2013 Stef Walter <stefw@redhat.com> - 0.13.0-4
+- Use the standard name format for p11-kit module configs
+- Put the p11-kit module config is the system location
+
 * Thu Feb 14 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.13.0-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_19_Mass_Rebuild
 
