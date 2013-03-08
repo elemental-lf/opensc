@@ -76,7 +76,7 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libopensc.so
 %defattr(-,root,root,-)
 %doc COPYING NEWS README*
 %config(noreplace) %{_sysconfdir}/opensc.conf
-%config(noreplace) %{_datadir}/share/p11-kit/opensc.module
+%{_datadir}/share/p11-kit/opensc.module
 %{_bindir}/cardos-tool
 %{_bindir}/cryptoflex-tool
 %{_bindir}/eidenv
