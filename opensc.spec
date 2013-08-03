@@ -1,6 +1,6 @@
 Name:           opensc
 Version:        0.13.0
-Release:        4%{?dist}
+Release:        5%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
@@ -118,6 +118,9 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libopensc.so
 
 
 %changelog
+* Sat Aug 03 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.13.0-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_20_Mass_Rebuild
+
 * Fri Mar 08 2013 Stef Walter <stefw@redhat.com> - 0.13.0-4
 - Use the standard name format for p11-kit module configs
 - Put the p11-kit module config is the system location
