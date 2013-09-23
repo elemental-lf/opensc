@@ -1,6 +1,6 @@
 Name:           opensc
 Version:        0.13.0
-Release:        5%{?dist}
+Release:        6%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
@@ -53,7 +53,7 @@ make %{?_smp_mflags} V=1
 %install
 make install DESTDIR=$RPM_BUILD_ROOT
 install -Dpm 644 etc/opensc.conf $RPM_BUILD_ROOT%{_sysconfdir}/opensc.conf
-install -Dpm 644 %{SOURCE1} $RPM_BUILD_ROOT%{_datadir}/share/p11-kit/opensc.module
+install -Dpm 644 %{SOURCE1} $RPM_BUILD_ROOT%{_datadir}/share/p11-kit/modules/opensc.module
 # use NEWS file timestamp as reference for configuration file
 touch -r NEWS $RPM_BUILD_ROOT%{_sysconfdir}/opensc.conf
 
@@ -76,7 +76,7 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libopensc.so
 %defattr(-,root,root,-)
 %doc COPYING NEWS README*
 %config(noreplace) %{_sysconfdir}/opensc.conf
-%{_datadir}/share/p11-kit/opensc.module
+%{_datadir}/share/p11-kit/modules/opensc.module
 %{_bindir}/cardos-tool
 %{_bindir}/cryptoflex-tool
 %{_bindir}/eidenv
@@ -118,6 +118,9 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libopensc.so
 
 
 %changelog
+* Mon Sep 23 2013 Stef Walter <stefw@redhat.com> - 0.13.0-6
+- Install p11-kit config file to the right place (#999190)
+
 * Sat Aug 03 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.13.0-5
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_20_Mass_Rebuild
 
