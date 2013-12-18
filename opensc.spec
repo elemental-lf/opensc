@@ -1,6 +1,6 @@
 Name:           opensc
 Version:        0.13.0
-Release:        6%{?dist}
+Release:        7%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
@@ -18,6 +18,7 @@ BuildRequires:  openssl-devel
 BuildRequires:  /usr/bin/xsltproc
 BuildRequires:  docbook-style-xsl
 Requires:       pcsc-lite-libs%{?_isa}
+Requires:	pcsc-lite
 Obsoletes:      mozilla-opensc-signer < 0.12.0
 Obsoletes:      opensc-devel < 0.12.0
 
@@ -118,6 +119,9 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libopensc.so
 
 
 %changelog
+* Wed Dec 18 2013 Nikos Mavrogiannopoulos <nmav@redhat.com> - 0.13.0-7
+- Ensure that pcsc-lite is depended on (#1029133)
+
 * Mon Sep 23 2013 Stef Walter <stefw@redhat.com> - 0.13.0-6
 - Install p11-kit config file to the right place (#999190)
 
