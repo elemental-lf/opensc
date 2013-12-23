@@ -5,7 +5,7 @@ Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
 License:        LGPLv2+
-URL:            https://www.opensc-project.org/
+URL:            https://github.com/OpenSC/OpenSC/wiki
 Source0:        http://downloads.sourceforge.net/project/opensc/OpenSC/opensc-%{version}/%{name}-%{version}.tar.gz
 Source1:        opensc.module
 
