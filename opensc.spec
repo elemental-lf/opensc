@@ -1,6 +1,6 @@
 Name:           opensc
 Version:        0.13.0
-Release:        7%{?dist}
+Release:        8%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
@@ -47,6 +47,7 @@ sed -i -e 's|/usr/local/towitoko/lib/|/usr/lib/ctapi/|' etc/opensc.conf.in
 %configure  --disable-static \
   --disable-assert \
   --enable-pcsc \
+  --enable-sm \
   --with-pcsc-provider=libpcsclite.so.1
 make %{?_smp_mflags} V=1
 
@@ -66,6 +67,7 @@ rm -rf $RPM_BUILD_ROOT%{_datadir}/doc/opensc
 # public headers and pkgconfig files.
 # Remove the symlink as nothing is supposed to link against libopensc.
 rm -f $RPM_BUILD_ROOT%{_libdir}/libopensc.so
+rm -f $RPM_BUILD_ROOT%{_libdir}/libsmm-local.so
 
 
 %post -p /sbin/ldconfig
@@ -119,6 +121,9 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libopensc.so
 
 
 %changelog
+* Wed Dec 23 2013 Nikos Mavrogiannopoulos <nmav@redhat.com> - 0.13.0-8
+- Compile using the --enable-sm option (related but does not fix #981462)
+
 * Wed Dec 18 2013 Nikos Mavrogiannopoulos <nmav@redhat.com> - 0.13.0-7
 - Ensure that pcsc-lite is depended on (#1029133)
 
