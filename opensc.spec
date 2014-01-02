@@ -1,6 +1,6 @@
 Name:           opensc
 Version:        0.13.0
-Release:        8%{?dist}
+Release:        9%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
@@ -11,6 +11,7 @@ Source1:        opensc.module
 
 # Upstream patch for fixing pkcs15 cert length calculation
 Patch0:         0001-pkcs15-regression-in-e35febe-compute-cert-length.patch
+Patch1:		opensc-epass2003.patch
 
 BuildRequires:  pcsc-lite-devel
 BuildRequires:  readline-devel
@@ -35,6 +36,7 @@ every software/card that does so, too.
 %prep
 %setup -q
 %patch0 -p1 -b .cert_length
+%patch1 -p1 -b .epass2003
 
 sed -i -e 's|"/lib /usr/lib\b|"/%{_lib} %{_libdir}|' configure # lib64 rpaths
 cp -p src/pkcs15init/README ./README.pkcs15init
@@ -121,7 +123,10 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libsmm-local.so
 
 
 %changelog
-* Wed Dec 23 2013 Nikos Mavrogiannopoulos <nmav@redhat.com> - 0.13.0-8
+* Thu Jan 02 2014 Nikos Mavrogiannopoulos <nmav@redhat.com> - 0.13.0-9
+- Applied epass2003 related patch (#981462)
+
+* Mon Dec 23 2013 Nikos Mavrogiannopoulos <nmav@redhat.com> - 0.13.0-8
 - Compile using the --enable-sm option (related but does not fix #981462)
 
 * Wed Dec 18 2013 Nikos Mavrogiannopoulos <nmav@redhat.com> - 0.13.0-7
