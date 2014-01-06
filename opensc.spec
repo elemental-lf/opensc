@@ -1,6 +1,6 @@
 Name:           opensc
 Version:        0.13.0
-Release:        9%{?dist}
+Release:        10%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
@@ -12,6 +12,7 @@ Source1:        opensc.module
 # Upstream patch for fixing pkcs15 cert length calculation
 Patch0:         0001-pkcs15-regression-in-e35febe-compute-cert-length.patch
 Patch1:		opensc-epass2003.patch
+Patch2:		opensc-myeid.patch
 
 BuildRequires:  pcsc-lite-devel
 BuildRequires:  readline-devel
@@ -37,6 +38,7 @@ every software/card that does so, too.
 %setup -q
 %patch0 -p1 -b .cert_length
 %patch1 -p1 -b .epass2003
+%patch2 -p1 -b .myeid
 
 sed -i -e 's|"/lib /usr/lib\b|"/%{_lib} %{_libdir}|' configure # lib64 rpaths
 cp -p src/pkcs15init/README ./README.pkcs15init
@@ -123,6 +125,9 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libsmm-local.so
 
 
 %changelog
+* Thu Jan 06 2014 Nikos Mavrogiannopoulos <nmav@redhat.com> - 0.13.0-10
+- Applied myeid related patch (#1048576)
+
 * Thu Jan 02 2014 Nikos Mavrogiannopoulos <nmav@redhat.com> - 0.13.0-9
 - Applied epass2003 related patch (#981462)
 
