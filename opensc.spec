@@ -125,7 +125,7 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libsmm-local.so
 
 
 %changelog
-* Thu Jan 06 2014 Nikos Mavrogiannopoulos <nmav@redhat.com> - 0.13.0-10
+* Mon Jan 06 2014 Nikos Mavrogiannopoulos <nmav@redhat.com> - 0.13.0-10
 - Applied myeid related patch (#1048576)
 
 * Thu Jan 02 2014 Nikos Mavrogiannopoulos <nmav@redhat.com> - 0.13.0-9
