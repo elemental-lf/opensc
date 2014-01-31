@@ -1,6 +1,6 @@
 Name:           opensc
 Version:        0.13.0
-Release:        10%{?dist}
+Release:        11%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
@@ -59,7 +59,7 @@ make %{?_smp_mflags} V=1
 %install
 make install DESTDIR=$RPM_BUILD_ROOT
 install -Dpm 644 etc/opensc.conf $RPM_BUILD_ROOT%{_sysconfdir}/opensc.conf
-install -Dpm 644 %{SOURCE1} $RPM_BUILD_ROOT%{_datadir}/share/p11-kit/modules/opensc.module
+install -Dpm 644 %{SOURCE1} $RPM_BUILD_ROOT%{_datadir}/p11-kit/modules/opensc.module
 # use NEWS file timestamp as reference for configuration file
 touch -r NEWS $RPM_BUILD_ROOT%{_sysconfdir}/opensc.conf
 
@@ -83,7 +83,7 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libsmm-local.so
 %defattr(-,root,root,-)
 %doc COPYING NEWS README*
 %config(noreplace) %{_sysconfdir}/opensc.conf
-%{_datadir}/share/p11-kit/modules/opensc.module
+%{_datadir}/p11-kit/modules/opensc.module
 %{_bindir}/cardos-tool
 %{_bindir}/cryptoflex-tool
 %{_bindir}/eidenv
@@ -125,6 +125,9 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libsmm-local.so
 
 
 %changelog
+* Fri Jan 31 2014 Nikos Mavrogiannopoulos <nmav@redhat.com> - 0.13.0-11
+- Corrected installation path of opensc.module (#1060053)
+
 * Mon Jan 06 2014 Nikos Mavrogiannopoulos <nmav@redhat.com> - 0.13.0-10
 - Applied myeid related patch (#1048576)
 
