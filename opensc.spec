@@ -1,6 +1,6 @@
 Name:           opensc
 Version:        0.13.0
-Release:        11%{?dist}
+Release:        12%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
@@ -13,6 +13,8 @@ Source1:        opensc.module
 Patch0:         0001-pkcs15-regression-in-e35febe-compute-cert-length.patch
 Patch1:		opensc-epass2003.patch
 Patch2:		opensc-myeid.patch
+Patch3:		opensc-out-of-scope.patch
+Patch4:		opensc-dlclose.patch
 
 BuildRequires:  pcsc-lite-devel
 BuildRequires:  readline-devel
@@ -39,6 +41,8 @@ every software/card that does so, too.
 %patch0 -p1 -b .cert_length
 %patch1 -p1 -b .epass2003
 %patch2 -p1 -b .myeid
+%patch3 -p1 -b .out-of-scope
+%patch4 -p1 -b .dlclose
 
 sed -i -e 's|"/lib /usr/lib\b|"/%{_lib} %{_libdir}|' configure # lib64 rpaths
 cp -p src/pkcs15init/README ./README.pkcs15init
@@ -125,6 +129,11 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libsmm-local.so
 
 
 %changelog
+* Fri Feb 28 2014 Nikos Mavrogiannopoulos <nmav@redhat.com> - 0.13.0-12
+- Added fix for crash when calling pkcs11-tool with an invalid module (#1071368)
+- Added fix for invalid parameters passed to module by pkcs11-tool
+  when importing a private key (#1071369)
+
 * Fri Jan 31 2014 Nikos Mavrogiannopoulos <nmav@redhat.com> - 0.13.0-11
 - Corrected installation path of opensc.module (#1060053)
 
