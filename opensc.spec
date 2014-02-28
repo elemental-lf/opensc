@@ -44,6 +44,7 @@ every software/card that does so, too.
 %patch3 -p1 -b .out-of-scope
 %patch4 -p1 -b .dlclose
 
+sed -i -e 's/opensc.conf/opensc-%{_arch}.conf/g' src/libopensc/Makefile.in
 sed -i -e 's|"/lib /usr/lib\b|"/%{_lib} %{_libdir}|' configure # lib64 rpaths
 cp -p src/pkcs15init/README ./README.pkcs15init
 cp -p src/scconf/README.scconf .
@@ -62,10 +63,11 @@ make %{?_smp_mflags} V=1
 
 %install
 make install DESTDIR=$RPM_BUILD_ROOT
-install -Dpm 644 etc/opensc.conf $RPM_BUILD_ROOT%{_sysconfdir}/opensc.conf
+rm -f $RPM_BUILD_ROOT%{_sysconfdir}/opensc.conf
+install -Dpm 644 etc/opensc.conf $RPM_BUILD_ROOT%{_sysconfdir}/opensc-%{_arch}.conf
 install -Dpm 644 %{SOURCE1} $RPM_BUILD_ROOT%{_datadir}/p11-kit/modules/opensc.module
 # use NEWS file timestamp as reference for configuration file
-touch -r NEWS $RPM_BUILD_ROOT%{_sysconfdir}/opensc.conf
+touch -r NEWS $RPM_BUILD_ROOT%{_sysconfdir}/opensc-%{_arch}.conf
 
 find $RPM_BUILD_ROOT%{_libdir} -type f -name "*.la" | xargs rm
 
@@ -86,7 +88,7 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libsmm-local.so
 %files
 %defattr(-,root,root,-)
 %doc COPYING NEWS README*
-%config(noreplace) %{_sysconfdir}/opensc.conf
+%config(noreplace) %{_sysconfdir}/opensc-%{_arch}.conf
 %{_datadir}/p11-kit/modules/opensc.module
 %{_bindir}/cardos-tool
 %{_bindir}/cryptoflex-tool
@@ -133,6 +135,8 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libsmm-local.so
 - Added fix for crash when calling pkcs11-tool with an invalid module (#1071368)
 - Added fix for invalid parameters passed to module by pkcs11-tool
   when importing a private key (#1071369)
+- Configuration file opensc.conf was renamed to opensc-arch.conf to
+  avoid multi-arch issues.
 
 * Fri Jan 31 2014 Nikos Mavrogiannopoulos <nmav@redhat.com> - 0.13.0-11
 - Corrected installation path of opensc.module (#1060053)
