@@ -1,6 +1,6 @@
 Name:           opensc
 Version:        0.13.0
-Release:        12%{?dist}
+Release:        13%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
@@ -131,6 +131,9 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libsmm-local.so
 
 
 %changelog
+* Sat Jun 07 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.13.0-13
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_21_Mass_Rebuild
+
 * Fri Feb 28 2014 Nikos Mavrogiannopoulos <nmav@redhat.com> - 0.13.0-12
 - Added fix for crash when calling pkcs11-tool with an invalid module (#1071368)
 - Added fix for invalid parameters passed to module by pkcs11-tool
