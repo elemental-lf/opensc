@@ -1,6 +1,6 @@
 Name:           opensc
-Version:        0.13.0
-Release:        13%{?dist}
+Version:        0.14.0
+Release:        1%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
@@ -8,13 +8,6 @@ License:        LGPLv2+
 URL:            https://github.com/OpenSC/OpenSC/wiki
 Source0:        http://downloads.sourceforge.net/project/opensc/OpenSC/opensc-%{version}/%{name}-%{version}.tar.gz
 Source1:        opensc.module
-
-# Upstream patch for fixing pkcs15 cert length calculation
-Patch0:         0001-pkcs15-regression-in-e35febe-compute-cert-length.patch
-Patch1:		opensc-epass2003.patch
-Patch2:		opensc-myeid.patch
-Patch3:		opensc-out-of-scope.patch
-Patch4:		opensc-dlclose.patch
 
 BuildRequires:  pcsc-lite-devel
 BuildRequires:  readline-devel
@@ -38,11 +31,6 @@ every software/card that does so, too.
 
 %prep
 %setup -q
-%patch0 -p1 -b .cert_length
-%patch1 -p1 -b .epass2003
-%patch2 -p1 -b .myeid
-%patch3 -p1 -b .out-of-scope
-%patch4 -p1 -b .dlclose
 
 sed -i -e 's/opensc.conf/opensc-%{_arch}.conf/g' src/libopensc/Makefile.in
 sed -i -e 's|"/lib /usr/lib\b|"/%{_lib} %{_libdir}|' configure # lib64 rpaths
@@ -104,12 +92,15 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libsmm-local.so
 %{_bindir}/pkcs15-init
 %{_bindir}/pkcs15-tool
 %{_bindir}/sc-hsm-tool
+%{_bindir}/dnie-tool
 %{_bindir}/westcos-tool
 %{_libdir}/lib*.so.*
 %{_libdir}/opensc-pkcs11.so
 %{_libdir}/pkcs11-spy.so
+%{_libdir}/onepin-opensc-pkcs11.so
 %dir %{_libdir}/pkcs11
 %{_libdir}/pkcs11/opensc-pkcs11.so
+%{_libdir}/pkcs11/onepin-opensc-pkcs11.so
 %{_libdir}/pkcs11/pkcs11-spy.so
 %{_datadir}/opensc/
 %{_mandir}/man1/cardos-tool.1*
@@ -131,6 +122,9 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libsmm-local.so
 
 
 %changelog
+* Tue Jul 01 2014 Nikos Mavrogiannopoulos <nmav@redhat.com> - 0.14.0-1
+- new upstream version
+
 * Sat Jun 07 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.13.0-13
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_21_Mass_Rebuild
 
