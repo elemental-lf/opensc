@@ -1,12 +1,12 @@
 Name:           opensc
-Version:        0.14.0
-Release:        3%{?dist}
+Version:        0.15.0
+Release:        1%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
 License:        LGPLv2+
 URL:            https://github.com/OpenSC/OpenSC/wiki
-Source0:        http://downloads.sourceforge.net/project/opensc/OpenSC/opensc-%{version}/%{name}-%{version}.tar.gz
+Source0:	https://github.com/OpenSC/OpenSC/archive/%{version}.tar.gz#/%{name}-%{version}.tar.gz
 Source1:        opensc.module
 
 BuildRequires:  pcsc-lite-devel
@@ -14,6 +14,7 @@ BuildRequires:  readline-devel
 BuildRequires:  openssl-devel
 BuildRequires:  /usr/bin/xsltproc
 BuildRequires:  docbook-style-xsl
+BuildRequires:  autoconf automake libtool
 Requires:       pcsc-lite-libs%{?_isa}
 Requires:	pcsc-lite
 Obsoletes:      mozilla-opensc-signer < 0.12.0
@@ -30,10 +31,8 @@ every software/card that does so, too.
 
 
 %prep
-%setup -q
+%setup -q -n OpenSC-%{version}
 
-sed -i -e 's/opensc.conf/opensc-%{_arch}.conf/g' src/libopensc/Makefile.in
-sed -i -e 's|"/lib /usr/lib\b|"/%{_lib} %{_libdir}|' configure # lib64 rpaths
 cp -p src/pkcs15init/README ./README.pkcs15init
 cp -p src/scconf/README.scconf .
 # No {_libdir} here to avoid multilib conflicts; it's just an example
@@ -41,6 +40,9 @@ sed -i -e 's|/usr/local/towitoko/lib/|/usr/lib/ctapi/|' etc/opensc.conf.in
 
 
 %build
+autoreconf -fvi
+sed -i -e 's/opensc.conf/opensc-%{_arch}.conf/g' src/libopensc/Makefile.in
+sed -i -e 's|"/lib /usr/lib\b|"/%{_lib} %{_libdir}|' configure # lib64 rpaths
 %configure  --disable-static \
   --disable-assert \
   --enable-pcsc \
@@ -66,6 +68,9 @@ rm -rf $RPM_BUILD_ROOT%{_datadir}/doc/opensc
 # Remove the symlink as nothing is supposed to link against libopensc.
 rm -f $RPM_BUILD_ROOT%{_libdir}/libopensc.so
 rm -f $RPM_BUILD_ROOT%{_libdir}/libsmm-local.so
+%if 0%{?rhel}
+rm -rf %{buildroot}%{_sysconfdir}/bash_completion.d/
+%endif
 
 
 %post -p /sbin/ldconfig
@@ -76,6 +81,11 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libsmm-local.so
 %files
 %defattr(-,root,root,-)
 %doc COPYING NEWS README*
+
+%if ! 0%{?rhel}
+%{_sysconfdir}/bash_completion.d/
+%endif
+
 %config(noreplace) %{_sysconfdir}/opensc-%{_arch}.conf
 %{_datadir}/p11-kit/modules/opensc.module
 %{_bindir}/cardos-tool
@@ -118,10 +128,14 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libsmm-local.so
 %{_mandir}/man1/pkcs15-tool.1*
 %{_mandir}/man1/sc-hsm-tool.1*
 %{_mandir}/man1/westcos-tool.1*
+%{_mandir}/man1/dnie-tool.1*
 %{_mandir}/man5/*.5*
 
 
 %changelog
+* Tue Jul 14 2015 Nikos Mavrogiannopoulos <nmav@redhat.com> - 0.15.0-1
+- Update to 0.15.0 (#1209682)
+
 * Thu Jun 18 2015 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.14.0-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_23_Mass_Rebuild
 
