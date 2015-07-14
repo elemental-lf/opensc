@@ -1,0 +1,228 @@
+diff --git a/src/libopensc/ctx.c b/src/libopensc/ctx.c
+index 4670008..26f8bf5 100644
+--- a/src/libopensc/ctx.c
++++ b/src/libopensc/ctx.c
+@@ -791,19 +791,21 @@ int sc_wait_for_event(sc_context_t *ctx, unsigned int event_mask, sc_reader_t **
+ }
+ 
+ 
+-int sc_release_context(sc_context_t *ctx)
++static
++int __sc_release_context(sc_context_t *ctx, unsigned after_fork)
+ {
+ 	unsigned int i;
+ 
+ 	assert(ctx != NULL);
+ 	SC_FUNC_CALLED(ctx, SC_LOG_DEBUG_VERBOSE);
++
+ 	while (list_size(&ctx->readers)) {
+ 		sc_reader_t *rdr = (sc_reader_t *) list_get_at(&ctx->readers, 0);
+ 		_sc_delete_reader(ctx, rdr);
+ 	}
+ 
+ 	if (ctx->reader_driver->ops->finish != NULL)
+-		ctx->reader_driver->ops->finish(ctx);
++		ctx->reader_driver->ops->finish(ctx, after_fork);
+ 
+ 	for (i = 0; ctx->card_drivers[i]; i++) {
+ 		struct sc_card_driver *drv = ctx->card_drivers[i];
+@@ -836,6 +838,16 @@ int sc_release_context(sc_context_t *ctx)
+ 	return SC_SUCCESS;
+ }
+ 
++int sc_release_context(sc_context_t *ctx)
++{
++	return __sc_release_context(ctx, 0);
++}
++
++int sc_terminate_context(sc_context_t *ctx)
++{
++	return __sc_release_context(ctx, 1);
++}
++
+ int sc_set_card_driver(sc_context_t *ctx, const char *short_name)
+ {
+ 	int i = 0, match = 0;
+diff --git a/src/libopensc/libopensc.exports b/src/libopensc/libopensc.exports
+index cea8d42..ed84ffe 100644
+--- a/src/libopensc/libopensc.exports
++++ b/src/libopensc/libopensc.exports
+@@ -244,6 +244,7 @@ sc_put_data
+ sc_read_binary
+ sc_read_record
+ sc_release_context
++sc_terminate_context
+ sc_reset
+ sc_reset_retry_counter
+ sc_restore_security_env
+diff --git a/src/libopensc/opensc.h b/src/libopensc/opensc.h
+index ad5405d..437a14d 100644
+--- a/src/libopensc/opensc.h
++++ b/src/libopensc/opensc.h
+@@ -374,7 +374,7 @@ struct sc_reader_operations {
+ 	int (*init)(struct sc_context *ctx);
+ 	/* Called when the driver is being unloaded.  finish() has to
+ 	 * release any resources. */
+-	int (*finish)(struct sc_context *ctx);
++	int (*finish)(struct sc_context *ctx, unsigned after_fork);
+ 	/* Called when library wish to detect new readers
+ 	 * should add only new readers. */
+ 	int (*detect_readers)(struct sc_context *ctx);
+@@ -752,6 +752,12 @@ int sc_context_create(sc_context_t **ctx, const sc_context_param_t *parm);
+ int sc_release_context(sc_context_t *ctx);
+ 
+ /**
++ * Releases an established OpenSC context without releasing any state that is shared with parent process
++ * @param ctx A pointer to the context structure to be released
++ */
++int sc_terminate_context(sc_context_t *ctx);
++
++/**
+  * Detect new readers available on system.
+  * @param  ctx  OpenSC context
+  * @return SC_SUCCESS on success and an error code otherwise.
+diff --git a/src/libopensc/reader-ctapi.c b/src/libopensc/reader-ctapi.c
+index 919c3f0..e252a42 100644
+--- a/src/libopensc/reader-ctapi.c
++++ b/src/libopensc/reader-ctapi.c
+@@ -514,7 +514,7 @@ static int ctapi_init(sc_context_t *ctx)
+ 	return 0;
+ }
+ 
+-static int ctapi_finish(sc_context_t *ctx)
++static int ctapi_finish(sc_context_t *ctx, unsigned after_fork)
+ {
+ 	struct ctapi_global_private_data *priv = (struct ctapi_global_private_data *) ctx->reader_drv_data;
+ 
+diff --git a/src/libopensc/reader-openct.c b/src/libopensc/reader-openct.c
+index a276d52..32871d0 100644
+--- a/src/libopensc/reader-openct.c
++++ b/src/libopensc/reader-openct.c
+@@ -29,7 +29,7 @@
+ /* function declarations */
+ static int openct_reader_init(sc_context_t *ctx);
+ static int openct_add_reader(sc_context_t *ctx, unsigned int num, ct_info_t *info);
+-static int openct_reader_finish(sc_context_t *ctx);
++static int openct_reader_finish(sc_context_t *ctx, unsigned after_fork);
+ static int openct_reader_release(sc_reader_t *reader);
+ static int openct_reader_detect_card_presence(sc_reader_t *reader);
+ static int openct_reader_connect(sc_reader_t *reader);
+@@ -137,7 +137,7 @@ openct_add_reader(sc_context_t *ctx, unsigned int num, ct_info_t *info)
+  * Called when the driver is being unloaded.  finish() has to
+  * deallocate the private data and any resources.
+  */
+-static int openct_reader_finish(sc_context_t *ctx)
++static int openct_reader_finish(sc_context_t *ctx, unsigned after_fork)
+ {
+ 	SC_FUNC_CALLED(ctx, SC_LOG_DEBUG_VERBOSE);
+ 	return SC_SUCCESS;
+diff --git a/src/libopensc/reader-pcsc.c b/src/libopensc/reader-pcsc.c
+index 7382452..cf5890d 100644
+--- a/src/libopensc/reader-pcsc.c
++++ b/src/libopensc/reader-pcsc.c
+@@ -740,14 +740,14 @@ out:
+ 	return ret;
+ }
+ 
+-static int pcsc_finish(sc_context_t *ctx)
++static int pcsc_finish(sc_context_t *ctx, unsigned after_fork)
+ {
+ 	struct pcsc_global_private_data *gpriv = (struct pcsc_global_private_data *) ctx->reader_drv_data;
+ 
+ 	SC_FUNC_CALLED(ctx, SC_LOG_DEBUG_NORMAL);
+ 
+ 	if (gpriv) {
+-		if (gpriv->pcsc_ctx != -1)
++		if (!after_fork && gpriv->pcsc_ctx != -1)
+ 			gpriv->SCardReleaseContext(gpriv->pcsc_ctx);
+ 		if (gpriv->dlhandle != NULL)
+ 			sc_dlclose(gpriv->dlhandle);
+@@ -2096,7 +2096,7 @@ out:
+ 	return ret;
+ }
+ 
+-static int cardmod_finish(sc_context_t *ctx)
++static int cardmod_finish(sc_context_t *ctx, unsigned after_fork)
+ {
+ 	struct pcsc_global_private_data *gpriv = (struct pcsc_global_private_data *) ctx->reader_drv_data;
+ 
+diff --git a/src/pkcs11/pkcs11-global.c b/src/pkcs11/pkcs11-global.c
+index ee6cf7c..886476e 100644
+--- a/src/pkcs11/pkcs11-global.c
++++ b/src/pkcs11/pkcs11-global.c
+@@ -40,6 +40,7 @@ list_t virtual_slots;
+ pid_t initialized_pid = (pid_t)-1;
+ #endif
+ static int in_finalize = 0;
++static CK_RV __sc_pkcs11_finalize(CK_VOID_PTR pReserved, unsigned after_fork);
+ extern CK_FUNCTION_LIST pkcs11_function_list;
+ 
+ #if defined(HAVE_PTHREAD) && defined(PKCS11_THREAD_LOCKING)
+@@ -205,7 +206,7 @@ CK_RV C_Initialize(CK_VOID_PTR pInitArgs)
+ 	/* Handle fork() exception */
+ #if !defined(_WIN32)
+ 	if (current_pid != initialized_pid) {
+-		C_Finalize(NULL_PTR);
++		__sc_pkcs11_finalize(NULL_PTR, 1);
+ 	}
+ 	initialized_pid = current_pid;
+ 	in_finalize = 0;
+@@ -271,7 +272,8 @@ out:
+ 	return rv;
+ }
+ 
+-CK_RV C_Finalize(CK_VOID_PTR pReserved)
++static
++CK_RV __sc_pkcs11_finalize(CK_VOID_PTR pReserved, unsigned after_fork)
+ {
+ 	int i;
+ 	void *p;
+@@ -292,10 +294,14 @@ CK_RV C_Finalize(CK_VOID_PTR pReserved)
+ 
+ 	/* cancel pending calls */
+ 	in_finalize = 1;
+-	sc_cancel(context);
+-	/* remove all cards from readers */
+-	for (i=0; i < (int)sc_ctx_get_reader_count(context); i++)
+-		card_removed(sc_ctx_get_reader(context, i));
++
++	if (!after_fork) {
++		sc_cancel(context);
++
++		/* remove all cards from readers */
++		for (i=0; i < (int)sc_ctx_get_reader_count(context); i++)
++			card_removed(sc_ctx_get_reader(context, i));
++	}
+ 
+ 	while ((p = list_fetch(&sessions)))
+ 		free(p);
+@@ -307,7 +313,10 @@ CK_RV C_Finalize(CK_VOID_PTR pReserved)
+ 	}
+ 	list_destroy(&virtual_slots);
+ 
+-	sc_release_context(context);
++	if (after_fork)
++		sc_terminate_context(context);
++	else
++		sc_release_context(context);
+ 	context = NULL;
+ 
+ 	/* Release and destroy the mutex */
+@@ -316,6 +325,17 @@ CK_RV C_Finalize(CK_VOID_PTR pReserved)
+ 	return rv;
+ }
+ 
++CK_RV C_Finalize(CK_VOID_PTR pReserved)
++{
++#if !defined(_WIN32)
++	pid_t current_pid = getpid();
++	if (current_pid != initialized_pid) {
++		return __sc_pkcs11_finalize(NULL_PTR, 1);
++	}
++#endif
++	return __sc_pkcs11_finalize(pReserved, 0);
++}
++
+ CK_RV C_GetInfo(CK_INFO_PTR pInfo)
+ {
+ 	CK_RV rv = CKR_OK;

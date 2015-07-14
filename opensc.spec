@@ -20,6 +20,8 @@ Requires:	pcsc-lite
 Obsoletes:      mozilla-opensc-signer < 0.12.0
 Obsoletes:      opensc-devel < 0.12.0
 
+Patch0:		opensc-0.15.0-fork-issue.patch
+
 %description
 OpenSC provides a set of libraries and utilities to work with smart cards. Its
 main focus is on cards that support cryptographic operations, and facilitate
@@ -32,6 +34,8 @@ every software/card that does so, too.
 
 %prep
 %setup -q -n OpenSC-%{version}
+
+%patch0 -p1 -b .fork-issue
 
 cp -p src/pkcs15init/README ./README.pkcs15init
 cp -p src/scconf/README.scconf .
@@ -135,6 +139,7 @@ rm -rf %{buildroot}%{_sysconfdir}/bash_completion.d/
 %changelog
 * Tue Jul 14 2015 Nikos Mavrogiannopoulos <nmav@redhat.com> - 0.15.0-1
 - Update to 0.15.0 (#1209682)
+- Solve issue with C_Initialize after fork() (#1218797)
 
 * Thu Jun 18 2015 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.14.0-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_23_Mass_Rebuild
