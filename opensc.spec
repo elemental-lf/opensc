@@ -1,6 +1,6 @@
 Name:           opensc
 Version:        0.15.0
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
@@ -137,6 +137,9 @@ rm -rf %{buildroot}%{_sysconfdir}/bash_completion.d/
 
 
 %changelog
+* Tue Aug  4 2015 Nikos Mavrogiannopoulos <nmav@redhat.com> - 0.15.0-2
+- Updated fix for issue with C_Initialize after fork() (#1218797)
+
 * Tue Jul 14 2015 Nikos Mavrogiannopoulos <nmav@redhat.com> - 0.15.0-1
 - Update to 0.15.0 (#1209682)
 - Solve issue with C_Initialize after fork() (#1218797)
