@@ -1,228 +1,399 @@
+diff --git a/configure.ac b/configure.ac
+index 67aa5c4..e65c919 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -39,8 +39,8 @@ OPENSC_VS_FF_PRODUCT_NAME="VS_FF_PRODUCT_NAME"
+ #   (Code changed:                      REVISION++)
+ #   (Oldest interface removed:          OLDEST++)
+ #   (Interfaces added:                  CURRENT++, REVISION=0)
+-OPENSC_LT_CURRENT="3"
+-OPENSC_LT_OLDEST="3"
++OPENSC_LT_CURRENT="4"
++OPENSC_LT_OLDEST="4"
+ OPENSC_LT_REVISION="0"
+ OPENSC_LT_AGE="0"
+ OPENSC_LT_AGE="$((${OPENSC_LT_CURRENT}-${OPENSC_LT_OLDEST}))"
+diff --git a/src/libopensc/card.c b/src/libopensc/card.c
+index 2cb16f6..f3cb152 100644
+--- a/src/libopensc/card.c
++++ b/src/libopensc/card.c
+@@ -218,7 +218,8 @@ int sc_connect_card(sc_reader_t *reader, sc_card_t **card_out)
+ 			if (ops == NULL || ops->match_card == NULL)   {
+ 				continue;
+ 			}
+-			else if (!ctx->enable_default_driver && !strcmp("default", drv->short_name))   {
++			else if (!(ctx->flags & SC_CTX_FLAG_ENABLE_DEFAULT_DRIVER)
++				   	&& !strcmp("default", drv->short_name))   {
+ 				sc_log(ctx , "ignore 'default' card driver");
+ 				continue;
+ 			}
 diff --git a/src/libopensc/ctx.c b/src/libopensc/ctx.c
-index 4670008..26f8bf5 100644
+index 5595dc4..15312f7 100644
 --- a/src/libopensc/ctx.c
 +++ b/src/libopensc/ctx.c
-@@ -791,19 +791,21 @@ int sc_wait_for_event(sc_context_t *ctx, unsigned int event_mask, sc_reader_t **
- }
+@@ -186,8 +186,7 @@ static void set_defaults(sc_context_t *ctx, struct _sc_ctx_options *opts)
+ 	if (ctx->debug_file && (ctx->debug_file != stderr && ctx->debug_file != stdout))
+ 		fclose(ctx->debug_file);
+ 	ctx->debug_file = stderr;
+-	ctx->paranoid_memory = 0;
+-	ctx->enable_default_driver = 0;
++	ctx->flags = 0;
  
- 
--int sc_release_context(sc_context_t *ctx)
-+static
-+int __sc_release_context(sc_context_t *ctx, unsigned after_fork)
- {
- 	unsigned int i;
- 
- 	assert(ctx != NULL);
- 	SC_FUNC_CALLED(ctx, SC_LOG_DEBUG_VERBOSE);
-+
- 	while (list_size(&ctx->readers)) {
- 		sc_reader_t *rdr = (sc_reader_t *) list_get_at(&ctx->readers, 0);
- 		_sc_delete_reader(ctx, rdr);
+ #ifdef __APPLE__
+ 	/* Override the default debug log for OpenSC.tokend to be different from PKCS#11.
+@@ -258,11 +257,13 @@ load_parameters(sc_context_t *ctx, scconf_block *block, struct _sc_ctx_options *
+ 		sc_ctx_log_to_file(ctx, val);
  	}
  
- 	if (ctx->reader_driver->ops->finish != NULL)
--		ctx->reader_driver->ops->finish(ctx);
-+		ctx->reader_driver->ops->finish(ctx, after_fork);
+-	ctx->paranoid_memory = scconf_get_bool (block, "paranoid-memory",
+-		ctx->paranoid_memory);
++	if (scconf_get_bool (block, "paranoid-memory",
++			   	ctx->flags & SC_CTX_FLAG_PARANOID_MEMORY))
++		ctx->flags |= SC_CTX_FLAG_PARANOID_MEMORY;
  
- 	for (i = 0; ctx->card_drivers[i]; i++) {
- 		struct sc_card_driver *drv = ctx->card_drivers[i];
-@@ -836,6 +838,16 @@ int sc_release_context(sc_context_t *ctx)
- 	return SC_SUCCESS;
- }
+-	ctx->enable_default_driver = scconf_get_bool (block, "enable_default_driver",
+-			ctx->enable_default_driver);
++	if (scconf_get_bool (block, "enable_default_driver",
++			   	ctx->flags & SC_CTX_FLAG_ENABLE_DEFAULT_DRIVER))
++		ctx->flags |= SC_CTX_FLAG_ENABLE_DEFAULT_DRIVER;
  
-+int sc_release_context(sc_context_t *ctx)
-+{
-+	return __sc_release_context(ctx, 0);
-+}
+ 	val = scconf_get_str(block, "force_card_driver", NULL);
+ 	if (val) {
+@@ -723,7 +724,9 @@ int sc_context_create(sc_context_t **ctx_out, const sc_context_param_t *parm)
+ 		return SC_ERROR_OUT_OF_MEMORY;
+ 	}
+ 
++	ctx->flags = parm->flags;
+ 	set_defaults(ctx, &opts);
 +
-+int sc_terminate_context(sc_context_t *ctx)
-+{
-+	return __sc_release_context(ctx, 1);
-+}
-+
- int sc_set_card_driver(sc_context_t *ctx, const char *short_name)
- {
- 	int i = 0, match = 0;
-diff --git a/src/libopensc/libopensc.exports b/src/libopensc/libopensc.exports
-index cea8d42..ed84ffe 100644
---- a/src/libopensc/libopensc.exports
-+++ b/src/libopensc/libopensc.exports
-@@ -244,6 +244,7 @@ sc_put_data
- sc_read_binary
- sc_read_record
- sc_release_context
-+sc_terminate_context
- sc_reset
- sc_reset_retry_counter
- sc_restore_security_env
+ 	list_init(&ctx->readers);
+ 	list_attributes_seeker(&ctx->readers, reader_list_seeker);
+ 	/* set thread context and create mutex object (if specified) */
 diff --git a/src/libopensc/opensc.h b/src/libopensc/opensc.h
-index ad5405d..437a14d 100644
+index 8c4e81f..e9a4d19 100644
 --- a/src/libopensc/opensc.h
 +++ b/src/libopensc/opensc.h
-@@ -374,7 +374,7 @@ struct sc_reader_operations {
- 	int (*init)(struct sc_context *ctx);
- 	/* Called when the driver is being unloaded.  finish() has to
- 	 * release any resources. */
--	int (*finish)(struct sc_context *ctx);
-+	int (*finish)(struct sc_context *ctx, unsigned after_fork);
- 	/* Called when library wish to detect new readers
- 	 * should add only new readers. */
- 	int (*detect_readers)(struct sc_context *ctx);
-@@ -752,6 +752,12 @@ int sc_context_create(sc_context_t **ctx, const sc_context_param_t *parm);
- int sc_release_context(sc_context_t *ctx);
+@@ -639,13 +639,25 @@ typedef struct {
+ 	unsigned long (*thread_id)(void);
+ } sc_thread_context_t;
  
- /**
-+ * Releases an established OpenSC context without releasing any state that is shared with parent process
-+ * @param ctx A pointer to the context structure to be released
++/** Stop modifing or using external resources
++ *
++ * Currently this is used to avoid freeing duplicated external resources for a
++ * process that has been forked. For example, a child process may want to leave
++ * the duplicated card handles for the parent process. With this flag the child
++ * process indicates that shall the reader shall ignore those resources when
++ * calling sc_disconnect_card.
 + */
-+int sc_terminate_context(sc_context_t *ctx);
++#define SC_CTX_FLAG_TERMINATE				0x00000001
++#define SC_CTX_FLAG_PARANOID_MEMORY			0x00000002
++#define SC_CTX_FLAG_DEBUG_MEMORY			0x00000004
++#define SC_CTX_FLAG_ENABLE_DEFAULT_DRIVER	0x00000008
 +
-+/**
-  * Detect new readers available on system.
-  * @param  ctx  OpenSC context
-  * @return SC_SUCCESS on success and an error code otherwise.
+ typedef struct sc_context {
+ 	scconf_context *conf;
+ 	scconf_block *conf_blocks[3];
+ 	char *app_name;
+ 	int debug;
+-	int paranoid_memory;
+-	int enable_default_driver;
++	unsigned long flags;
+ 
+ 	FILE *debug_file;
+ 	char *debug_filename;
+@@ -719,7 +731,7 @@ typedef struct {
+ 	 *  dependend configuration data). If NULL the name "default"
+ 	 *  will be used. */
+ 	const char    *app_name;
+-	/** flags, currently unused */
++	/** context flags */
+ 	unsigned long flags;
+ 	/** mutex functions to use (optional) */
+ 	sc_thread_context_t *thread_ctx;
 diff --git a/src/libopensc/reader-ctapi.c b/src/libopensc/reader-ctapi.c
-index 919c3f0..e252a42 100644
+index 919c3f0..c526500 100644
 --- a/src/libopensc/reader-ctapi.c
 +++ b/src/libopensc/reader-ctapi.c
-@@ -514,7 +514,7 @@ static int ctapi_init(sc_context_t *ctx)
- 	return 0;
- }
+@@ -116,6 +116,9 @@ static int refresh_attributes(sc_reader_t *reader)
+ 	u8 cmd[5], rbuf[256], sad, dad;
+ 	unsigned short lr;
  
--static int ctapi_finish(sc_context_t *ctx)
-+static int ctapi_finish(sc_context_t *ctx, unsigned after_fork)
++	if (reader->ctx->flags & SC_CTX_FLAG_TERMINATE)
++		return SC_ERROR_NOT_ALLOWED;
++
+ 	cmd[0] = CTBCS_CLA;
+ 	cmd[1] = CTBCS_INS_STATUS;
+ 	cmd[2] = CTBCS_P1_CT_KERNEL;
+@@ -158,6 +161,9 @@ static int ctapi_internal_transmit(sc_reader_t *reader,
+ 	u8 dad, sad;
+ 	unsigned short lr;
+ 	char rv;
++
++	if (reader->ctx->flags & SC_CTX_FLAG_TERMINATE)
++		return SC_ERROR_NOT_ALLOWED;
+ 	
+ 	if (control)
+ 		dad = 1;
+@@ -235,6 +241,9 @@ static int ctapi_connect(sc_reader_t *reader)
+ 	unsigned short lr;
+ 	int r;
+ 
++	if (reader->ctx->flags & SC_CTX_FLAG_TERMINATE)
++		return SC_ERROR_NOT_ALLOWED;
++
+ 	cmd[0] = CTBCS_CLA;
+ 	cmd[1] = CTBCS_INS_REQUEST;
+ 	cmd[2] = CTBCS_P1_INTERFACE1;
+@@ -280,7 +289,9 @@ static int ctapi_release(sc_reader_t *reader)
  {
- 	struct ctapi_global_private_data *priv = (struct ctapi_global_private_data *) ctx->reader_drv_data;
+ 	struct ctapi_private_data *priv = GET_PRIV_DATA(reader);
  
+-	priv->funcs.CT_close(priv->ctn);
++
++	if (!(reader->ctx->flags & SC_CTX_FLAG_TERMINATE))
++		priv->funcs.CT_close(priv->ctn);
+ 
+ 	free(priv);
+ 	return 0;
 diff --git a/src/libopensc/reader-openct.c b/src/libopensc/reader-openct.c
-index a276d52..32871d0 100644
+index a276d52..2d7d6bd 100644
 --- a/src/libopensc/reader-openct.c
 +++ b/src/libopensc/reader-openct.c
-@@ -29,7 +29,7 @@
- /* function declarations */
- static int openct_reader_init(sc_context_t *ctx);
- static int openct_add_reader(sc_context_t *ctx, unsigned int num, ct_info_t *info);
--static int openct_reader_finish(sc_context_t *ctx);
-+static int openct_reader_finish(sc_context_t *ctx, unsigned after_fork);
- static int openct_reader_release(sc_reader_t *reader);
- static int openct_reader_detect_card_presence(sc_reader_t *reader);
- static int openct_reader_connect(sc_reader_t *reader);
-@@ -137,7 +137,7 @@ openct_add_reader(sc_context_t *ctx, unsigned int num, ct_info_t *info)
-  * Called when the driver is being unloaded.  finish() has to
-  * deallocate the private data and any resources.
-  */
--static int openct_reader_finish(sc_context_t *ctx)
-+static int openct_reader_finish(sc_context_t *ctx, unsigned after_fork)
- {
- 	SC_FUNC_CALLED(ctx, SC_LOG_DEBUG_VERBOSE);
+@@ -154,7 +154,7 @@ static int openct_reader_release(sc_reader_t *reader)
+ 
+ 	SC_FUNC_CALLED(reader->ctx, SC_LOG_DEBUG_VERBOSE);
+ 	if (data) {
+-		if (data->h)
++		if (data->h && !(reader->ctx->flags & SC_CTX_FLAG_TERMINATE))
+ 			ct_reader_disconnect(data->h);
+ 		sc_mem_clear(data, sizeof(*data));
+ 		reader->drv_data = NULL;
+@@ -174,6 +174,9 @@ static int openct_reader_detect_card_presence(sc_reader_t *reader)
+ 
+ 	SC_FUNC_CALLED(reader->ctx, SC_LOG_DEBUG_VERBOSE);
+ 
++	if (reader->ctx->flags & SC_CTX_FLAG_TERMINATE)
++		return SC_ERROR_NOT_ALLOWED;
++
+ 	reader->flags = 0;
+ 	if (!data->h && !(data->h = ct_reader_connect(data->num)))
+ 		return 0;
+@@ -197,6 +200,9 @@ openct_reader_connect(sc_reader_t *reader)
+ 
+ 	SC_FUNC_CALLED(reader->ctx, SC_LOG_DEBUG_VERBOSE);
+ 
++	if (reader->ctx->flags & SC_CTX_FLAG_TERMINATE)
++		return SC_ERROR_NOT_ALLOWED;
++
+ 	if (data->h)
+ 		ct_reader_disconnect(data->h);
+ 
+@@ -242,7 +248,7 @@ static int openct_reader_disconnect(sc_reader_t *reader)
+ 	struct driver_data *data = (struct driver_data *) reader->drv_data;
+ 
+ 	SC_FUNC_CALLED(reader->ctx, SC_LOG_DEBUG_VERBOSE);
+-	if (data->h)
++	if (data->h && !(reader->flags & SC_TERMINATE))
+ 		ct_reader_disconnect(data->h);
+ 	data->h = NULL;
  	return SC_SUCCESS;
+@@ -256,6 +262,9 @@ openct_reader_internal_transmit(sc_reader_t *reader,
+ 	struct driver_data *data = (struct driver_data *) reader->drv_data;
+ 	int rc;
+ 
++	if (reader->ctx->flags & SC_CTX_FLAG_TERMINATE)
++		return SC_ERROR_NOT_ALLOWED;
++
+ 	/* Hotplug check */
+ 	if ((rc = openct_reader_reconnect(reader)) < 0)
+ 		return rc;
+@@ -324,6 +333,9 @@ static int openct_reader_perform_verify(sc_reader_t *reader, struct sc_pin_cmd_d
+ 	u8 buf[254];
+ 	int rc;
+ 
++	if (reader->ctx->flags & SC_CTX_FLAG_TERMINATE)
++		return SC_ERROR_NOT_ALLOWED;
++
+ 	/* Hotplug check */
+ 	if ((rc = openct_reader_reconnect(reader)) < 0)
+ 		return rc;
+@@ -382,6 +394,9 @@ static int openct_reader_lock(sc_reader_t *reader)
+ 
+ 	SC_FUNC_CALLED(reader->ctx, SC_LOG_DEBUG_VERBOSE);
+ 
++	if (reader->ctx->flags & SC_CTX_FLAG_TERMINATE)
++		return SC_ERROR_NOT_ALLOWED;
++
+ 	/* Hotplug check */
+ 	if ((rc = openct_reader_reconnect(reader)) < 0)
+ 		return rc;
+@@ -408,6 +423,9 @@ static int openct_reader_unlock(sc_reader_t *reader)
+ 
+ 	SC_FUNC_CALLED(reader->ctx, SC_LOG_DEBUG_VERBOSE);
+ 
++	if (reader->ctx->flags & SC_CTX_FLAG_TERMINATE)
++		return SC_ERROR_NOT_ALLOWED;
++
+ 	/* Not connected */
+ 	if (data->h == NULL)
+ 		return 0;
 diff --git a/src/libopensc/reader-pcsc.c b/src/libopensc/reader-pcsc.c
-index 7382452..cf5890d 100644
+index 666265d..7c26a25 100644
 --- a/src/libopensc/reader-pcsc.c
 +++ b/src/libopensc/reader-pcsc.c
-@@ -740,14 +740,14 @@ out:
- 	return ret;
+@@ -184,6 +184,9 @@ static int pcsc_internal_transmit(sc_reader_t *reader,
+ 	SC_FUNC_CALLED(reader->ctx, SC_LOG_DEBUG_NORMAL);
+ 	card = priv->pcsc_card;
+ 
++	if (reader->ctx->flags & SC_CTX_FLAG_TERMINATE)
++		return SC_ERROR_NOT_ALLOWED;
++
+ 	sSendPci.dwProtocol = opensc_proto_to_pcsc(reader->active_protocol);
+ 	sSendPci.cbPciLength = sizeof(sSendPci);
+ 	sRecvPci.dwProtocol = opensc_proto_to_pcsc(reader->active_protocol);
+@@ -284,6 +287,9 @@ static int refresh_attributes(sc_reader_t *reader)
+ 
+ 	sc_debug(reader->ctx, SC_LOG_DEBUG_NORMAL, "%s check", reader->name);
+ 
++	if (reader->ctx->flags & SC_CTX_FLAG_TERMINATE)
++		return SC_ERROR_NOT_ALLOWED;
++
+ 	if (priv->reader_state.szReader == NULL) {
+ 		priv->reader_state.szReader = reader->name;
+ 		priv->reader_state.dwCurrentState = SCARD_STATE_UNAWARE;
+@@ -505,7 +511,8 @@ static int pcsc_disconnect(sc_reader_t * reader)
+ 
+ 	SC_FUNC_CALLED(reader->ctx, SC_LOG_DEBUG_NORMAL);
+ 
+-	priv->gpriv->SCardDisconnect(priv->pcsc_card, priv->gpriv->disconnect_action);
++	if (!(reader->ctx->flags & SC_CTX_FLAG_TERMINATE))
++		priv->gpriv->SCardDisconnect(priv->pcsc_card, priv->gpriv->disconnect_action);
+ 	reader->flags = 0;
+ 	return SC_SUCCESS;
  }
+@@ -518,6 +525,9 @@ static int pcsc_lock(sc_reader_t *reader)
  
--static int pcsc_finish(sc_context_t *ctx)
-+static int pcsc_finish(sc_context_t *ctx, unsigned after_fork)
- {
- 	struct pcsc_global_private_data *gpriv = (struct pcsc_global_private_data *) ctx->reader_drv_data;
+ 	SC_FUNC_CALLED(reader->ctx, SC_LOG_DEBUG_NORMAL);
  
++	if (reader->ctx->flags & SC_CTX_FLAG_TERMINATE)
++		return SC_ERROR_NOT_ALLOWED;
++
+ 	rv = priv->gpriv->SCardBeginTransaction(priv->pcsc_card);
+ 
+ 	switch (rv) {
+@@ -555,6 +565,9 @@ static int pcsc_unlock(sc_reader_t *reader)
+ 
+ 	SC_FUNC_CALLED(reader->ctx, SC_LOG_DEBUG_NORMAL);
+ 
++	if (reader->ctx->flags & SC_CTX_FLAG_TERMINATE)
++		return SC_ERROR_NOT_ALLOWED;
++
+ 	rv = priv->gpriv->SCardEndTransaction(priv->pcsc_card, priv->gpriv->transaction_end_action);
+ 
+ 	priv->locked = 0;
+@@ -597,12 +610,18 @@ static int pcsc_cancel(sc_context_t *ctx)
+ 	struct pcsc_global_private_data *gpriv = (struct pcsc_global_private_data *)ctx->reader_drv_data;
+ 
+ 	SC_FUNC_CALLED(ctx, SC_LOG_DEBUG_NORMAL);
++
++	if (ctx->flags & SC_CTX_FLAG_TERMINATE)
++		return SC_ERROR_NOT_ALLOWED;
++
+ #ifndef _WIN32
+ 	if (gpriv->pcsc_wait_ctx != -1) {
+ 		rv = gpriv->SCardCancel(gpriv->pcsc_wait_ctx);
+-		if (rv == SCARD_S_SUCCESS)
++		if (rv == SCARD_S_SUCCESS) {
+ 			 /* Also close and clear the waiting context */
+ 			 rv = gpriv->SCardReleaseContext(gpriv->pcsc_wait_ctx);
++			 gpriv->pcsc_wait_ctx = -1;
++		}
+ 	}
+ #else
+ 	rv = gpriv->SCardCancel(gpriv->pcsc_ctx);
+@@ -747,7 +766,7 @@ static int pcsc_finish(sc_context_t *ctx)
  	SC_FUNC_CALLED(ctx, SC_LOG_DEBUG_NORMAL);
  
  	if (gpriv) {
 -		if (gpriv->pcsc_ctx != -1)
-+		if (!after_fork && gpriv->pcsc_ctx != -1)
++		if (gpriv->pcsc_ctx != -1 && !(ctx->flags & SC_CTX_FLAG_TERMINATE))
  			gpriv->SCardReleaseContext(gpriv->pcsc_ctx);
  		if (gpriv->dlhandle != NULL)
  			sc_dlclose(gpriv->dlhandle);
-@@ -2096,7 +2096,7 @@ out:
- 	return ret;
- }
+@@ -1693,6 +1712,9 @@ pcsc_pin_cmd(sc_reader_t *reader, struct sc_pin_cmd_data *data)
  
--static int cardmod_finish(sc_context_t *ctx)
-+static int cardmod_finish(sc_context_t *ctx, unsigned after_fork)
+ 	SC_FUNC_CALLED(reader->ctx, SC_LOG_DEBUG_NORMAL);
+ 
++	if (reader->ctx->flags & SC_CTX_FLAG_TERMINATE)
++		return SC_ERROR_NOT_ALLOWED;
++
+ 	if (priv->gpriv->SCardControl == NULL)
+ 		return SC_ERROR_NOT_SUPPORTED;
+ 
+@@ -1982,8 +2004,8 @@ static int transform_pace_output(u8 *rbuf, size_t rbuflen,
+ static int
+ pcsc_perform_pace(struct sc_reader *reader, void *input_pace, void *output_pace)
  {
- 	struct pcsc_global_private_data *gpriv = (struct pcsc_global_private_data *) ctx->reader_drv_data;
- 
+-        struct establish_pace_channel_input *pace_input = (struct establish_pace_channel_input *) input_pace;
+-        struct establish_pace_channel_output *pace_output = (struct establish_pace_channel_output *) output_pace;
++	struct establish_pace_channel_input *pace_input = (struct establish_pace_channel_input *) input_pace;
++	struct establish_pace_channel_output *pace_output = (struct establish_pace_channel_output *) output_pace;
+ 	struct pcsc_private_data *priv;
+ 	u8 rbuf[SC_MAX_EXT_APDU_BUFFER_SIZE], sbuf[SC_MAX_EXT_APDU_BUFFER_SIZE];
+ 	size_t rcount = sizeof rbuf, scount = sizeof sbuf;
+diff --git a/src/libopensc/sc.c b/src/libopensc/sc.c
+index 052d6eb..5cddd32 100644
+--- a/src/libopensc/sc.c
++++ b/src/libopensc/sc.c
+@@ -806,7 +806,7 @@ void *sc_mem_alloc_secure(sc_context_t *ctx, size_t len)
+         locked = 1;
+ #endif
+     if (!locked) {
+-        if (ctx->paranoid_memory) {
++        if (ctx->flags & SC_CTX_FLAG_PARANOID_MEMORY) {
+             sc_do_log (ctx, 0, NULL, 0, NULL, "cannot lock memory, failing allocation because paranoid set");
+             free (pointer);
+             pointer = NULL;
 diff --git a/src/pkcs11/pkcs11-global.c b/src/pkcs11/pkcs11-global.c
-index ee6cf7c..886476e 100644
+index a01cbab..349ee29 100644
 --- a/src/pkcs11/pkcs11-global.c
 +++ b/src/pkcs11/pkcs11-global.c
-@@ -40,6 +40,7 @@ list_t virtual_slots;
- pid_t initialized_pid = (pid_t)-1;
- #endif
- static int in_finalize = 0;
-+static CK_RV __sc_pkcs11_finalize(CK_VOID_PTR pReserved, unsigned after_fork);
- extern CK_FUNCTION_LIST pkcs11_function_list;
+@@ -202,9 +202,11 @@ CK_RV C_Initialize(CK_VOID_PTR pInitArgs)
+ 	unsigned int i;
+ 	sc_context_param_t ctx_opts;
  
- #if defined(HAVE_PTHREAD) && defined(PKCS11_THREAD_LOCKING)
-@@ -205,7 +206,7 @@ CK_RV C_Initialize(CK_VOID_PTR pInitArgs)
- 	/* Handle fork() exception */
+-	/* Handle fork() exception */
  #if !defined(_WIN32)
++	/* Handle fork() exception */
  	if (current_pid != initialized_pid) {
--		C_Finalize(NULL_PTR);
-+		__sc_pkcs11_finalize(NULL_PTR, 1);
++		if (context)
++			context->flags |= SC_CTX_FLAG_TERMINATE;
+ 		C_Finalize(NULL_PTR);
  	}
  	initialized_pid = current_pid;
- 	in_finalize = 0;
-@@ -271,7 +272,8 @@ out:
- 	return rv;
- }
- 
--CK_RV C_Finalize(CK_VOID_PTR pReserved)
-+static
-+CK_RV __sc_pkcs11_finalize(CK_VOID_PTR pReserved, unsigned after_fork)
- {
- 	int i;
- 	void *p;
-@@ -292,10 +294,14 @@ CK_RV C_Finalize(CK_VOID_PTR pReserved)
- 
- 	/* cancel pending calls */
- 	in_finalize = 1;
--	sc_cancel(context);
--	/* remove all cards from readers */
--	for (i=0; i < (int)sc_ctx_get_reader_count(context); i++)
--		card_removed(sc_ctx_get_reader(context, i));
-+
-+	if (!after_fork) {
-+		sc_cancel(context);
-+
-+		/* remove all cards from readers */
-+		for (i=0; i < (int)sc_ctx_get_reader_count(context); i++)
-+			card_removed(sc_ctx_get_reader(context, i));
-+	}
- 
- 	while ((p = list_fetch(&sessions)))
- 		free(p);
-@@ -307,7 +313,10 @@ CK_RV C_Finalize(CK_VOID_PTR pReserved)
+diff --git a/src/tools/opensc-explorer.c b/src/tools/opensc-explorer.c
+index fa2581b..75588df 100644
+--- a/src/tools/opensc-explorer.c
++++ b/src/tools/opensc-explorer.c
+@@ -1836,7 +1836,7 @@ int main(int argc, char * const argv[])
+ 		return 1;
  	}
- 	list_destroy(&virtual_slots);
  
--	sc_release_context(context);
-+	if (after_fork)
-+		sc_terminate_context(context);
-+	else
-+		sc_release_context(context);
- 	context = NULL;
+-	ctx->enable_default_driver = 1;
++	ctx->flags |= SC_CTX_FLAG_ENABLE_DEFAULT_DRIVER;
  
- 	/* Release and destroy the mutex */
-@@ -316,6 +325,17 @@ CK_RV C_Finalize(CK_VOID_PTR pReserved)
- 	return rv;
- }
+ 	if (verbose > 1) {
+ 		ctx->debug = verbose;
+diff --git a/src/tools/opensc-tool.c b/src/tools/opensc-tool.c
+index d907984..aea526e 100644
+--- a/src/tools/opensc-tool.c
++++ b/src/tools/opensc-tool.c
+@@ -758,7 +758,7 @@ int main(int argc, char * const argv[])
+ 		return 1;
+ 	}
  
-+CK_RV C_Finalize(CK_VOID_PTR pReserved)
-+{
-+#if !defined(_WIN32)
-+	pid_t current_pid = getpid();
-+	if (current_pid != initialized_pid) {
-+		return __sc_pkcs11_finalize(NULL_PTR, 1);
-+	}
-+#endif
-+	return __sc_pkcs11_finalize(pReserved, 0);
-+}
-+
- CK_RV C_GetInfo(CK_INFO_PTR pInfo)
- {
- 	CK_RV rv = CKR_OK;
+-	ctx->enable_default_driver = 1;
++	ctx->flags |= SC_CTX_FLAG_ENABLE_DEFAULT_DRIVER;
+ 
+ 	if (verbose > 1) {
+ 		ctx->debug = verbose;
