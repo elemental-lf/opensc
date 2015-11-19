@@ -1,6 +1,6 @@
 Name:           opensc
 Version:        0.15.0
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
@@ -21,6 +21,7 @@ Obsoletes:      mozilla-opensc-signer < 0.12.0
 Obsoletes:      opensc-devel < 0.12.0
 
 Patch0:		opensc-0.15.0-fork-issue.patch
+Patch1:		opensc-export-symbols.patch
 
 %description
 OpenSC provides a set of libraries and utilities to work with smart cards. Its
@@ -36,6 +37,7 @@ every software/card that does so, too.
 %setup -q -n OpenSC-%{version}
 
 %patch0 -p1 -b .fork-issue
+%patch1 -p1 -b .export-symbols
 
 cp -p src/pkcs15init/README ./README.pkcs15init
 cp -p src/scconf/README.scconf .
@@ -137,6 +139,9 @@ rm -rf %{buildroot}%{_sysconfdir}/bash_completion.d/
 
 
 %changelog
+* Thu Nov 19 2015 Nikos Mavrogiannopoulos <nmav@redhat.com> - 0.15.0-3
+- Export PKCS#11 symbols from spy library (#1283306)
+
 * Tue Aug  4 2015 Nikos Mavrogiannopoulos <nmav@redhat.com> - 0.15.0-2
 - Updated fix for issue with C_Initialize after fork() (#1218797)
 
