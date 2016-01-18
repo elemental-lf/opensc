@@ -141,7 +141,7 @@ rm -rf %{buildroot}%{_sysconfdir}/bash_completion.d/
 
 
 %changelog
-* Thu Nov 19 2015 Nikos Mavrogiannopoulos <nmav@redhat.com> - 0.15.0-4
+* Mon Jan 18 2016 Nikos Mavrogiannopoulos <nmav@redhat.com> - 0.15.0-4
 - Fix a crash in accessing public key (#1298669)
 
 * Thu Nov 19 2015 Nikos Mavrogiannopoulos <nmav@redhat.com> - 0.15.0-3
