@@ -1,6 +1,6 @@
 Name:           opensc
 Version:        0.15.0
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
@@ -22,6 +22,7 @@ Obsoletes:      opensc-devel < 0.12.0
 
 Patch0:		opensc-0.15.0-fork-issue.patch
 Patch1:		opensc-export-symbols.patch
+Patch2:		opensc-0.15.0-pubkey-crash.patch
 
 %description
 OpenSC provides a set of libraries and utilities to work with smart cards. Its
@@ -139,6 +140,9 @@ rm -rf %{buildroot}%{_sysconfdir}/bash_completion.d/
 
 
 %changelog
+* Thu Nov 19 2015 Nikos Mavrogiannopoulos <nmav@redhat.com> - 0.15.0-4
+- Fix a crash in accessing public key (#1298669)
+
 * Thu Nov 19 2015 Nikos Mavrogiannopoulos <nmav@redhat.com> - 0.15.0-3
 - Export PKCS#11 symbols from spy library (#1283306)
 
