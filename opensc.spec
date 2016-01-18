@@ -39,6 +39,7 @@ every software/card that does so, too.
 
 %patch0 -p1 -b .fork-issue
 %patch1 -p1 -b .export-symbols
+%patch2 -p1 -b .pubkey-crash
 
 cp -p src/pkcs15init/README ./README.pkcs15init
 cp -p src/scconf/README.scconf .
