@@ -1,6 +1,6 @@
 Name:           opensc
 Version:        0.15.0
-Release:        5%{?dist}
+Release:        6%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
@@ -24,6 +24,7 @@ Patch0:		opensc-0.15.0-fork-issue.patch
 Patch1:		opensc-export-symbols.patch
 Patch2:		opensc-0.15.0-pubkey-crash.patch
 Patch3:		opensc-0.15.0-eID-rsa2048.patch
+Patch4:		opensc-0.15.0-cka_private.patch
 
 %description
 OpenSC provides a set of libraries and utilities to work with smart cards. Its
@@ -42,6 +43,7 @@ every software/card that does so, too.
 %patch1 -p1 -b .export-symbols
 %patch2 -p1 -b .pubkey-crash
 %patch3 -p1 -b .eID-rsa2048
+%patch4 -p1 -b .cka-private
 
 cp -p src/pkcs15init/README ./README.pkcs15init
 cp -p src/scconf/README.scconf .
@@ -143,6 +145,10 @@ rm -rf %{buildroot}%{_sysconfdir}/bash_completion.d/
 
 
 %changelog
+* Tue Jul 12 2016 Jakub Jelen <jjelen@redhat.com> - 0.15.0-6
+- Add support for 2048 key length (#1350588)
+- Explicitly set CKA_PRIVATE to false when writing certificates (#1272127)
+
 * Thu Feb 04 2016 Fedora Release Engineering <releng@fedoraproject.org> - 0.15.0-5
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_24_Mass_Rebuild
 
