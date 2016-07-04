@@ -1,0 +1,24 @@
+From 74493ca73f8e3c21c098fecb42a7a08ead85e197 Mon Sep 17 00:00:00 2001
+From: Henrik Andersson <henrik.4e@gmail.com>
+Date: Fri, 13 May 2016 09:16:21 +0200
+Subject: [PATCH] Add support for RSA with keylength 2048
+
+This solves sign issues with swedish eID cards which have
+RSA keys with length 2048. This also solves the issue #726.
+---
+ src/libopensc/card-setcos.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/src/libopensc/card-setcos.c b/src/libopensc/card-setcos.c
+index 2b0182a..a852180 100644
+--- a/src/libopensc/card-setcos.c
++++ b/src/libopensc/card-setcos.c
+@@ -215,6 +215,7 @@ static int setcos_init(sc_card_t *card)
+ 			_sc_card_add_rsa_alg(card, 512, flags, 0);
+ 			_sc_card_add_rsa_alg(card, 768, flags, 0);
+ 			_sc_card_add_rsa_alg(card, 1024, flags, 0);
++			_sc_card_add_rsa_alg(card, 2048, flags, 0);
+ 		}
+ 		break;
+ 	}
+

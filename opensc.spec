@@ -23,6 +23,7 @@ Obsoletes:      opensc-devel < 0.12.0
 Patch0:		opensc-0.15.0-fork-issue.patch
 Patch1:		opensc-export-symbols.patch
 Patch2:		opensc-0.15.0-pubkey-crash.patch
+Patch3:		opensc-0.15.0-eID-rsa2048.patch
 
 %description
 OpenSC provides a set of libraries and utilities to work with smart cards. Its
@@ -40,6 +41,7 @@ every software/card that does so, too.
 %patch0 -p1 -b .fork-issue
 %patch1 -p1 -b .export-symbols
 %patch2 -p1 -b .pubkey-crash
+%patch3 -p1 -b .eID-rsa2048
 
 cp -p src/pkcs15init/README ./README.pkcs15init
 cp -p src/scconf/README.scconf .
