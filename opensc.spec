@@ -1,6 +1,6 @@
 Name:           opensc
-Version:        0.15.0
-Release:        6%{?dist}
+Version:        0.16.0
+Release:        1%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
@@ -20,12 +20,6 @@ Requires:	pcsc-lite
 Obsoletes:      mozilla-opensc-signer < 0.12.0
 Obsoletes:      opensc-devel < 0.12.0
 
-Patch0:		opensc-0.15.0-fork-issue.patch
-Patch1:		opensc-export-symbols.patch
-Patch2:		opensc-0.15.0-pubkey-crash.patch
-Patch3:		opensc-0.15.0-eID-rsa2048.patch
-Patch4:		opensc-0.15.0-cka_private.patch
-
 %description
 OpenSC provides a set of libraries and utilities to work with smart cards. Its
 main focus is on cards that support cryptographic operations, and facilitate
@@ -37,13 +31,7 @@ every software/card that does so, too.
 
 
 %prep
-%setup -q -n OpenSC-%{version}
-
-%patch0 -p1 -b .fork-issue
-%patch1 -p1 -b .export-symbols
-%patch2 -p1 -b .pubkey-crash
-%patch3 -p1 -b .eID-rsa2048
-%patch4 -p1 -b .cka-private
+%setup -q -n opensc-%{version}
 
 cp -p src/pkcs15init/README ./README.pkcs15init
 cp -p src/scconf/README.scconf .
@@ -104,6 +92,7 @@ rm -rf %{buildroot}%{_sysconfdir}/bash_completion.d/
 %{_bindir}/cryptoflex-tool
 %{_bindir}/eidenv
 %{_bindir}/iasecc-tool
+%{_bindir}/gids-tool
 %{_bindir}/netkey-tool
 %{_bindir}/openpgp-tool
 %{_bindir}/opensc-explorer
@@ -128,6 +117,7 @@ rm -rf %{buildroot}%{_sysconfdir}/bash_completion.d/
 %{_mandir}/man1/cardos-tool.1*
 %{_mandir}/man1/cryptoflex-tool.1*
 %{_mandir}/man1/eidenv.1*
+%{_mandir}/man1/gids-tool.1*
 %{_mandir}/man1/iasecc-tool.1*
 %{_mandir}/man1/netkey-tool.1*
 %{_mandir}/man1/openpgp-tool.1*
@@ -145,6 +135,9 @@ rm -rf %{buildroot}%{_sysconfdir}/bash_completion.d/
 
 
 %changelog
+* Tue Aug 02 2016 Jakub Jelen <jjelen@redhat.com> - 0.16.0-1
+- New upstream release 0.16.0 (#1306071)
+
 * Tue Jul 12 2016 Jakub Jelen <jjelen@redhat.com> - 0.15.0-6
 - Add support for 2048 key length (#1350588)
 - Explicitly set CKA_PRIVATE to false when writing certificates (#1272127)
