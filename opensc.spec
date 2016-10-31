@@ -1,13 +1,17 @@
+%global commit0 0362439563a11d254aeda63b9e9ddb44ea289308
+%global shortcommit0 %(c=%{commit0}; echo ${c:0:7})
+
 Name:           opensc
 Version:        0.16.0
-Release:        1%{?dist}
+Release:        2.20161016git%{shortcommit0}%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
 License:        LGPLv2+
 URL:            https://github.com/OpenSC/OpenSC/wiki
-Source0:	https://github.com/OpenSC/OpenSC/archive/%{version}.tar.gz#/%{name}-%{version}.tar.gz
+Source0:        https://github.com/OpenSC/OpenSC/archive/%{commit0}.tar.gz#/%{name}-%{version}-git%{shortcommit0}.tar.gz
 Source1:        opensc.module
+Patch0:         opensc-prkey-fixup.patch
 
 BuildRequires:  pcsc-lite-devel
 BuildRequires:  readline-devel
@@ -31,7 +35,9 @@ every software/card that does so, too.
 
 
 %prep
-%setup -q -n opensc-%{version}
+%setup -q -n OpenSC-%{commit0}
+
+%patch0 -p1 -b .prkey-fixes
 
 cp -p src/pkcs15init/README ./README.pkcs15init
 cp -p src/scconf/README.scconf .
@@ -109,7 +115,8 @@ rm -rf %{buildroot}%{_sysconfdir}/bash_completion.d/
 %{_libdir}/opensc-pkcs11.so
 %{_libdir}/pkcs11-spy.so
 %{_libdir}/onepin-opensc-pkcs11.so
-%dir %{_libdir}/pkcs11
+%{_libdir}/pkgconfig/*.pc
+%%dir %{_libdir}/pkcs11
 %{_libdir}/pkcs11/opensc-pkcs11.so
 %{_libdir}/pkcs11/onepin-opensc-pkcs11.so
 %{_libdir}/pkcs11/pkcs11-spy.so
@@ -135,6 +142,10 @@ rm -rf %{buildroot}%{_sysconfdir}/bash_completion.d/
 
 
 %changelog
+* Mon Oct 31 2016 Jakub Jelen <jjelen@redhat.com> - 0.16.0-2.20161016git0362439
+- Updated to latest git to address openssl 1.1.0 compilation issues (#1388895)
+- Do not own /etc/bash_completion.d directory (#1303441)
+
 * Tue Aug 02 2016 Jakub Jelen <jjelen@redhat.com> - 0.16.0-1
 - New upstream release 0.16.0 (#1306071)
 
