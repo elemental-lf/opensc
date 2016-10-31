@@ -83,7 +83,7 @@ rm -rf %{buildroot}%{_sysconfdir}/bash_completion.d/
 %doc COPYING NEWS README*
 
 %if ! 0%{?rhel}
-%{_sysconfdir}/bash_completion.d/
+%{_sysconfdir}/bash_completion.d/*
 %endif
 
 %config(noreplace) %{_sysconfdir}/opensc-%{_arch}.conf
