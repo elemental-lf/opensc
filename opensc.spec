@@ -3,7 +3,7 @@
 
 Name:           opensc
 Version:        0.16.0
-Release:        2.20161016git%{shortcommit0}%{?dist}
+Release:        3.20161016git%{shortcommit0}%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
@@ -142,6 +142,9 @@ rm -rf %{buildroot}%{_sysconfdir}/bash_completion.d/
 
 
 %changelog
+* Thu Jan 12 2017 Igor Gnatenko <ignatenko@redhat.com> - 0.16.0-3.20161016git0362439
+- Rebuild for readline 7.x
+
 * Mon Oct 31 2016 Jakub Jelen <jjelen@redhat.com> - 0.16.0-2.20161016git0362439
 - Updated to latest git to address openssl 1.1.0 compilation issues (#1388895)
 - Do not own /etc/bash_completion.d directory (#1303441)
