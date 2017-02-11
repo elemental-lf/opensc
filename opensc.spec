@@ -3,7 +3,7 @@
 
 Name:           opensc
 Version:        0.16.0
-Release:        3.20161016git%{shortcommit0}%{?dist}
+Release:        4.20161016git%{shortcommit0}%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
@@ -142,6 +142,9 @@ rm -rf %{buildroot}%{_sysconfdir}/bash_completion.d/
 
 
 %changelog
+* Sat Feb 11 2017 Fedora Release Engineering <releng@fedoraproject.org> - 0.16.0-4.20161016git0362439
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_26_Mass_Rebuild
+
 * Thu Jan 12 2017 Igor Gnatenko <ignatenko@redhat.com> - 0.16.0-3.20161016git0362439
 - Rebuild for readline 7.x
 
