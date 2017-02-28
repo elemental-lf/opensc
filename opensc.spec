@@ -1,9 +1,12 @@
 %global commit0 0362439563a11d254aeda63b9e9ddb44ea289308
 %global shortcommit0 %(c=%{commit0}; echo ${c:0:7})
 
+%define opensc_module "OpenSC PKCS #11 Module"
+%define nssdb %{_sysconfdir}/pki/nssdb
+
 Name:           opensc
 Version:        0.16.0
-Release:        4.20161016git%{shortcommit0}%{?dist}
+Release:        5.20161016git%{shortcommit0}%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
@@ -21,6 +24,7 @@ BuildRequires:  docbook-style-xsl
 BuildRequires:  autoconf automake libtool
 Requires:       pcsc-lite-libs%{?_isa}
 Requires:	pcsc-lite
+Requires:	nss-tools
 Obsoletes:      mozilla-opensc-signer < 0.12.0
 Obsoletes:      opensc-devel < 0.12.0
 
@@ -78,11 +82,20 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libsmm-local.so
 rm -rf %{buildroot}%{_sysconfdir}/bash_completion.d/
 %endif
 
+%post
+/sbin/ldconfig
+isThere=`modutil -rawlist -dbdir %{nssdb} | grep %{opensc_module} || echo NO`
+if [ "$isThere" == "NO" ]; then
+   if [ -x %{_bindir}/pk11install ]; then
+      modutil -dbdir %{nssdb} -add %{opensc_module} -libfile opensc-pkcs11.so -force  ||:
+   fi
+fi
 
-%post -p /sbin/ldconfig
-
-%postun -p /sbin/ldconfig
-
+%postun
+/sbin/ldconfig
+if [ $1 -eq 0 ]; then
+   modutil -delete %{opensc_module} -dbdir %{nssdb} -force || :
+fi
 
 %files
 %defattr(-,root,root,-)
@@ -142,6 +155,9 @@ rm -rf %{buildroot}%{_sysconfdir}/bash_completion.d/
 
 
 %changelog
+* Tue Feb 28 2017 Jakub Jelen <jjelen@redhat.com> - 0.16.0-5.20161016git0362439
+- Add PKCS#11 library to the NSS DB (#1421692)
+
 * Sat Feb 11 2017 Fedora Release Engineering <releng@fedoraproject.org> - 0.16.0-4.20161016git0362439
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_26_Mass_Rebuild
 
