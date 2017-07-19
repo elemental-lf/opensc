@@ -14,6 +14,7 @@ License:        LGPLv2+
 URL:            https://github.com/OpenSC/OpenSC/wiki
 Source0:        https://github.com/OpenSC/OpenSC/archive/%{commit0}.tar.gz#/%{name}-%{version}-git%{shortcommit0}.tar.gz
 Source1:        opensc.module
+Source2:        pkcs11-switch.sh
 Patch0:         opensc-prkey-fixup.patch
 
 BuildRequires:  pcsc-lite-devel
@@ -66,6 +67,7 @@ make install DESTDIR=$RPM_BUILD_ROOT
 rm -f $RPM_BUILD_ROOT%{_sysconfdir}/opensc.conf
 install -Dpm 644 etc/opensc.conf $RPM_BUILD_ROOT%{_sysconfdir}/opensc-%{_arch}.conf
 install -Dpm 644 %{SOURCE1} $RPM_BUILD_ROOT%{_datadir}/p11-kit/modules/opensc.module
+install -Dpm 755 %{SOURCE2} $RPM_BUILD_ROOT%{_bindir}/pkcs11-switch
 # use NEWS file timestamp as reference for configuration file
 touch -r NEWS $RPM_BUILD_ROOT%{_sysconfdir}/opensc-%{_arch}.conf
 
@@ -118,6 +120,7 @@ fi
 %{_bindir}/opensc-tool
 %{_bindir}/piv-tool
 %{_bindir}/pkcs11-tool
+%{_bindir}/pkcs11-switch
 %{_bindir}/pkcs15-crypt
 %{_bindir}/pkcs15-init
 %{_bindir}/pkcs15-tool
