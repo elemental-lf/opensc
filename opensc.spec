@@ -1,21 +1,18 @@
-%global commit0 0362439563a11d254aeda63b9e9ddb44ea289308
-%global shortcommit0 %(c=%{commit0}; echo ${c:0:7})
-
 %define opensc_module "OpenSC PKCS #11 Module"
 %define nssdb %{_sysconfdir}/pki/nssdb
 
 Name:           opensc
-Version:        0.16.0
-Release:        5.20161016git%{shortcommit0}%{?dist}
+Version:        0.17.0
+Release:        1%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
 License:        LGPLv2+
 URL:            https://github.com/OpenSC/OpenSC/wiki
-Source0:        https://github.com/OpenSC/OpenSC/archive/%{commit0}.tar.gz#/%{name}-%{version}-git%{shortcommit0}.tar.gz
+Source0:        https://github.com/OpenSC/OpenSC/releases/download/%{version}/%{name}-%{version}.tar.gz
 Source1:        opensc.module
 Source2:        pkcs11-switch.sh
-Patch0:         opensc-prkey-fixup.patch
+Patch0:        opensc-coolkey.patch
 
 BuildRequires:  pcsc-lite-devel
 BuildRequires:  readline-devel
@@ -40,9 +37,8 @@ every software/card that does so, too.
 
 
 %prep
-%setup -q -n OpenSC-%{commit0}
-
-%patch0 -p1 -b .prkey-fixes
+%setup -q
+%patch0 -p1
 
 cp -p src/pkcs15init/README ./README.pkcs15init
 cp -p src/scconf/README.scconf .
@@ -83,6 +79,10 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libsmm-local.so
 %if 0%{?rhel}
 rm -rf %{buildroot}%{_sysconfdir}/bash_completion.d/
 %endif
+
+# the npa-tool builds to nothing since we do not have OpenPACE library
+rm -rf %{buildroot}%{_bindir}/npa-tool
+rm -rf %{buildroot}%{_mandir}/man1/npa-tool.1*
 
 %post
 /sbin/ldconfig
@@ -158,6 +158,9 @@ fi
 
 
 %changelog
+* Wed Jul 19 2017 Jakub Jelen <jjelen@redhat.com> - 0.17.0-1
+- New upstream release including support for Coolkey and CAC cards
+
 * Tue Feb 28 2017 Jakub Jelen <jjelen@redhat.com> - 0.16.0-5.20161016git0362439
 - Add PKCS#11 library to the NSS DB (#1421692)
 
