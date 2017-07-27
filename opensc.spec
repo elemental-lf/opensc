@@ -3,7 +3,7 @@
 
 Name:           opensc
 Version:        0.17.0
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
@@ -158,6 +158,9 @@ fi
 
 
 %changelog
+* Thu Jul 27 2017 Fedora Release Engineering <releng@fedoraproject.org> - 0.17.0-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_27_Mass_Rebuild
+
 * Wed Jul 19 2017 Jakub Jelen <jjelen@redhat.com> - 0.17.0-1
 - New upstream release including support for Coolkey and CAC cards
 
