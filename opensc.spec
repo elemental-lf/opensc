@@ -12,7 +12,8 @@ URL:            https://github.com/OpenSC/OpenSC/wiki
 Source0:        https://github.com/OpenSC/OpenSC/releases/download/%{version}/%{name}-%{version}.tar.gz
 Source1:        opensc.module
 Source2:        pkcs11-switch.sh
-Patch0:        opensc-coolkey.patch
+Patch0:         opensc-coolkey.patch
+Patch1:         opensc-estonia.patch
 
 BuildRequires:  pcsc-lite-devel
 BuildRequires:  readline-devel
@@ -39,6 +40,7 @@ every software/card that does so, too.
 %prep
 %setup -q
 %patch0 -p1
+%patch1 -p1
 
 cp -p src/pkcs15init/README ./README.pkcs15init
 cp -p src/scconf/README.scconf .
