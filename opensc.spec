@@ -3,7 +3,7 @@
 
 Name:           opensc
 Version:        0.17.0
-Release:        4%{?dist}
+Release:        5%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
@@ -160,6 +160,9 @@ fi
 
 
 %changelog
+* Thu Feb 08 2018 Fedora Release Engineering <releng@fedoraproject.org> - 0.17.0-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_28_Mass_Rebuild
+
 * Mon Dec 04 2017 Jakub Jelen <jjelen@redhat.com> - 0.17.0-4
 - Allow functionality of a new Estonia ID cards (#1519751)
 
