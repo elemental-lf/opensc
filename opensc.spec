@@ -13,7 +13,16 @@ Source0:        https://github.com/OpenSC/OpenSC/releases/download/%{version}/%{
 Source1:        opensc.module
 Source2:        pkcs11-switch.sh
 Patch0:         opensc-coolkey.patch
+# Allow functionality of new Estonia ID cards (#1519751)
 Patch1:         opensc-estonia.patch
+# Use Cardholder name in the token label (#1449740)
+Patch2:		opensc-0.17.0-piv-cardholder-name.patch
+# Avoid infinite loop when reading CAC cards (#1473335)
+Patch3:		opensc-0.17.0-infinite-loop.patch
+# Workaround for CAC Alt tokens (#1473418)
+Patch4:		opensc-0.17.0-cac-alt.patch
+# Properly parse multi-byte length (#1473418)
+Patch5:		opensc-0.17.0-simpletlv.patch
 
 BuildRequires:  pcsc-lite-devel
 BuildRequires:  readline-devel
@@ -39,8 +48,12 @@ every software/card that does so, too.
 
 %prep
 %setup -q
-%patch0 -p1
-%patch1 -p1
+%patch0 -p1 -b .coolkey
+%patch1 -p1 -b .estonia
+%patch2 -p1 -b .piv
+%patch3 -p1 -b .infinite
+%patch4 -p1 -b .cac-alt
+%patch5 -p1 -b .simpletlv
 
 cp -p src/pkcs15init/README ./README.pkcs15init
 cp -p src/scconf/README.scconf .

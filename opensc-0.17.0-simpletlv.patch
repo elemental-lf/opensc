@@ -1,0 +1,21 @@
+commit 602279acecb9aaff1154ac1e2993562741a57281
+Author: Jakub Jelen <jjelen@redhat.com>
+Date:   Tue Jan 2 11:08:31 2018 +0100
+
+    Skip correctly two bytes after reading 2b size
+
+diff --git a/src/libopensc/simpletlv.c b/src/libopensc/simpletlv.c
+index f526a1cd..ab0401b5 100644
+--- a/src/libopensc/simpletlv.c
++++ b/src/libopensc/simpletlv.c
+@@ -90,8 +90,9 @@ sc_simpletlv_read_tag(u8 **buf, size_t buflen, u8 *tag_out, size_t *taglen)
+ 			*taglen = 0;
+ 			return SC_ERROR_INVALID_ARGUMENTS;
+ 		}
++		/* skip two bytes (the size) */
+ 		len = lebytes2ushort(p);
+-		p++;
++		p+=2;
+ 	}
+ 	*taglen = len;
+ 	*buf = p;
