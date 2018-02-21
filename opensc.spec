@@ -3,7 +3,7 @@
 
 Name:           opensc
 Version:        0.17.0
-Release:        5%{?dist}
+Release:        6%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
@@ -173,6 +173,12 @@ fi
 
 
 %changelog
+* Wed Feb 21 2018 Jakub Jelen <jjelen@redhat.com> - 0.17.0-6
+- PIV: Use Cardholder name in the token label
+- Avoid infinite loop when reading CAC cards
+- Properly parse multi-byte length in SimpleTLV
+- Support CAC Alt tokens
+
 * Thu Feb 08 2018 Fedora Release Engineering <releng@fedoraproject.org> - 0.17.0-5
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_28_Mass_Rebuild
 
