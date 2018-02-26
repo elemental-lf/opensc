@@ -35,6 +35,7 @@ Requires:	pcsc-lite
 Requires:	nss-tools
 Obsoletes:      mozilla-opensc-signer < 0.12.0
 Obsoletes:      opensc-devel < 0.12.0
+Obsoletes:      coolkey <= 1.1.0-36
 
 %description
 OpenSC provides a set of libraries and utilities to work with smart cards. Its
