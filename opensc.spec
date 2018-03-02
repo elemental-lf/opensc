@@ -3,7 +3,7 @@
 
 Name:           opensc
 Version:        0.17.0
-Release:        6%{?dist}
+Release:        7%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
@@ -177,6 +177,11 @@ fi
 
 
 %changelog
+* Fri Mar 02 2018 Jakub Jelen <jjelen@redhat.com> - 0.17.0-7
+- Obsolete coolkey
+- Do not report bogus errors from pkcs11-switch
+- Do not delete nonexisting modules during uninstall (#1526670)
+
 * Wed Feb 21 2018 Jakub Jelen <jjelen@redhat.com> - 0.17.0-6
 - PIV: Use Cardholder name in the token label
 - Avoid infinite loop when reading CAC cards
