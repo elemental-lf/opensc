@@ -8,9 +8,12 @@ OPENSC_NAME="OpenSC PKCS #11 Module"
 OPENSC_LIBRARY="opensc-pkcs11.so"
 
 add_module() {
-	NAME="$1"
-	LIBRARY="$2"
-	modutil -add "$NAME" -dbdir "$NSSDB" -libfile "$LIBRARY"
+	CURRENT="$1"
+	NAME="$2"
+	LIBRARY="$3"
+	if [ ! "$CURRENT" = "opensc coolkey" ]; then
+		modutil -add "$NAME" -dbdir "$NSSDB" -libfile "$LIBRARY"
+	fi
 }
 remove_module() {
 	NAME="$1"
@@ -68,10 +71,10 @@ fi
 
 # Do the actual change
 if [ "$TARGET" = "opensc" ]; then
-	add_module "$OPENSC_NAME" "$OPENSC_LIBRARY"
+	add_module "$CURRENT" "$OPENSC_NAME" "$OPENSC_LIBRARY"
 	remove_module "$COOLKEY_NAME"
 fi
 if [ "$TARGET" = "coolkey" ]; then
-	add_module "$COOLKEY_NAME" "$COOLKEY_LIBRARY"
+	add_module "$CURRENT" "$COOLKEY_NAME" "$COOLKEY_LIBRARY"
 	remove_module "$OPENSC_NAME"
 fi
