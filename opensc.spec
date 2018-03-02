@@ -112,7 +112,10 @@ fi
 %postun
 /sbin/ldconfig
 if [ $1 -eq 0 ]; then
-   modutil -delete %{opensc_module} -dbdir %{nssdb} -force || :
+  isThere=`modutil -rawlist -dbdir %{nssdb} | grep %{opensc_module} || echo NO`
+  if [ ! "$isThere" == "NO" ]; then
+    modutil -delete %{opensc_module} -dbdir %{nssdb} -force || :
+  fi
 fi
 
 %files
