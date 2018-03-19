@@ -23,6 +23,9 @@ Patch3:		opensc-0.17.0-infinite-loop.patch
 Patch4:		opensc-0.17.0-cac-alt.patch
 # Properly parse multi-byte length (#1473418)
 Patch5:		opensc-0.17.0-simpletlv.patch
+# Make Feitian tokens working again (#1558099)
+# https://github.com/OpenSC/OpenSC/pull/1145
+Patch6:		opensc-0.17.0-feitian.patch
 
 BuildRequires:  pcsc-lite-devel
 BuildRequires:  readline-devel
@@ -55,6 +58,7 @@ every software/card that does so, too.
 %patch3 -p1 -b .infinite
 %patch4 -p1 -b .cac-alt
 %patch5 -p1 -b .simpletlv
+%patch6 -p1 -b .feitian
 
 cp -p src/pkcs15init/README ./README.pkcs15init
 cp -p src/scconf/README.scconf .
