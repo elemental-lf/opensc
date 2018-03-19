@@ -32,7 +32,7 @@ BuildRequires:  readline-devel
 BuildRequires:  openssl-devel
 BuildRequires:  /usr/bin/xsltproc
 BuildRequires:  docbook-style-xsl
-BuildRequires:  autoconf automake libtool
+BuildRequires:  autoconf automake libtool gcc
 Requires:       pcsc-lite-libs%{?_isa}
 Requires:	pcsc-lite
 Requires:	nss-tools
