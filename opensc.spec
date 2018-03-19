@@ -3,7 +3,7 @@
 
 Name:           opensc
 Version:        0.17.0
-Release:        7%{?dist}
+Release:        8%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
@@ -181,6 +181,10 @@ fi
 
 
 %changelog
+* Mon Mar 19 2018 Jakub Jelen <jjelen@redhat.com> - 0.17.0-8
+- Build requires gcc
+- Backport a fix for feitian tokens (#1558099)
+
 * Fri Mar 02 2018 Jakub Jelen <jjelen@redhat.com> - 0.17.0-7
 - Obsolete coolkey
 - Do not report bogus errors from pkcs11-switch
