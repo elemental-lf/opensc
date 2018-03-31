@@ -99,7 +99,7 @@ rm -rf $RPM_BUILD_ROOT%{_datadir}/doc/opensc
 # Remove the symlink as nothing is supposed to link against libopensc.
 rm -f $RPM_BUILD_ROOT%{_libdir}/libopensc.so
 rm -f $RPM_BUILD_ROOT%{_libdir}/libsmm-local.so
-%if 0%{?rhel}
+%if 0%{?rhel} && 0%{?rhel} < 7
 rm -rf %{buildroot}%{_sysconfdir}/bash_completion.d/
 %endif
 
@@ -135,7 +135,7 @@ fi
 %defattr(-,root,root,-)
 %doc COPYING NEWS README*
 
-%if ! 0%{?rhel}
+%if ! 0%{?rhel} || 0%{?rhel} >= 7
 %{_sysconfdir}/bash_completion.d/*
 %endif
 
