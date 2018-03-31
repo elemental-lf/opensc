@@ -111,9 +111,11 @@ rm -rf %{buildroot}%{_mandir}/man1/npa-tool.1*
 /sbin/ldconfig
 isThere=`modutil -rawlist -dbdir %{nssdb} | grep %{opensc_module} || echo NO`
 if [ "$isThere" == "NO" ]; then
-   if [ -x %{_bindir}/pk11install ]; then
-      modutil -dbdir %{nssdb} -add %{opensc_module} -libfile opensc-pkcs11.so -force  ||:
-   fi
+   modutil -dbdir %{nssdb} -add %{opensc_module} -libfile opensc-pkcs11.so -force ||:
+fi
+isThere=`modutil -rawlist -dbdir sql:%{nssdb} | grep %{opensc_module} || echo NO`
+if [ "$isThere" == "NO" ]; then
+   modutil -dbdir sql:%{nssdb} -add %{opensc_module} -libfile opensc-pkcs11.so -force ||:
 fi
 
 %postun
@@ -122,6 +124,10 @@ if [ $1 -eq 0 ]; then
   isThere=`modutil -rawlist -dbdir %{nssdb} | grep %{opensc_module} || echo NO`
   if [ ! "$isThere" == "NO" ]; then
     modutil -delete %{opensc_module} -dbdir %{nssdb} -force || :
+  fi
+  isThere=`modutil -rawlist -dbdir sql:%{nssdb} | grep %{opensc_module} || echo NO`
+  if [ ! "$isThere" == "NO" ]; then
+    modutil -delete %{opensc_module} -dbdir sql:%{nssdb} -force || :
   fi
 fi
 
