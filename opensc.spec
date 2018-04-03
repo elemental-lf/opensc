@@ -3,7 +3,7 @@
 
 Name:           opensc
 Version:        0.17.0
-Release:        8%{?dist}
+Release:        9%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
@@ -184,6 +184,9 @@ fi
 
 
 %changelog
+* Tue Apr 03 2018 Jakub Jelen <jjelen@redhat.com> - 0.17.0-9
+- Improved support for CloudHSM (#1562572)
+
 * Mon Mar 19 2018 Jakub Jelen <jjelen@redhat.com> - 0.17.0-8
 - Build requires gcc
 - Backport a fix for feitian tokens (#1558099)
