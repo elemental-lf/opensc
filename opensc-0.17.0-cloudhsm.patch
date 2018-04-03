@@ -1,0 +1,78 @@
+From 74885fb1c174468cc0a505cd7404e228d465efd8 Mon Sep 17 00:00:00 2001
+From: AnthonyA <ascanio.alba7@gmail.com>
+Date: Tue, 27 Mar 2018 00:48:05 +0000
+Subject: [PATCH] pkcs11-tool: allow mechanism to be specified in hexadecimal
+
+To support vendor mechanisms, let -m accept hexadecimal strings,
+e.g., -m 0x80001234
+---
+ doc/tools/pkcs11-tool.1.xml | 3 ++-
+ src/tools/pkcs11-tool.c     | 5 ++++-
+ 2 files changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/doc/tools/pkcs11-tool.1.xml b/doc/tools/pkcs11-tool.1.xml
+index f8d638b45..e78570b10 100644
+--- a/doc/tools/pkcs11-tool.1.xml
++++ b/doc/tools/pkcs11-tool.1.xml
+@@ -231,7 +231,8 @@
+ 					</term>
+ 					<listitem><para>Use the specified <replaceable>mechanism</replaceable>
+ 					for token operations. See <option>-M</option> for a list
+-					of mechanisms supported by your token.</para></listitem>
++					of mechanisms supported by your token. The mechanism can also be specified in
++					hexadecimal, e.g., <replaceable>0x80001234</replaceable>.</para></listitem>
+ 				</varlistentry>
+ 
+ 				<varlistentry>
+diff --git a/src/tools/pkcs11-tool.c b/src/tools/pkcs11-tool.c
+index 63e5c5f7f..484c019d8 100644
+--- a/src/tools/pkcs11-tool.c
++++ b/src/tools/pkcs11-tool.c
+@@ -234,7 +234,7 @@ static const char *option_help[] = {
+ 	"Hash some data",
+ 	"Derive a secret key using another key and some data",
+ 	"Derive ECDHpass DER encoded pubkey for compatibility with some PKCS#11 implementations",
+-	"Specify mechanism (use -M for a list of supported mechanisms)",
++	"Specify mechanism (use -M for a list of supported mechanisms), or by hexadecimal, e.g., 0x80001234",
+ 
+ 	"Log into the token first",
+ 	"Specify login type ('so', 'user', 'context-specific'; default:'user')",
+@@ -6076,6 +6076,9 @@ static CK_MECHANISM_TYPE p11_name_to_mechanism(const char *name)
+ {
+ 	struct mech_info *mi;
+ 
++	if (strncasecmp("0x", name, 2) == 0) {
++		return strtoul(name, NULL, 0);
++	}
+ 	for (mi = p11_mechanisms; mi->name; mi++) {
+ 		if (!strcasecmp(mi->name, name)
+ 		 || (mi->short_name && !strcasecmp(mi->short_name, name)))
+
+
+From ea4baf50d57a7a41164fedcd1b10fdb0438305c5 Mon Sep 17 00:00:00 2001
+From: AnthonyA <ascanio.alba7@gmail.com>
+Date: Mon, 19 Mar 2018 15:58:21 +0800
+Subject: [PATCH] pkcs11-tool: make ECPoint behaviour standards compliant by
+ default
+
+Fixes #1286. The behaviour of pkcs11-tool will follow the standard -
+send DER. If EC_POINT_NO_ASN1_OCTET_STRING is defined then it will
+write plain bytes.
+---
+ src/tools/pkcs11-tool.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/tools/pkcs11-tool.c b/src/tools/pkcs11-tool.c
+index 876bba2dc..63e5c5f7f 100644
+--- a/src/tools/pkcs11-tool.c
++++ b/src/tools/pkcs11-tool.c
+@@ -2632,7 +2632,7 @@ parse_ec_pkey(EVP_PKEY *pkey, int private, struct gostkey_info *gost)
+ 		header_len = point-gost->public.value;
+ 		memcpy(point, buf, point_len);
+ 		gost->public.len = header_len+point_len;
+-#ifndef EC_POINT_NO_ASN1_OCTET_STRING // workaround for non-compliant cards not expecting DER encoding
++#ifdef EC_POINT_NO_ASN1_OCTET_STRING // workaround for non-compliant cards not expecting DER encoding
+ 		gost->public.len   -= header_len;
+ 		gost->public.value += header_len;
+ #endif
+

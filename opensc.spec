@@ -26,6 +26,8 @@ Patch5:		opensc-0.17.0-simpletlv.patch
 # Make Feitian tokens working again (#1558099)
 # https://github.com/OpenSC/OpenSC/pull/1145
 Patch6:		opensc-0.17.0-feitian.patch
+# CloudHSM improvements (proper EC_POINT, specification of mechanisms)
+Patch7:		opensc-0.17.0-cloudhsm.patch
 
 BuildRequires:  pcsc-lite-devel
 BuildRequires:  readline-devel
@@ -59,6 +61,7 @@ every software/card that does so, too.
 %patch4 -p1 -b .cac-alt
 %patch5 -p1 -b .simpletlv
 %patch6 -p1 -b .feitian
+%patch7 -p1 -b .cloudhsm
 
 cp -p src/pkcs15init/README ./README.pkcs15init
 cp -p src/scconf/README.scconf .
