@@ -3,7 +3,7 @@
 
 Name:           opensc
 Version:        0.17.0
-Release:        9%{?dist}
+Release:        10%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
@@ -194,6 +194,10 @@ fi
 
 
 %changelog
+* Wed Apr 04 2018 Jakub Jelen <jjelen@redhat.com> - 0.17.0-10
+- Install the PKCS#11 modules also to the new NSS DB
+- Drop the pkcs11-switch as the coolkey is gone
+
 * Tue Apr 03 2018 Jakub Jelen <jjelen@redhat.com> - 0.17.0-9
 - Improved support for CloudHSM (#1562572)
 
