@@ -86,7 +86,9 @@ make install DESTDIR=$RPM_BUILD_ROOT
 rm -f $RPM_BUILD_ROOT%{_sysconfdir}/opensc.conf
 install -Dpm 644 etc/opensc.conf $RPM_BUILD_ROOT%{_sysconfdir}/opensc-%{_arch}.conf
 install -Dpm 644 %{SOURCE1} $RPM_BUILD_ROOT%{_datadir}/p11-kit/modules/opensc.module
+%if 0%{?rhel} <= 7
 install -Dpm 755 %{SOURCE2} $RPM_BUILD_ROOT%{_bindir}/pkcs11-switch
+%endif
 # use NEWS file timestamp as reference for configuration file
 touch -r NEWS $RPM_BUILD_ROOT%{_sysconfdir}/opensc-%{_arch}.conf
 
@@ -152,7 +154,9 @@ fi
 %{_bindir}/opensc-tool
 %{_bindir}/piv-tool
 %{_bindir}/pkcs11-tool
+%if 0%{?rhel} <= 7
 %{_bindir}/pkcs11-switch
+%endif
 %{_bindir}/pkcs15-crypt
 %{_bindir}/pkcs15-init
 %{_bindir}/pkcs15-tool
