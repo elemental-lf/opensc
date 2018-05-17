@@ -2,8 +2,8 @@
 %define nssdb %{_sysconfdir}/pki/nssdb
 
 Name:           opensc
-Version:        0.17.0
-Release:        10%{?dist}
+Version:        0.18.0
+Release:        1%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
@@ -12,22 +12,6 @@ URL:            https://github.com/OpenSC/OpenSC/wiki
 Source0:        https://github.com/OpenSC/OpenSC/releases/download/%{version}/%{name}-%{version}.tar.gz
 Source1:        opensc.module
 Source2:        pkcs11-switch.sh
-Patch0:         opensc-coolkey.patch
-# Allow functionality of new Estonia ID cards (#1519751)
-Patch1:         opensc-estonia.patch
-# Use Cardholder name in the token label (#1449740)
-Patch2:		opensc-0.17.0-piv-cardholder-name.patch
-# Avoid infinite loop when reading CAC cards (#1473335)
-Patch3:		opensc-0.17.0-infinite-loop.patch
-# Workaround for CAC Alt tokens (#1473418)
-Patch4:		opensc-0.17.0-cac-alt.patch
-# Properly parse multi-byte length (#1473418)
-Patch5:		opensc-0.17.0-simpletlv.patch
-# Make Feitian tokens working again (#1558099)
-# https://github.com/OpenSC/OpenSC/pull/1145
-Patch6:		opensc-0.17.0-feitian.patch
-# CloudHSM improvements (proper EC_POINT, specification of mechanisms)
-Patch7:		opensc-0.17.0-cloudhsm.patch
 
 BuildRequires:  pcsc-lite-devel
 BuildRequires:  readline-devel
@@ -35,6 +19,7 @@ BuildRequires:  openssl-devel
 BuildRequires:  /usr/bin/xsltproc
 BuildRequires:  docbook-style-xsl
 BuildRequires:  autoconf automake libtool gcc
+BuildRequires:  desktop-file-utils
 Requires:       pcsc-lite-libs%{?_isa}
 Requires:	pcsc-lite
 Requires:	nss-tools
@@ -54,14 +39,6 @@ every software/card that does so, too.
 
 %prep
 %setup -q
-%patch0 -p1 -b .coolkey
-%patch1 -p1 -b .estonia
-%patch2 -p1 -b .piv
-%patch3 -p1 -b .infinite
-%patch4 -p1 -b .cac-alt
-%patch5 -p1 -b .simpletlv
-%patch6 -p1 -b .feitian
-%patch7 -p1 -b .cloudhsm
 
 cp -p src/pkcs15init/README ./README.pkcs15init
 cp -p src/scconf/README.scconf .
@@ -109,6 +86,8 @@ rm -rf %{buildroot}%{_sysconfdir}/bash_completion.d/
 rm -rf %{buildroot}%{_bindir}/npa-tool
 rm -rf %{buildroot}%{_mandir}/man1/npa-tool.1*
 
+desktop-file-validate %{buildroot}/%{_datadir}/applications/org.opensc.notify.desktop
+
 %post
 /sbin/ldconfig
 isThere=`modutil -rawlist -dbdir %{nssdb} | grep %{opensc_module} || echo NO`
@@ -152,6 +131,8 @@ fi
 %{_bindir}/openpgp-tool
 %{_bindir}/opensc-explorer
 %{_bindir}/opensc-tool
+%{_bindir}/opensc-asn1
+%{_bindir}/opensc-notify
 %{_bindir}/piv-tool
 %{_bindir}/pkcs11-tool
 %if 0%{?rhel} <= 7
@@ -163,6 +144,8 @@ fi
 %{_bindir}/sc-hsm-tool
 %{_bindir}/dnie-tool
 %{_bindir}/westcos-tool
+%{_bindir}/egk-tool
+%{_datadir}/applications/org.opensc.notify.desktop
 %{_libdir}/lib*.so.*
 %{_libdir}/opensc-pkcs11.so
 %{_libdir}/pkcs11-spy.so
@@ -182,6 +165,8 @@ fi
 %{_mandir}/man1/openpgp-tool.1*
 %{_mandir}/man1/opensc-explorer.*
 %{_mandir}/man1/opensc-tool.1*
+%{_mandir}/man1/opensc-asn1.1*
+%{_mandir}/man1/opensc-notify.1*
 %{_mandir}/man1/piv-tool.1*
 %{_mandir}/man1/pkcs11-tool.1*
 %{_mandir}/man1/pkcs15-crypt.1*
@@ -190,10 +175,14 @@ fi
 %{_mandir}/man1/sc-hsm-tool.1*
 %{_mandir}/man1/westcos-tool.1*
 %{_mandir}/man1/dnie-tool.1*
+%{_mandir}/man1/egk-tool.1*
 %{_mandir}/man5/*.5*
 
 
 %changelog
+* Thu May 17 2018 Jakub Jelen <jjelen@redhat.com> - 0.18.0-1
+- New upstream release (#1567503)
+
 * Wed Apr 04 2018 Jakub Jelen <jjelen@redhat.com> - 0.17.0-10
 - Install the PKCS#11 modules also to the new NSS DB
 - Drop the pkcs11-switch as the coolkey is gone
