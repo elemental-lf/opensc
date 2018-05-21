@@ -3,7 +3,7 @@
 
 Name:           opensc
 Version:        0.18.0
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
@@ -183,6 +183,9 @@ fi
 
 
 %changelog
+* Mon May 21 2018 Jakub Jelen <jjelen@redhat.com> - 0.18.0-2
+- Backport a fix for C_WaitForSlotEvent crash (#1579933)
+
 * Thu May 17 2018 Jakub Jelen <jjelen@redhat.com> - 0.18.0-1
 - New upstream release (#1567503)
 
