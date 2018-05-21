@@ -26,6 +26,8 @@ Requires:	nss-tools
 Obsoletes:      mozilla-opensc-signer < 0.12.0
 Obsoletes:      opensc-devel < 0.12.0
 Obsoletes:      coolkey <= 1.1.0-36
+# https://github.com/OpenSC/OpenSC/issues/1324 (#1579933)
+Patch1:         opensc-0.18.0-WaitForSlotEvent.patch
 
 %description
 OpenSC provides a set of libraries and utilities to work with smart cards. Its
@@ -39,6 +41,7 @@ every software/card that does so, too.
 
 %prep
 %setup -q
+%patch1 -p1 -b .wait
 
 cp -p src/pkcs15init/README ./README.pkcs15init
 cp -p src/scconf/README.scconf .

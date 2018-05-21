@@ -1,0 +1,171 @@
+From 14afdf38e371e57db39d6236f60f5458a0bdb0d8 Mon Sep 17 00:00:00 2001
+From: David Ward <david.ward@ll.mit.edu>
+Date: Fri, 18 May 2018 07:11:49 -0400
+Subject: [PATCH] Do not temporarily set SC_READER_REMOVED on all readers
+ (#1335)
+
+* reader-pcsc: Do not temporarily set SC_READER_REMOVED on all readers
+
+Fixes #1324.
+
+* reader-cryptotokenkit: Do not temporarily set SC_READER_REMOVED on all readers
+
+See #1324.
+---
+ src/libopensc/reader-cryptotokenkit.m | 51 ++++++++++++++++-----------------
+ src/libopensc/reader-pcsc.c           | 53 +++++++++++++++++++----------------
+ 2 files changed, 55 insertions(+), 49 deletions(-)
+
+diff --git a/src/libopensc/reader-cryptotokenkit.m b/src/libopensc/reader-cryptotokenkit.m
+index cf0774697..449b9f86d 100644
+--- a/src/libopensc/reader-cryptotokenkit.m
++++ b/src/libopensc/reader-cryptotokenkit.m
+@@ -543,8 +543,10 @@ int cryptotokenkit_use_reader(sc_context_t *ctx, void *pcsc_context_handle, void
+ static int cryptotokenkit_detect_readers(sc_context_t *ctx)
+ {
+ 	size_t i;
++	NSUInteger j;
+ 	int r;
+ 	TKSmartCardSlotManager *mngr = [TKSmartCardSlotManager defaultManager];
++	NSMutableArray *slotNames;
+ 
+ 	LOG_FUNC_CALLED(ctx);
+ 
+@@ -554,38 +556,37 @@ static int cryptotokenkit_detect_readers(sc_context_t *ctx)
+ 	 	goto err;
+ 	}
+ 
+-	/* temporarily mark all readers as removed */
+-	for (i=0; i < sc_ctx_get_reader_count(ctx); i++) {
+-		sc_reader_t *reader = sc_ctx_get_reader(ctx, i);
+-		reader->flags |= SC_READER_REMOVED;
+-	}
+-
+ 	sc_log(ctx, "Probing CryptoTokenKit readers");
+ 
+-	for (NSString *slotName in [mngr slotNames]) {
+-		sc_reader_t *old_reader;
+-		int found = 0;
+-		const char *reader_name = [slotName UTF8String];
+-		dispatch_semaphore_t sema = dispatch_semaphore_create(0);
++	slotNames = [[mngr slotNames] mutableCopy];
+ 
+-		for (i=0; i < sc_ctx_get_reader_count(ctx) && !found; i++) {
+-			old_reader = sc_ctx_get_reader(ctx, i);
+-			if (old_reader == NULL) {
+-				r = SC_ERROR_INTERNAL;
+-				goto err;
+-			}
+-			if (!strcmp(old_reader->name, reader_name)) {
+-				found = 1;
+-			}
++	/* check if existing readers were returned in the list */
++	for (i = 0; i < sc_ctx_get_reader_count(ctx); i++) {
++		sc_reader_t *reader = sc_ctx_get_reader(ctx, i);
++
++		if (reader == NULL) {
++			r = SC_ERROR_INTERNAL;
++			goto err;
++		}
++
++		for (j = 0; j < [slotNames count]; j++) {
++			if (!strcmp(reader->name, [slotNames[j] UTF8String]))
++				break;
+ 		}
+ 
+-		/* Reader already available, skip */
+-		if (found) {
+-			old_reader->flags &= ~SC_READER_REMOVED;
+-			continue;
++		if (j < [slotNames count]) {
++			/* existing reader found; remove it from the list */
++			[slotNames removeObjectAtIndex:j];
++		} else {
++			/* existing reader not found */
++			reader->flags |= SC_READER_REMOVED;
+ 		}
++	}
+ 
+-		sc_log(ctx, "Found new CryptoTokenKit reader '%s'", reader_name);
++	/* add readers remaining in the list */
++	for (NSString *slotName in slotNames) {
++		dispatch_semaphore_t sema = dispatch_semaphore_create(0);
++		sc_log(ctx, "Found new CryptoTokenKit reader '%s'", [slotName UTF8String]);
+ 		[mngr getSlotWithName:slotName reply:^(TKSmartCardSlot *slot) {
+ 			cryptotokenkit_use_reader(ctx, slot, NULL);
+ 		 	dispatch_semaphore_signal(sema);
+diff --git a/src/libopensc/reader-pcsc.c b/src/libopensc/reader-pcsc.c
+index 18d97f0c8..c9edad608 100644
+--- a/src/libopensc/reader-pcsc.c
++++ b/src/libopensc/reader-pcsc.c
+@@ -1298,12 +1298,6 @@ static int pcsc_detect_readers(sc_context_t *ctx)
+ 		goto out;
+ 	}
+ 
+-	/* temporarily mark all readers as removed */
+-	for (i=0;i < sc_ctx_get_reader_count(ctx);i++) {
+-		sc_reader_t *reader = sc_ctx_get_reader(ctx, i);
+-		reader->flags |= SC_READER_REMOVED;
+-	}
+-
+ 	sc_log(ctx, "Probing PC/SC readers");
+ 
+ 	do {
+@@ -1359,28 +1353,39 @@ static int pcsc_detect_readers(sc_context_t *ctx)
+ 		goto out;
+ 	}
+ 
+-	for (reader_name = reader_buf; *reader_name != '\x0';
+-		   	reader_name += strlen(reader_name) + 1) {
+-		sc_reader_t *reader = NULL, *old_reader = NULL;
+-		struct pcsc_private_data *priv = NULL;
+-		int found = 0;
++	/* check if existing readers were returned in the list */
++	for (i = 0; i < sc_ctx_get_reader_count(ctx); i++) {
++		sc_reader_t *reader = sc_ctx_get_reader(ctx, i);
+ 
+-		for (i=0;i < sc_ctx_get_reader_count(ctx) && !found;i++) {
+-			old_reader = sc_ctx_get_reader(ctx, i);
+-			if (old_reader == NULL) {
+-				ret = SC_ERROR_INTERNAL;
+-				goto out;
+-			}
+-			if (!strcmp(old_reader->name, reader_name)) {
+-				found = 1;
+-			}
++		if (!reader) {
++			ret = SC_ERROR_INTERNAL;
++			goto out;
+ 		}
+ 
+-		/* Reader already available, skip */
+-		if (found) {
+-			old_reader->flags &= ~SC_READER_REMOVED;
+-			continue;
++		for (reader_name = reader_buf; *reader_name != '\x0';
++				reader_name += strlen(reader_name) + 1) {
++			if (!strcmp(reader->name, reader_name))
++				break;
++		}
++
++		if (*reader_name != '\x0') {
++			/* existing reader found; remove it from the list */
++			char *next_reader_name = reader_name + strlen(reader_name) + 1;
++
++			memmove(reader_name, next_reader_name,
++					(reader_buf + reader_buf_size) - next_reader_name);
++			reader_buf_size -= (next_reader_name - reader_name);
++		} else {
++			/* existing reader not found */
++			reader->flags |= SC_READER_REMOVED;
+ 		}
++	}
++
++	/* add readers remaining in the list */
++	for (reader_name = reader_buf; *reader_name != '\x0';
++		   	reader_name += strlen(reader_name) + 1) {
++		sc_reader_t *reader = NULL;
++		struct pcsc_private_data *priv = NULL;
+ 
+ 		ret = pcsc_add_reader(ctx, reader_name, strlen(reader_name), &reader);
+ 		if (ret != SC_SUCCESS) {
