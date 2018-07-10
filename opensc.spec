@@ -116,7 +116,6 @@ if [ $1 -eq 0 ]; then
 fi
 
 %files
-%defattr(-,root,root,-)
 %doc COPYING NEWS README*
 
 %if ! 0%{?rhel} || 0%{?rhel} >= 7
