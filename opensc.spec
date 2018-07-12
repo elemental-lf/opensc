@@ -1,6 +1,6 @@
 Name:           opensc
 Version:        0.18.0
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
@@ -153,6 +153,11 @@ desktop-file-validate %{buildroot}/%{_datadir}/applications/org.opensc.notify.de
 
 
 %changelog
+* Thu Jul 12 2018 Jakub Jelen <jjelen@redhat.com> - 0.18.0-3
+- Do not add pkcs11 module to NSS after installation
+  (NSS is loading p11-kit modules by default)
+- Remove pkcs11-switch since there is nothing to switch to
+
 * Mon May 21 2018 Jakub Jelen <jjelen@redhat.com> - 0.18.0-2
 - Backport a fix for C_WaitForSlotEvent crash (#1579933)
 
