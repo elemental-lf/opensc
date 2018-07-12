@@ -1,6 +1,3 @@
-%define opensc_module "OpenSC PKCS #11 Module"
-%define nssdb %{_sysconfdir}/pki/nssdb
-
 Name:           opensc
 Version:        0.18.0
 Release:        2%{?dist}
@@ -22,7 +19,6 @@ BuildRequires:  autoconf automake libtool gcc
 BuildRequires:  desktop-file-utils
 Requires:       pcsc-lite-libs%{?_isa}
 Requires:	pcsc-lite
-Requires:	nss-tools
 Obsoletes:      mozilla-opensc-signer < 0.12.0
 Obsoletes:      opensc-devel < 0.12.0
 Obsoletes:      coolkey <= 1.1.0-36
@@ -93,27 +89,9 @@ desktop-file-validate %{buildroot}/%{_datadir}/applications/org.opensc.notify.de
 
 %post
 /sbin/ldconfig
-isThere=`modutil -rawlist -dbdir %{nssdb} | grep %{opensc_module} || echo NO`
-if [ "$isThere" == "NO" ]; then
-   modutil -dbdir %{nssdb} -add %{opensc_module} -libfile opensc-pkcs11.so -force ||:
-fi
-isThere=`modutil -rawlist -dbdir sql:%{nssdb} | grep %{opensc_module} || echo NO`
-if [ "$isThere" == "NO" ]; then
-   modutil -dbdir sql:%{nssdb} -add %{opensc_module} -libfile opensc-pkcs11.so -force ||:
-fi
 
 %postun
 /sbin/ldconfig
-if [ $1 -eq 0 ]; then
-  isThere=`modutil -rawlist -dbdir %{nssdb} | grep %{opensc_module} || echo NO`
-  if [ ! "$isThere" == "NO" ]; then
-    modutil -delete %{opensc_module} -dbdir %{nssdb} -force || :
-  fi
-  isThere=`modutil -rawlist -dbdir sql:%{nssdb} | grep %{opensc_module} || echo NO`
-  if [ ! "$isThere" == "NO" ]; then
-    modutil -delete %{opensc_module} -dbdir sql:%{nssdb} -force || :
-  fi
-fi
 
 %files
 %doc COPYING NEWS README*
