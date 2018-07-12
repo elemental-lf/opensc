@@ -8,7 +8,6 @@ License:        LGPLv2+
 URL:            https://github.com/OpenSC/OpenSC/wiki
 Source0:        https://github.com/OpenSC/OpenSC/releases/download/%{version}/%{name}-%{version}.tar.gz
 Source1:        opensc.module
-Source2:        pkcs11-switch.sh
 
 BuildRequires:  pcsc-lite-devel
 BuildRequires:  readline-devel
@@ -62,9 +61,6 @@ make install DESTDIR=$RPM_BUILD_ROOT
 rm -f $RPM_BUILD_ROOT%{_sysconfdir}/opensc.conf
 install -Dpm 644 etc/opensc.conf $RPM_BUILD_ROOT%{_sysconfdir}/opensc-%{_arch}.conf
 install -Dpm 644 %{SOURCE1} $RPM_BUILD_ROOT%{_datadir}/p11-kit/modules/opensc.module
-%if 0%{?rhel} <= 7
-install -Dpm 755 %{SOURCE2} $RPM_BUILD_ROOT%{_bindir}/pkcs11-switch
-%endif
 # use NEWS file timestamp as reference for configuration file
 touch -r NEWS $RPM_BUILD_ROOT%{_sysconfdir}/opensc-%{_arch}.conf
 
@@ -115,9 +111,6 @@ desktop-file-validate %{buildroot}/%{_datadir}/applications/org.opensc.notify.de
 %{_bindir}/opensc-notify
 %{_bindir}/piv-tool
 %{_bindir}/pkcs11-tool
-%if 0%{?rhel} <= 7
-%{_bindir}/pkcs11-switch
-%endif
 %{_bindir}/pkcs15-crypt
 %{_bindir}/pkcs15-init
 %{_bindir}/pkcs15-tool
