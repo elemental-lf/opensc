@@ -1,3 +1,6 @@
+%define opensc_module "OpenSC PKCS #11 Module"
+%define nssdb %{_sysconfdir}/pki/nssdb
+
 Name:           opensc
 Version:        0.18.0
 Release:        4%{?dist}
@@ -85,6 +88,21 @@ desktop-file-validate %{buildroot}/%{_datadir}/applications/org.opensc.notify.de
 
 %post
 /sbin/ldconfig
+# Remove our PKCS#11 module from NSS DB, if there is NSS installed, because
+# it is already loaded by p11-kit-proxy. Using both of them can cause
+# race conditions and hard-to-debug problems
+# TODO Remove with F30 or so
+if [ -x /usr/bin/modutil ]; then
+	isThere=`modutil -rawlist -dbdir %{nssdb} | grep %{opensc_module} || echo NO`
+	if [ ! "$isThere" == "NO" ]; then
+		modutil -delete %{opensc_module} -dbdir %{nssdb} -force || :
+
+	fi
+	isThere=`modutil -rawlist -dbdir sql:%{nssdb} | grep %{opensc_module} || echo NO`
+	if [ ! "$isThere" == "NO" ]; then
+		modutil -delete %{opensc_module} -dbdir sql:%{nssdb} -force || :
+	fi
+fi
 
 %postun
 /sbin/ldconfig
