@@ -2,8 +2,8 @@
 %define nssdb %{_sysconfdir}/pki/nssdb
 
 Name:           opensc
-Version:        0.18.0
-Release:        4%{?dist}
+Version:        0.19.0
+Release:        1%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
@@ -11,6 +11,7 @@ License:        LGPLv2+
 URL:            https://github.com/OpenSC/OpenSC/wiki
 Source0:        https://github.com/OpenSC/OpenSC/releases/download/%{version}/%{name}-%{version}.tar.gz
 Source1:        opensc.module
+Patch1:         opensc-0.19.0-rsa-pss.patch
 
 BuildRequires:  pcsc-lite-devel
 BuildRequires:  readline-devel
@@ -24,8 +25,8 @@ Requires:	pcsc-lite
 Obsoletes:      mozilla-opensc-signer < 0.12.0
 Obsoletes:      opensc-devel < 0.12.0
 Obsoletes:      coolkey <= 1.1.0-36
-# https://github.com/OpenSC/OpenSC/issues/1324 (#1579933)
-Patch1:         opensc-0.18.0-WaitForSlotEvent.patch
+# https://github.com/OpenSC/OpenSC/pull/1435
+Patch2:         opensc-0.19.0-rsa-pss.patch
 
 %description
 OpenSC provides a set of libraries and utilities to work with smart cards. Its
@@ -39,12 +40,12 @@ every software/card that does so, too.
 
 %prep
 %setup -q
-%patch1 -p1 -b .wait
+%patch2 -p1 -b .pss
 
 cp -p src/pkcs15init/README ./README.pkcs15init
 cp -p src/scconf/README.scconf .
 # No {_libdir} here to avoid multilib conflicts; it's just an example
-sed -i -e 's|/usr/local/towitoko/lib/|/usr/lib/ctapi/|' etc/opensc.conf.in
+sed -i -e 's|/usr/local/towitoko/lib/|/usr/lib/ctapi/|' etc/opensc.conf.example.in
 
 
 %build
@@ -54,6 +55,7 @@ sed -i -e 's|"/lib /usr/lib\b|"/%{_lib} %{_libdir}|' configure # lib64 rpaths
 %configure  --disable-static \
   --disable-assert \
   --enable-pcsc \
+  --disable-tests \
   --enable-sm \
   --with-pcsc-provider=libpcsclite.so.1
 make %{?_smp_mflags} V=1
@@ -77,7 +79,7 @@ rm -rf $RPM_BUILD_ROOT%{_datadir}/doc/opensc
 rm -f $RPM_BUILD_ROOT%{_libdir}/libopensc.so
 rm -f $RPM_BUILD_ROOT%{_libdir}/libsmm-local.so
 %if 0%{?rhel} && 0%{?rhel} < 7
-rm -rf %{buildroot}%{_sysconfdir}/bash_completion.d/
+rm -rf %{buildroot}%{_datadir}/bash-completion/
 %endif
 
 # the npa-tool builds to nothing since we do not have OpenPACE library
@@ -111,7 +113,7 @@ fi
 %doc COPYING NEWS README*
 
 %if ! 0%{?rhel} || 0%{?rhel} >= 7
-%{_sysconfdir}/bash_completion.d/*
+%{_datadir}/bash-completion/*
 %endif
 
 %config(noreplace) %{_sysconfdir}/opensc-%{_arch}.conf
@@ -171,6 +173,10 @@ fi
 
 
 %changelog
+* Tue Sep 25 2018 Jakub Jelen <jjelen@redhat.com> - 0.19.0-1
+- New upstream release fixing various CVE's
+- Add support for RSA-PSS signatures
+
 * Fri Jul 13 2018 Fedora Release Engineering <releng@fedoraproject.org> - 0.18.0-4
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_29_Mass_Rebuild
 
