@@ -175,7 +175,7 @@ fi
 
 %changelog
 * Tue Sep 25 2018 Jakub Jelen <jjelen@redhat.com> - 0.19.0-1
-- New upstream release fixing various CVE's
+- New upstream release fixing various CVE-2018-16418 - 16421, 16423 - 16427
 - Add support for RSA-PSS signatures
 
 * Fri Jul 13 2018 Fedora Release Engineering <releng@fedoraproject.org> - 0.18.0-4
