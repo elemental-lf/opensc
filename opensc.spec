@@ -20,6 +20,7 @@ BuildRequires:  /usr/bin/xsltproc
 BuildRequires:  docbook-style-xsl
 BuildRequires:  autoconf automake libtool gcc
 BuildRequires:  desktop-file-utils
+BuildRequires:  bash-completion
 Requires:       pcsc-lite-libs%{?_isa}
 Requires:	pcsc-lite
 Obsoletes:      mozilla-opensc-signer < 0.12.0
