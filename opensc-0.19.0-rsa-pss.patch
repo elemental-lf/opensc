@@ -1906,4 +1906,38 @@ index fe322e68e..3102bf986 100644
  		free(p11card);
  	}
  
+From 2fd8e278f5d3664555cad706d7270229c87cae56 Mon Sep 17 00:00:00 2001
+From: Doug Engert <deengert@gmail.com>
+Date: Wed, 17 Oct 2018 16:07:20 -0500
+Subject: [PATCH] pkcs11/openssl.c - add missing mechanisms fixes #1497
+
+ On branch pkcs11-openssl-c
+ Changes to be committed:
+	modified:   ../pkcs11/openssl.c
+---
+ src/pkcs11/openssl.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/src/pkcs11/openssl.c b/src/pkcs11/openssl.c
+index 00b9814e4..fb9f8fea8 100644
+--- a/src/pkcs11/openssl.c
++++ b/src/pkcs11/openssl.c
+@@ -449,6 +449,8 @@ CK_RV sc_pkcs11_verify_data(const unsigned char *pubkey, int pubkey_len,
+ 		return CKR_GENERAL_ERROR;
+ 
+ 	if (md != NULL && (mech->mechanism == CKM_SHA1_RSA_PKCS
++		|| mech->mechanism == CKM_MD5_RSA_PKCS
++		|| mech->mechanism == CKM_RIPEMD160_RSA_PKCS
+ 		|| mech->mechanism == CKM_SHA224_RSA_PKCS
+ 		|| mech->mechanism == CKM_SHA256_RSA_PKCS
+ 		|| mech->mechanism == CKM_SHA384_RSA_PKCS
+@@ -478,6 +480,8 @@ CK_RV sc_pkcs11_verify_data(const unsigned char *pubkey, int pubkey_len,
+ 		sc_log(context, "Trying to verify using low-level API");
+ 		switch (mech->mechanism) {
+ 		case CKM_RSA_PKCS:
++		case CKM_MD5_RSA_PKCS:
++		case CKM_RIPEMD160_RSA_PKCS:
+ 		 	pad = RSA_PKCS1_PADDING;
+ 		 	break;
+ 		case CKM_RSA_X_509:
 
