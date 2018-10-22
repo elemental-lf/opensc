@@ -3,7 +3,7 @@
 
 Name:           opensc
 Version:        0.19.0
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
@@ -176,6 +176,10 @@ fi
 
 
 %changelog
+* Mon Oct 22 2018 Jakub Jelen <jjelen@redhat.com> - 0.19.0-2
+- Fix verification after implementing RSA-PSS mechanisms
+- Disable pinpad by default
+
 * Tue Sep 25 2018 Jakub Jelen <jjelen@redhat.com> - 0.19.0-1
 - New upstream release fixing various CVE-2018-16418 - 16421, 16423 - 16427
 - Add support for RSA-PSS signatures
