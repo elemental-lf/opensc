@@ -28,6 +28,7 @@ Obsoletes:      opensc-devel < 0.12.0
 Obsoletes:      coolkey <= 1.1.0-36
 # https://github.com/OpenSC/OpenSC/pull/1435
 Patch2:         opensc-0.19.0-rsa-pss.patch
+Patch3:         opensc-0.19.0-pinpad.patch
 
 %description
 OpenSC provides a set of libraries and utilities to work with smart cards. Its
@@ -42,6 +43,7 @@ every software/card that does so, too.
 %prep
 %setup -q
 %patch2 -p1 -b .pss
+%patch3 -p1 -b .pinpad
 
 cp -p src/pkcs15init/README ./README.pkcs15init
 cp -p src/scconf/README.scconf .
