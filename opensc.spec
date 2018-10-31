@@ -27,6 +27,7 @@ Obsoletes:      mozilla-opensc-signer < 0.12.0
 Obsoletes:      opensc-devel < 0.12.0
 Obsoletes:      coolkey <= 1.1.0-36
 # https://github.com/OpenSC/OpenSC/pull/1435
+# https://github.com/OpenSC/OpenSC/pull/1521
 Patch2:         opensc-0.19.0-rsa-pss.patch
 Patch3:         opensc-0.19.0-pinpad.patch
 

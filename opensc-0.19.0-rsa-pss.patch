@@ -1941,3 +1941,241 @@ index 00b9814e4..fb9f8fea8 100644
  		 	break;
  		case CKM_RSA_X_509:
 
+
+From 9b289e074bff22f7e2339b7d3f9428c3233efb71 Mon Sep 17 00:00:00 2001
+From: Jakub Jelen <jjelen@redhat.com>
+Date: Wed, 31 Oct 2018 11:46:37 +0100
+Subject: [PATCH 2/7] coolkey: Check return values from list initialization
+ (coverity)
+
+>>>     CID 324484:  Error handling issues  (CHECKED_RETURN)
+>>>     Calling "list_init" without checking return value (as is done elsewhere 8 out of 9 times).
+---
+ src/libopensc/card-coolkey.c | 13 ++++++++++---
+ 1 file changed, 10 insertions(+), 3 deletions(-)
+
+diff --git a/src/libopensc/card-coolkey.c b/src/libopensc/card-coolkey.c
+index c1c09b662..e320290df 100644
+--- a/src/libopensc/card-coolkey.c
++++ b/src/libopensc/card-coolkey.c
+@@ -784,18 +784,25 @@ size_t coolkey_list_meter(const void *el) {
+ 	return sizeof(sc_cardctl_coolkey_object_t);
+ }
+ 
++static void coolkey_free_private_data(coolkey_private_data_t *priv);
++
+ static coolkey_private_data_t *coolkey_new_private_data(void)
+ {
+ 	coolkey_private_data_t *priv;
++
+ 	/* allocate priv and zero all the fields */
+ 	priv = calloc(1, sizeof(coolkey_private_data_t));
+ 	if (!priv)
+ 		return NULL;
++
+ 	/* set other fields as appropriate */
+ 	priv->key_id = COOLKEY_INVALID_KEY;
+-	list_init(&priv->objects_list);
+-	list_attributes_comparator(&priv->objects_list, coolkey_compare_id);
+-	list_attributes_copy(&priv->objects_list, coolkey_list_meter, 1);
++	if (list_init(&priv->objects_list) != 0 ||
++	    list_attributes_comparator(&priv->objects_list, coolkey_compare_id) != 0 ||
++	    list_attributes_copy(&priv->objects_list, coolkey_list_meter, 1) != 0) {
++		coolkey_free_private_data(priv);
++		return NULL;
++	}
+ 
+ 	return priv;
+ }
+
+From a32fbd0525ea6e21e73b03086e29862481761848 Mon Sep 17 00:00:00 2001
+From: Jakub Jelen <jjelen@redhat.com>
+Date: Wed, 31 Oct 2018 15:02:00 +0100
+Subject: [PATCH 3/7] framework-pkcs15.c: Reformat
+
+ * Reasonable line lengths
+ * Correct indentation
+ * Add missing SHA224 mechanism
+---
+ src/pkcs11/framework-pkcs15.c | 40 +++++++++++++++++++++++------------
+ 1 file changed, 26 insertions(+), 14 deletions(-)
+
+diff --git a/src/pkcs11/framework-pkcs15.c b/src/pkcs11/framework-pkcs15.c
+index 85e12df66..3657bcbdd 100644
+--- a/src/pkcs11/framework-pkcs15.c
++++ b/src/pkcs11/framework-pkcs15.c
+@@ -5159,18 +5159,14 @@ register_mechanisms(struct sc_pkcs11_card *p11card)
+ 	}
+ 
+ #ifdef ENABLE_OPENSSL
+-		/* all our software hashes are in OpenSSL */
+-		/* Only if card did not list the hashes, will we
+-		 * help it a little, by adding all the OpenSSL hashes
+-		 * that have PKCS#11 mechanisms.
+-		 */
+-		if (!(rsa_flags & SC_ALGORITHM_RSA_HASHES)) {
+-			rsa_flags |= SC_ALGORITHM_RSA_HASHES;
+-#if OPENSSL_VERSION_NUMBER <  0x00908000L
+-		/* turn off hashes not in openssl 0.9.8 */
+-			rsa_flags &= ~(SC_ALGORITHM_RSA_HASH_SHA256 | SC_ALGORITHM_RSA_HASH_SHA384 | SC_ALGORITHM_RSA_HASH_SHA512 | SC_ALGORITHM_RSA_HASH_SHA224);
+-#endif
+-		}
++	/* all our software hashes are in OpenSSL */
++	/* Only if card did not list the hashes, will we
++	 * help it a little, by adding all the OpenSSL hashes
++	 * that have PKCS#11 mechanisms.
++	 */
++	if (!(rsa_flags & SC_ALGORITHM_RSA_HASHES)) {
++		rsa_flags |= SC_ALGORITHM_RSA_HASHES;
++	}
+ #endif
+ 
+ 	/* No need to Check for PKCS1  We support it in software and turned it on above so always added it */
+@@ -5182,32 +5182,44 @@ register_mechanisms(struct sc_pkcs11_card *p11card)
+ 		 * Either the card set the hashes or we helped it above */
+ 
+ 		if (rsa_flags & SC_ALGORITHM_RSA_HASH_SHA1) {
+-			rc = sc_pkcs11_register_sign_and_hash_mechanism(p11card, CKM_SHA1_RSA_PKCS, CKM_SHA_1, mt);
++			rc = sc_pkcs11_register_sign_and_hash_mechanism(p11card,
++				CKM_SHA1_RSA_PKCS, CKM_SHA_1, mt);
++			if (rc != CKR_OK)
++				return rc;
++		}
++		if (rsa_flags & SC_ALGORITHM_RSA_HASH_SHA224) {
++			rc = sc_pkcs11_register_sign_and_hash_mechanism(p11card,
++				CKM_SHA224_RSA_PKCS, CKM_SHA224, mt);
+ 			if (rc != CKR_OK)
+ 				return rc;
+ 		}
+ 		if (rsa_flags & SC_ALGORITHM_RSA_HASH_SHA256) {
+-			rc = sc_pkcs11_register_sign_and_hash_mechanism(p11card, CKM_SHA256_RSA_PKCS, CKM_SHA256, mt);
++			rc = sc_pkcs11_register_sign_and_hash_mechanism(p11card,
++				CKM_SHA256_RSA_PKCS, CKM_SHA256, mt);
+ 			if (rc != CKR_OK)
+ 				return rc;
+ 		}
+ 		if (rsa_flags & SC_ALGORITHM_RSA_HASH_SHA384) {
+-			rc = sc_pkcs11_register_sign_and_hash_mechanism(p11card, CKM_SHA384_RSA_PKCS, CKM_SHA384, mt);
++			rc = sc_pkcs11_register_sign_and_hash_mechanism(p11card,
++				CKM_SHA384_RSA_PKCS, CKM_SHA384, mt);
+ 			if (rc != CKR_OK)
+ 				return rc;
+ 		}
+ 		if (rsa_flags & SC_ALGORITHM_RSA_HASH_SHA512) {
+-			rc = sc_pkcs11_register_sign_and_hash_mechanism(p11card, CKM_SHA512_RSA_PKCS, CKM_SHA512, mt);
++			rc = sc_pkcs11_register_sign_and_hash_mechanism(p11card,
++				CKM_SHA512_RSA_PKCS, CKM_SHA512, mt);
+ 			if (rc != CKR_OK)
+ 				return rc;
+ 		}
+ 		if (rsa_flags & SC_ALGORITHM_RSA_HASH_MD5) {
+-			rc = sc_pkcs11_register_sign_and_hash_mechanism(p11card, CKM_MD5_RSA_PKCS, CKM_MD5, mt);
++			rc = sc_pkcs11_register_sign_and_hash_mechanism(p11card,
++				CKM_MD5_RSA_PKCS, CKM_MD5, mt);
+ 			if (rc != CKR_OK)
+ 				return rc;
+ 		}
+ 		if (rsa_flags & SC_ALGORITHM_RSA_HASH_RIPEMD160) {
+-			rc = sc_pkcs11_register_sign_and_hash_mechanism(p11card, CKM_RIPEMD160_RSA_PKCS, CKM_RIPEMD160, mt);
++			rc = sc_pkcs11_register_sign_and_hash_mechanism(p11card,
++				CKM_RIPEMD160_RSA_PKCS, CKM_RIPEMD160, mt);
+ 			if (rc != CKR_OK)
+ 				return rc;
+ 		}
+
+From 7461c259c96f086621a35baeb699cf3cdc2968dd Mon Sep 17 00:00:00 2001
+From: Jakub Jelen <jjelen@redhat.com>
+Date: Wed, 31 Oct 2018 15:03:40 +0100
+Subject: [PATCH 4/7] framework-pkcs15.c: Add PKCS#1 mechanisms also if
+ SC_ALGORITHM_RSA_HASH_NONE is defined
+
+---
+ src/pkcs11/framework-pkcs15.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/pkcs11/framework-pkcs15.c b/src/pkcs11/framework-pkcs15.c
+index 3657bcbdd..cac39b821 100644
+--- a/src/pkcs11/framework-pkcs15.c
++++ b/src/pkcs11/framework-pkcs15.c
+@@ -5164,7 +5164,7 @@ register_mechanisms(struct sc_pkcs11_card *p11card)
+ 	 * help it a little, by adding all the OpenSSL hashes
+ 	 * that have PKCS#11 mechanisms.
+ 	 */
+-	if (!(rsa_flags & SC_ALGORITHM_RSA_HASHES)) {
++	if (!(rsa_flags & (SC_ALGORITHM_RSA_HASHES & ~SC_ALGORITHM_RSA_HASH_NONE))) {
+ 		rsa_flags |= SC_ALGORITHM_RSA_HASHES;
+ 	}
+ #endif
+
+From 56a9dab5c0a3bc91175266296a70aea94cb5747b Mon Sep 17 00:00:00 2001
+From: Jakub Jelen <jjelen@redhat.com>
+Date: Wed, 31 Oct 2018 15:35:25 +0100
+Subject: [PATCH 5/7] p11test: Do not report incomplete key pairs
+
+---
+ src/tests/p11test/p11test_case_pss_oaep.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/src/tests/p11test/p11test_case_pss_oaep.c b/src/tests/p11test/p11test_case_pss_oaep.c
+index d0b8392fd..019471192 100644
+--- a/src/tests/p11test/p11test_case_pss_oaep.c
++++ b/src/tests/p11test/p11test_case_pss_oaep.c
+@@ -815,6 +815,10 @@ void pss_oaep_test(void **state) {
+ 	for (i = 0; i < objects.count; i++) {
+ 		test_cert_t *o = &objects.data[i];
+ 
++		/* Do not go through incomplete pairs */
++		if (o->private_handle == CK_INVALID_HANDLE)
++			continue;
++
+ 		/* Do not list non-RSA keys here */
+ 		if (o->type != EVP_PK_RSA)
+ 			continue;
+
+From 21d6d8092c98e572c89853593f3f680d219a06d9 Mon Sep 17 00:00:00 2001
+From: Jakub Jelen <jjelen@redhat.com>
+Date: Wed, 31 Oct 2018 15:39:56 +0100
+Subject: [PATCH 6/7] framework-pkcs15.c: Add SHA224 mechanism for PKCS#1.5
+
+---
+ src/pkcs11/framework-pkcs15.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/src/pkcs11/framework-pkcs15.c b/src/pkcs11/framework-pkcs15.c
+index cac39b821..6948e31d4 100644
+--- a/src/pkcs11/framework-pkcs15.c
++++ b/src/pkcs11/framework-pkcs15.c
+@@ -3781,6 +3781,9 @@ pkcs15_prkey_sign(struct sc_pkcs11_session *session, void *obj,
+ 	case CKM_SHA1_RSA_PKCS:
+ 		flags = SC_ALGORITHM_RSA_PAD_PKCS1 | SC_ALGORITHM_RSA_HASH_SHA1;
+ 		break;
++	case CKM_SHA224_RSA_PKCS:
++		flags = SC_ALGORITHM_RSA_PAD_PKCS1 | SC_ALGORITHM_RSA_HASH_SHA224;
++		break;
+ 	case CKM_SHA256_RSA_PKCS:
+ 		flags = SC_ALGORITHM_RSA_PAD_PKCS1 | SC_ALGORITHM_RSA_HASH_SHA256;
+ 		break;
+
+From 7d4fa67efc22bf085863ead342b9fc55513425f1 Mon Sep 17 00:00:00 2001
+From: Jakub Jelen <jjelen@redhat.com>
+Date: Wed, 31 Oct 2018 17:50:08 +0100
+Subject: [PATCH 7/7] padding: Fix error checking in RSA-PSS
+
+---
+ src/libopensc/padding.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/libopensc/padding.c b/src/libopensc/padding.c
+index 75c92b651..f0e2263b8 100644
+--- a/src/libopensc/padding.c
++++ b/src/libopensc/padding.c
+@@ -345,7 +345,7 @@ static int sc_pkcs1_add_pss_padding(unsigned int hash, unsigned int mgf1_hash,
+ 		if (EVP_DigestInit_ex(ctx, mgf1_md, NULL) != 1 ||
+ 		    EVP_DigestUpdate(ctx, out + dblen, hlen) != 1 || /* H (Z parameter of MGF1) */
+ 		    EVP_DigestUpdate(ctx, buf, 4) != 1 || /* C */
+-		    EVP_DigestFinal_ex(ctx, mask, NULL)) {
++		    EVP_DigestFinal_ex(ctx, mask, NULL) != 1) {
+ 			goto done;
+ 		}
+ 		/* this is no longer part of the MGF1, but actually
+
