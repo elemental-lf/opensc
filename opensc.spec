@@ -3,7 +3,7 @@
 
 Name:           opensc
 Version:        0.19.0
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Smart card library and applications
 
 Group:          System Environment/Libraries
@@ -177,6 +177,10 @@ fi
 
 
 %changelog
+* Wed Oct 31 2018 Jakub Jelen <jjelen@redhat.com> - 0.19.0-3
+- Unbreak the RSA-PSS mechanisms
+- Unbreak the signing using hashed mechanisms in CardOS and others
+
 * Mon Oct 22 2018 Jakub Jelen <jjelen@redhat.com> - 0.19.0-2
 - Fix verification after implementing RSA-PSS mechanisms
 - Disable pinpad by default
