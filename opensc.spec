@@ -11,7 +11,10 @@ License:        LGPLv2+
 URL:            https://github.com/OpenSC/OpenSC/wiki
 Source0:        https://github.com/OpenSC/OpenSC/releases/download/%{version}/%{name}-%{version}.tar.gz
 Source1:        opensc.module
-Patch1:         opensc-0.19.0-rsa-pss.patch
+# https://github.com/OpenSC/OpenSC/pull/1435
+# https://github.com/OpenSC/OpenSC/pull/1521
+Patch2:         opensc-0.19.0-rsa-pss.patch
+Patch3:         opensc-0.19.0-pinpad.patch
 
 BuildRequires:  pcsc-lite-devel
 BuildRequires:  readline-devel
@@ -26,10 +29,6 @@ Requires:	pcsc-lite
 Obsoletes:      mozilla-opensc-signer < 0.12.0
 Obsoletes:      opensc-devel < 0.12.0
 Obsoletes:      coolkey <= 1.1.0-36
-# https://github.com/OpenSC/OpenSC/pull/1435
-# https://github.com/OpenSC/OpenSC/pull/1521
-Patch2:         opensc-0.19.0-rsa-pss.patch
-Patch3:         opensc-0.19.0-pinpad.patch
 
 %description
 OpenSC provides a set of libraries and utilities to work with smart cards. Its
