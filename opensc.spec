@@ -15,6 +15,8 @@ Source1:        opensc.module
 # https://github.com/OpenSC/OpenSC/pull/1521
 Patch2:         opensc-0.19.0-rsa-pss.patch
 Patch3:         opensc-0.19.0-pinpad.patch
+# https://github.com/OpenSC/OpenSC/pull/1557
+Patch4:         opensc-0.19.0-gcc9.patch
 
 BuildRequires:  pcsc-lite-devel
 BuildRequires:  readline-devel
@@ -44,6 +46,7 @@ every software/card that does so, too.
 %setup -q
 %patch2 -p1 -b .pss
 %patch3 -p1 -b .pinpad
+%patch4 -p1 -b .gcc9
 
 cp -p src/pkcs15init/README ./README.pkcs15init
 cp -p src/scconf/README.scconf .
