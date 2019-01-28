@@ -6,7 +6,6 @@ Version:        0.19.0
 Release:        3%{?dist}
 Summary:        Smart card library and applications
 
-Group:          System Environment/Libraries
 License:        LGPLv2+
 URL:            https://github.com/OpenSC/OpenSC/wiki
 Source0:        https://github.com/OpenSC/OpenSC/releases/download/%{version}/%{name}-%{version}.tar.gz
