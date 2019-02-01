@@ -3,7 +3,7 @@
 
 Name:           opensc
 Version:        0.19.0
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        Smart card library and applications
 
 License:        LGPLv2+
@@ -178,6 +178,9 @@ fi
 
 
 %changelog
+* Fri Feb 01 2019 Fedora Release Engineering <releng@fedoraproject.org> - 0.19.0-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_30_Mass_Rebuild
+
 * Wed Oct 31 2018 Jakub Jelen <jjelen@redhat.com> - 0.19.0-3
 - Unbreak the RSA-PSS mechanisms
 - Unbreak the signing using hashed mechanisms in CardOS and others
