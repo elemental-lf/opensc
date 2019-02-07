@@ -82,6 +82,8 @@ rm -rf $RPM_BUILD_ROOT%{_datadir}/doc/opensc
 # public headers and pkgconfig files.
 # Remove the symlink as nothing is supposed to link against libopensc.
 rm -f $RPM_BUILD_ROOT%{_libdir}/libopensc.so
+# remove the .pc file so we do not confuse users #1673139
+rm -f $RPM_BUILD_ROOT%{_libdir}/pkgconfig/*.pc
 rm -f $RPM_BUILD_ROOT%{_libdir}/libsmm-local.so
 %if 0%{?rhel} && 0%{?rhel} < 7
 rm -rf %{buildroot}%{_datadir}/bash-completion/
@@ -148,7 +150,6 @@ fi
 %{_libdir}/opensc-pkcs11.so
 %{_libdir}/pkcs11-spy.so
 %{_libdir}/onepin-opensc-pkcs11.so
-%{_libdir}/pkgconfig/*.pc
 %%dir %{_libdir}/pkcs11
 %{_libdir}/pkcs11/opensc-pkcs11.so
 %{_libdir}/pkcs11/onepin-opensc-pkcs11.so
