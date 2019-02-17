@@ -3,7 +3,7 @@
 
 Name:           opensc
 Version:        0.19.0
-Release:        4%{?dist}
+Release:        5%{?dist}
 Summary:        Smart card library and applications
 
 License:        LGPLv2+
@@ -179,6 +179,9 @@ fi
 
 
 %changelog
+* Sun Feb 17 2019 Igor Gnatenko <ignatenkobrain@fedoraproject.org> - 0.19.0-5
+- Rebuild for readline 8.0
+
 * Fri Feb 01 2019 Fedora Release Engineering <releng@fedoraproject.org> - 0.19.0-4
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_30_Mass_Rebuild
 
