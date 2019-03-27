@@ -3,7 +3,7 @@
 
 Name:           opensc
 Version:        0.19.0
-Release:        5%{?dist}
+Release:        6%{?dist}
 Summary:        Smart card library and applications
 
 License:        LGPLv2+
@@ -198,6 +198,10 @@ fi
 
 
 %changelog
+* Wed Mar 27 2019 Jakub Jelen <jjelen@redhat.com> - 0.19.0-6
+- Make OpenSC multilib again by moving the offending files on ix86 arch
+- Do not ship packageconfig files to avoid inadvertent linking against pkcs11 modules (#1673139)
+
 * Sun Feb 17 2019 Igor Gnatenko <ignatenkobrain@fedoraproject.org> - 0.19.0-5
 - Rebuild for readline 8.0
 
