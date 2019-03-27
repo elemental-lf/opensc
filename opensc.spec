@@ -55,7 +55,9 @@ sed -i -e 's|/usr/local/towitoko/lib/|/usr/lib/ctapi/|' etc/opensc.conf.example.
 
 %build
 autoreconf -fvi
+%ifarch %{ix86}
 sed -i -e 's/opensc.conf/opensc-%{_arch}.conf/g' src/libopensc/Makefile.in
+%endif
 sed -i -e 's|"/lib /usr/lib\b|"/%{_lib} %{_libdir}|' configure # lib64 rpaths
 %configure  --disable-static \
   --disable-assert \
@@ -68,11 +70,21 @@ make %{?_smp_mflags} V=1
 
 %install
 make install DESTDIR=$RPM_BUILD_ROOT
+install -Dpm 644 %{SOURCE1} $RPM_BUILD_ROOT%{_datadir}/p11-kit/modules/opensc.module
+
+%ifarch %{ix86}
+# To avoid multilib issues, move these files on 32b intel architectures
 rm -f $RPM_BUILD_ROOT%{_sysconfdir}/opensc.conf
 install -Dpm 644 etc/opensc.conf $RPM_BUILD_ROOT%{_sysconfdir}/opensc-%{_arch}.conf
-install -Dpm 644 %{SOURCE1} $RPM_BUILD_ROOT%{_datadir}/p11-kit/modules/opensc.module
+rm -f $RPM_BUILD_ROOT%{_mandir}/man5/opensc.conf.5
+install -Dpm 644 doc/files/opensc.conf.5 $RPM_BUILD_ROOT%{_mandir}/man5/opensc-%{_arch}.conf.5
 # use NEWS file timestamp as reference for configuration file
 touch -r NEWS $RPM_BUILD_ROOT%{_sysconfdir}/opensc-%{_arch}.conf
+touch -r NEWS $RPM_BUILD_ROOT%{_mandir}/man5/opensc-%{_arch}.conf.5
+%else
+# For backward compatibility, symlink the old location to the new files
+ln -s %{_sysconfdir}/opensc.conf $RPM_BUILD_ROOT%{_sysconfdir}/opensc-%{_arch}.conf
+%endif
 
 find $RPM_BUILD_ROOT%{_libdir} -type f -name "*.la" | xargs rm
 
@@ -121,6 +133,13 @@ fi
 
 %if ! 0%{?rhel} || 0%{?rhel} >= 7
 %{_datadir}/bash-completion/*
+%endif
+
+%ifarch %{ix86}
+%{_mandir}/man5/opensc-%{_arch}.conf.5*
+%else
+%config(noreplace) %{_sysconfdir}/opensc.conf
+%{_mandir}/man5/opensc.conf.5*
 %endif
 
 %config(noreplace) %{_sysconfdir}/opensc-%{_arch}.conf
@@ -175,7 +194,7 @@ fi
 %{_mandir}/man1/westcos-tool.1*
 %{_mandir}/man1/dnie-tool.1*
 %{_mandir}/man1/egk-tool.1*
-%{_mandir}/man5/*.5*
+%{_mandir}/man5/pkcs15-profile.5*
 
 
 %changelog
