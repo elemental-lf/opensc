@@ -28,7 +28,7 @@ export TESTVERSION=1.0
 
 BUILT_FILES=
 
-FILES=$(METADATA) runtest.sh Makefile PURPOSE cert.cfg
+FILES=$(METADATA) runtest.sh Makefile PURPOSE cert.cfg virtcacard.cil
 
 .PHONY: all install download clean
 
@@ -51,9 +51,13 @@ $(METADATA): Makefile
 	@echo "Path:            $(TEST_DIR)" >> $(METADATA)
 	@echo "Description:     This is a sanity test for pkcs11-tool" >> $(METADATA)
 	@echo "Type:            Sanity" >> $(METADATA)
-	@echo "TestTime:        5m" >> $(METADATA)
+	@echo "TestTime:        15m" >> $(METADATA)
 	@echo "RunFor:          opensc" >> $(METADATA)
-	@echo "Requires:        opensc openssl gnutls-utils opencryptoki-libs" >> $(METADATA)
+	@echo "Requires:        opensc openssl gnutls-utils" >> $(METADATA)
+	@echo "Requires:        opencryptoki-libs opencryptoki opencryptoki-swtok" >> $(METADATA)
+	@echo "Requires:        libcacard-devel autoconf" >> $(METADATA)
+	@echo "Requires:        autoconf-archive automake libtool" >> $(METADATA)
+	@echo "Requires:        softhsm help2man pcsc-lite-devel nss-tools policycoreutils" >> $(METADATA)
 	@echo "Priority:        Normal" >> $(METADATA)
 	@echo "License:         GPLv2+" >> $(METADATA)
 	@echo "Confidential:    yes" >> $(METADATA)
