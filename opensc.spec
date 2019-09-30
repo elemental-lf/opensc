@@ -3,7 +3,7 @@
 
 Name:           opensc
 Version:        0.19.0
-Release:        7%{?dist}
+Release:        8%{?dist}
 Summary:        Smart card library and applications
 
 License:        LGPLv2+
@@ -201,6 +201,10 @@ fi
 
 
 %changelog
+* Mon Sep 30 2019 Jakub Jelen <jjelen@redhat.com> - 0.19.0-8
+- Correctly mention bundled simclist library
+- Add missing zlib build requires (#1756326)
+
 * Thu Jul 25 2019 Fedora Release Engineering <releng@fedoraproject.org> - 0.19.0-7
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_31_Mass_Rebuild
 
