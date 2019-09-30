@@ -31,6 +31,8 @@ Requires:	pcsc-lite
 Obsoletes:      mozilla-opensc-signer < 0.12.0
 Obsoletes:      opensc-devel < 0.12.0
 Obsoletes:      coolkey <= 1.1.0-36
+# The simclist is bundled in upstream
+Provides:       bundled(simclist) = 1.5
 
 %description
 OpenSC provides a set of libraries and utilities to work with smart cards. Its
