@@ -146,6 +146,9 @@ fi
 %endif
 
 %config(noreplace) %{_sysconfdir}/opensc-%{_arch}.conf
+# Co-owned with p11-kit so it is not hard dependency
+%{_datadir}/p11-kit
+%{_datadir}/p11-kit/modules
 %{_datadir}/p11-kit/modules/opensc.module
 %{_bindir}/cardos-tool
 %{_bindir}/cryptoflex-tool
