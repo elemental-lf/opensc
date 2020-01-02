@@ -2,8 +2,8 @@
 %define nssdb %{_sysconfdir}/pki/nssdb
 
 Name:           opensc
-Version:        0.19.0
-Release:        8%{?dist}
+Version:        0.20.0
+Release:        1%{?dist}
 Summary:        Smart card library and applications
 
 License:        LGPLv2+
@@ -13,12 +13,6 @@ Source1:        opensc.module
 # Missing from release tarball
 # https://github.com/OpenSC/OpenSC/blob/master/tests/common.sh
 Source2:        common.sh
-# https://github.com/OpenSC/OpenSC/pull/1435
-# https://github.com/OpenSC/OpenSC/pull/1521
-Patch2:         opensc-0.19.0-rsa-pss.patch
-Patch3:         opensc-0.19.0-pinpad.patch
-# https://github.com/OpenSC/OpenSC/pull/1557
-Patch4:         opensc-0.19.0-gcc9.patch
 Patch1:         opensc-0.19.0-pinpad.patch
 
 BuildRequires:  pcsc-lite-devel
@@ -55,9 +49,7 @@ every software/card that does so, too.
 
 %prep
 %setup -q
-%patch2 -p1 -b .pss
-%patch3 -p1 -b .pinpad
-%patch4 -p1 -b .gcc9
+%patch1 -p1 -b .pinpad
 
 cp %{SOURCE2} tests/
 # The test-pkcs11-tool-allowed-mechanisms already works in Fedora
@@ -79,6 +71,7 @@ sed -i -e 's/opensc.conf/opensc-%{_arch}.conf/g' src/libopensc/Makefile.in
 %endif
 sed -i -e 's|"/lib /usr/lib\b|"/%{_lib} %{_libdir}|' configure # lib64 rpaths
 %configure  --disable-static \
+  --disable-autostart-items \
   --disable-assert \
   --enable-pcsc \
   --enable-tests \
@@ -167,8 +160,8 @@ fi
 
 %config(noreplace) %{_sysconfdir}/opensc-%{_arch}.conf
 # Co-owned with p11-kit so it is not hard dependency
-%{_datadir}/p11-kit
-%{_datadir}/p11-kit/modules
+%dir %{_datadir}/p11-kit
+%dir %{_datadir}/p11-kit/modules
 %{_datadir}/p11-kit/modules/opensc.module
 %{_bindir}/cardos-tool
 %{_bindir}/cryptoflex-tool
@@ -190,6 +183,8 @@ fi
 %{_bindir}/dnie-tool
 %{_bindir}/westcos-tool
 %{_bindir}/egk-tool
+%{_bindir}/goid-tool
+%{_bindir}/pkcs11-register
 %{_datadir}/applications/org.opensc.notify.desktop
 %{_libdir}/lib*.so.*
 %{_libdir}/opensc-pkcs11.so
@@ -224,6 +219,10 @@ fi
 
 
 %changelog
+* Thu Jan 02 2020 Jakub Jelen <jjelen@redhat.com> - 0.20.0-1
+- New upstream release (#1749357)
+- Fixes for various security issues identified by fuzzing (#1765223, #1765231, #1782520, #1782951, #1782956)
+
 * Mon Sep 30 2019 Jakub Jelen <jjelen@redhat.com> - 0.19.0-8
 - Correctly mention bundled simclist library
 - Add missing zlib build requires (#1756326)
