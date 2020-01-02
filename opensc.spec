@@ -26,8 +26,9 @@ BuildRequires:  autoconf automake libtool gcc
 BuildRequires:  desktop-file-utils
 BuildRequires:  bash-completion
 BuildRequires:  zlib-devel
+BuildRequires:  glib2-devel
 Requires:       pcsc-lite-libs%{?_isa}
-Requires:	pcsc-lite
+Requires:       pcsc-lite
 Obsoletes:      mozilla-opensc-signer < 0.12.0
 Obsoletes:      opensc-devel < 0.12.0
 Obsoletes:      coolkey <= 1.1.0-36
