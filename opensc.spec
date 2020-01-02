@@ -10,12 +10,16 @@ License:        LGPLv2+
 URL:            https://github.com/OpenSC/OpenSC/wiki
 Source0:        https://github.com/OpenSC/OpenSC/releases/download/%{version}/%{name}-%{version}.tar.gz
 Source1:        opensc.module
+# Missing from release tarball
+# https://github.com/OpenSC/OpenSC/blob/master/tests/common.sh
+Source2:        common.sh
 # https://github.com/OpenSC/OpenSC/pull/1435
 # https://github.com/OpenSC/OpenSC/pull/1521
 Patch2:         opensc-0.19.0-rsa-pss.patch
 Patch3:         opensc-0.19.0-pinpad.patch
 # https://github.com/OpenSC/OpenSC/pull/1557
 Patch4:         opensc-0.19.0-gcc9.patch
+Patch1:         opensc-0.19.0-pinpad.patch
 
 BuildRequires:  pcsc-lite-devel
 BuildRequires:  readline-devel
@@ -27,6 +31,10 @@ BuildRequires:  desktop-file-utils
 BuildRequires:  bash-completion
 BuildRequires:  zlib-devel
 BuildRequires:  glib2-devel
+# For tests
+BuildRequires:  libcmocka-devel
+BuildRequires:  softhsm
+BuildRequires:  openssl
 Requires:       pcsc-lite-libs%{?_isa}
 Requires:       pcsc-lite
 Obsoletes:      mozilla-opensc-signer < 0.12.0
@@ -51,6 +59,13 @@ every software/card that does so, too.
 %patch3 -p1 -b .pinpad
 %patch4 -p1 -b .gcc9
 
+cp %{SOURCE2} tests/
+# The test-pkcs11-tool-allowed-mechanisms already works in Fedora
+sed -i -e '/XFAIL_TESTS/,$ {
+  s/XFAIL_TESTS.*/XFAIL_TESTS=test-pkcs11-tool-test.sh/
+  q
+}' tests/Makefile.am
+
 cp -p src/pkcs15init/README ./README.pkcs15init
 cp -p src/scconf/README.scconf .
 # No {_libdir} here to avoid multilib conflicts; it's just an example
@@ -66,10 +81,14 @@ sed -i -e 's|"/lib /usr/lib\b|"/%{_lib} %{_libdir}|' configure # lib64 rpaths
 %configure  --disable-static \
   --disable-assert \
   --enable-pcsc \
-  --disable-tests \
+  --enable-tests \
   --enable-sm \
   --with-pcsc-provider=libpcsclite.so.1
 make %{?_smp_mflags} V=1
+
+
+%check
+make check
 
 
 %install
