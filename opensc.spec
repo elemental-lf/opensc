@@ -123,11 +123,8 @@ rm -rf %{buildroot}%{_mandir}/man1/npa-tool.1*
 
 desktop-file-validate %{buildroot}/%{_datadir}/applications/org.opensc.notify.desktop
 
-%post
-/sbin/ldconfig
-
-%postun
-/sbin/ldconfig
+%post -p /sbin/ldconfig
+%postun -p /sbin/ldconfig
 
 %files
 %doc COPYING NEWS README*
