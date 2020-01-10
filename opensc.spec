@@ -36,6 +36,12 @@ Obsoletes:      opensc-devel < 0.12.0
 Obsoletes:      coolkey <= 1.1.0-36
 # The simclist is bundled in upstream
 Provides:       bundled(simclist) = 1.5
+Recommends:     opensc-notify
+
+%package notify
+Summary: Notification support for OpenSC
+Requires:       opensc = %{version}-%{release}
+Requires:       gnome-icon-theme
 
 %description
 OpenSC provides a set of libraries and utilities to work with smart cards. Its
@@ -45,6 +51,10 @@ digital signatures. OpenSC implements the PKCS#11 API so applications
 supporting this API (such as Mozilla Firefox and Thunderbird) can use it. On
 the card OpenSC implements the PKCS#15 standard and aims to be compatible with
 every software/card that does so, too.
+
+%description notify
+The opensc-notify subpackage provides support for desktop notification from
+OpenSC tools.
 
 
 %prep
@@ -72,6 +82,7 @@ sed -i -e 's/opensc.conf/opensc-%{_arch}.conf/g' src/libopensc/Makefile.in
 sed -i -e 's|"/lib /usr/lib\b|"/%{_lib} %{_libdir}|' configure # lib64 rpaths
 %configure  --disable-static \
   --disable-autostart-items \
+  --enable-notify \
   --disable-assert \
   --enable-pcsc \
   --enable-cmocka \
@@ -155,7 +166,6 @@ desktop-file-validate %{buildroot}/%{_datadir}/applications/org.opensc.notify.de
 %{_bindir}/opensc-explorer
 %{_bindir}/opensc-tool
 %{_bindir}/opensc-asn1
-%{_bindir}/opensc-notify
 %{_bindir}/piv-tool
 %{_bindir}/pkcs11-tool
 %{_bindir}/pkcs15-crypt
@@ -167,7 +177,6 @@ desktop-file-validate %{buildroot}/%{_datadir}/applications/org.opensc.notify.de
 %{_bindir}/egk-tool
 %{_bindir}/goid-tool
 %{_bindir}/pkcs11-register
-%{_datadir}/applications/org.opensc.notify.desktop
 %{_libdir}/lib*.so.*
 %{_libdir}/opensc-pkcs11.so
 %{_libdir}/pkcs11-spy.so
@@ -187,7 +196,6 @@ desktop-file-validate %{buildroot}/%{_datadir}/applications/org.opensc.notify.de
 %{_mandir}/man1/opensc-explorer.*
 %{_mandir}/man1/opensc-tool.1*
 %{_mandir}/man1/opensc-asn1.1*
-%{_mandir}/man1/opensc-notify.1*
 %{_mandir}/man1/piv-tool.1*
 %{_mandir}/man1/pkcs11-tool.1*
 %{_mandir}/man1/pkcs15-crypt.1*
@@ -198,6 +206,11 @@ desktop-file-validate %{buildroot}/%{_datadir}/applications/org.opensc.notify.de
 %{_mandir}/man1/dnie-tool.1*
 %{_mandir}/man1/egk-tool.1*
 %{_mandir}/man5/pkcs15-profile.5*
+
+%files notify
+%{_bindir}/opensc-notify
+%{_datadir}/applications/org.opensc.notify.desktop
+%{_mandir}/man1/opensc-notify.1*
 
 
 %changelog
