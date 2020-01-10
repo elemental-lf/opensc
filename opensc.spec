@@ -3,7 +3,7 @@
 
 Name:           opensc
 Version:        0.20.0
-Release:        1.1%{?dist}
+Release:        2%{?dist}
 Summary:        Smart card library and applications
 
 License:        LGPLv2+
@@ -214,6 +214,10 @@ desktop-file-validate %{buildroot}/%{_datadir}/applications/org.opensc.notify.de
 
 
 %changelog
+* Fri Jan 10 2020 Jakub Jelen <jjelen@redhat.com> - 0.20.0-2
+- Cleanup spec file
+- Split notify support to separate subpackage
+
 * Thu Jan 02 2020 Jakub Jelen <jjelen@redhat.com> - 0.20.0-1
 - New upstream release (#1749357)
 - Fixes for various security issues identified by fuzzing (#1765223, #1765231, #1782520, #1782951, #1782956)
