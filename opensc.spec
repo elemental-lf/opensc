@@ -74,7 +74,7 @@ sed -i -e 's|"/lib /usr/lib\b|"/%{_lib} %{_libdir}|' configure # lib64 rpaths
   --disable-autostart-items \
   --disable-assert \
   --enable-pcsc \
-  --enable-tests \
+  --enable-cmocka \
   --enable-sm \
   --with-pcsc-provider=libpcsclite.so.1
 make %{?_smp_mflags} V=1
