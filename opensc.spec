@@ -21,10 +21,8 @@ BuildRequires:  openssl-devel
 BuildRequires:  /usr/bin/xsltproc
 BuildRequires:  docbook-style-xsl
 BuildRequires:  autoconf automake libtool gcc
-BuildRequires:  desktop-file-utils
 BuildRequires:  bash-completion
 BuildRequires:  zlib-devel
-BuildRequires:  glib2-devel
 # For tests
 BuildRequires:  libcmocka-devel
 BuildRequires:  softhsm
@@ -36,12 +34,6 @@ Obsoletes:      opensc-devel < 0.12.0
 Obsoletes:      coolkey <= 1.1.0-36
 # The simclist is bundled in upstream
 Provides:       bundled(simclist) = 1.5
-Recommends:     opensc-notify
-
-%package notify
-Summary: Notification support for OpenSC
-Requires:       opensc = %{version}-%{release}
-Requires:       gnome-icon-theme
 
 %description
 OpenSC provides a set of libraries and utilities to work with smart cards. Its
@@ -51,10 +43,6 @@ digital signatures. OpenSC implements the PKCS#11 API so applications
 supporting this API (such as Mozilla Firefox and Thunderbird) can use it. On
 the card OpenSC implements the PKCS#15 standard and aims to be compatible with
 every software/card that does so, too.
-
-%description notify
-The opensc-notify subpackage provides support for desktop notification from
-OpenSC tools.
 
 
 %prep
@@ -82,7 +70,7 @@ sed -i -e 's/opensc.conf/opensc-%{_arch}.conf/g' src/libopensc/Makefile.in
 sed -i -e 's|"/lib /usr/lib\b|"/%{_lib} %{_libdir}|' configure # lib64 rpaths
 %configure  --disable-static \
   --disable-autostart-items \
-  --enable-notify \
+  --disable-notify \
   --disable-assert \
   --enable-pcsc \
   --enable-cmocka \
@@ -132,7 +120,11 @@ rm -rf %{buildroot}%{_datadir}/bash-completion/
 rm -rf %{buildroot}%{_bindir}/npa-tool
 rm -rf %{buildroot}%{_mandir}/man1/npa-tool.1*
 
-desktop-file-validate %{buildroot}/%{_datadir}/applications/org.opensc.notify.desktop
+# Remove the notification files
+rm %{buildroot}%{_bindir}/opensc-notify
+rm %{buildroot}%{_datadir}/applications/org.opensc.notify.desktop
+rm %{buildroot}%{_mandir}/man1/opensc-notify.1*
+
 
 %post -p /sbin/ldconfig
 %postun -p /sbin/ldconfig
@@ -206,11 +198,6 @@ desktop-file-validate %{buildroot}/%{_datadir}/applications/org.opensc.notify.de
 %{_mandir}/man1/dnie-tool.1*
 %{_mandir}/man1/egk-tool.1*
 %{_mandir}/man5/pkcs15-profile.5*
-
-%files notify
-%{_bindir}/opensc-notify
-%{_datadir}/applications/org.opensc.notify.desktop
-%{_mandir}/man1/opensc-notify.1*
 
 
 %changelog
