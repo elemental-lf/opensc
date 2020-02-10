@@ -14,6 +14,7 @@ Source1:        opensc.module
 # https://github.com/OpenSC/OpenSC/blob/master/tests/common.sh
 Source2:        common.sh
 Patch1:         opensc-0.19.0-pinpad.patch
+Patch2:         opensc-0.20.0-no-common.patch
 
 BuildRequires:  pcsc-lite-devel
 BuildRequires:  readline-devel
@@ -48,6 +49,7 @@ every software/card that does so, too.
 %prep
 %setup -q
 %patch1 -p1 -b .pinpad
+%patch2 -p1 -b .no-common
 
 cp %{SOURCE2} tests/
 # The test-pkcs11-tool-allowed-mechanisms already works in Fedora
