@@ -115,16 +115,9 @@ function card_setup() {
                 rlRun "modutil -force -add 'SoftHSM PKCS#11' -dbdir sql:$NSSDB -libfile $P11LIB"
             fi
 
-            # Download and Install vsmartcard
-            rlRun "git clone https://github.com/frankmorgner/vsmartcard.git"
-            rlRun "pushd vsmartcard/virtualsmartcard"
-            rlRun "autoreconf -vis && ./configure && make -j4 && make install"
-            rlRun "popd"
-
-            # Download and Install virt_cacard
-            rlRun "git clone https://github.com/PL4typus/virt_cacard.git"
-            rlRun "pushd virt_cacard && ./autogen.sh && ./configure && make"
-            rlRun "popd"
+            # Download and Install vsmartcard and virt_cacard
+            rlRun "yes | dnf copr enable jjelen/vsmartcard"
+            rlRun "dnf install -y virt_cacard virtualsmartcard"
 
             # Install the temporary SELinux policy
             rlRun "semodule -i virtcacard.cil"
@@ -134,7 +127,7 @@ function card_setup() {
 
             # Start virtcacard
             #rlRun "G_MESSAGES_DEBUG=libcacard LIBCACARD_DEBUG=1 ./virt_cacard/virt_cacard 2> virt_cacard.debug &"
-            rlRun "./virt_cacard/virt_cacard 2> virt_cacard.debug &"
+            rlRun "/usr/bin/virt_cacard 2> virt_cacard.debug &"
             rlRun "sleep 5"
 
             # We will use OpenSC directly from here

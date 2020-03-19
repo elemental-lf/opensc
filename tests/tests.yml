@@ -22,15 +22,8 @@
     - opencryptoki-libs # opencryptoki
     - opencryptoki
     - opencryptoki-swtok
-    - git               # to download vsmartcard and virt_cacard projects
-    - libcacard-devel   # Build requires for virt_cacard and vsmartcard
-    - autoconf
-    - autoconf-archive
-    - automake
-    - libtool
+    - libcacard
     - softhsm
-    - help2man
-    - pcsc-lite-devel
     - nss-tools         # Handling NSS DB
     - policycoreutils   # Loading custom selinux modules
 
