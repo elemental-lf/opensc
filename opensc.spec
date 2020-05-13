@@ -17,6 +17,8 @@ Patch1:         opensc-0.19.0-pinpad.patch
 Patch2:         opensc-0.20.0-no-common.patch
 # https://github.com/OpenSC/OpenSC/pull/1987
 Patch3:         opensc-0.20.0-cardos.patch
+# https://github.com/OpenSC/OpenSC/commit/8551e84d
+Patch4:         opensc-0.20.0-lto-build.patch
 
 BuildRequires:  pcsc-lite-devel
 BuildRequires:  readline-devel
@@ -53,6 +55,7 @@ every software/card that does so, too.
 %patch1 -p1 -b .pinpad
 %patch2 -p1 -b .no-common
 %patch3 -p1 -b .cardos
+%patch4 -p1 -b .lto-build
 
 cp %{SOURCE2} tests/
 # The test-pkcs11-tool-allowed-mechanisms already works in Fedora
