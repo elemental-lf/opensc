@@ -3,7 +3,7 @@
 
 Name:           opensc
 Version:        0.20.0
-Release:        5%{?dist}
+Release:        6%{?dist}
 Summary:        Smart card library and applications
 
 License:        LGPLv2+
@@ -206,6 +206,9 @@ rm %{buildroot}%{_mandir}/man1/opensc-notify.1*
 
 
 %changelog
+* Wed May 13 2020 Jakub Jelen <jjelen@redhat.com> - 0.20.0-6
+- Unbreak CardOS 5.x support (#1830528)
+
 * Mon Feb 10 2020 Jakub Jelen <jjelen@redhat.com> - 0.20.0-5
 - Unbreak build on gcc10 with -fno-common (#1799836)
 
