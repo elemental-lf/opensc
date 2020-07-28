@@ -3,7 +3,7 @@
 
 Name:           opensc
 Version:        0.20.0
-Release:        6%{?dist}
+Release:        7%{?dist}
 Summary:        Smart card library and applications
 
 License:        LGPLv2+
@@ -209,6 +209,9 @@ rm %{buildroot}%{_mandir}/man1/opensc-notify.1*
 
 
 %changelog
+* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.20.0-7
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
+
 * Wed May 13 2020 Jakub Jelen <jjelen@redhat.com> - 0.20.0-6
 - Unbreak CardOS 5.x support (#1830528)
 
