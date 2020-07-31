@@ -30,7 +30,9 @@ BuildRequires:  bash-completion
 BuildRequires:  zlib-devel
 # For tests
 BuildRequires:  libcmocka-devel
+%if ! 0%{?rhel}
 BuildRequires:  softhsm
+%endif
 BuildRequires:  openssl
 Requires:       pcsc-lite-libs%{?_isa}
 Requires:       pcsc-lite
@@ -84,7 +86,7 @@ sed -i -e 's|"/lib /usr/lib\b|"/%{_lib} %{_libdir}|' configure # lib64 rpaths
   --enable-cmocka \
   --enable-sm \
   --with-pcsc-provider=libpcsclite.so.1
-make %{?_smp_mflags} V=1
+%make_build
 
 
 %check
@@ -92,7 +94,7 @@ make check
 
 
 %install
-make install DESTDIR=$RPM_BUILD_ROOT
+%make_install
 install -Dpm 644 %{SOURCE1} $RPM_BUILD_ROOT%{_datadir}/p11-kit/modules/opensc.module
 
 %ifarch %{ix86}
