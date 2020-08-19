@@ -3,7 +3,7 @@
 
 Name:           opensc
 Version:        0.20.0
-Release:        7%{?dist}
+Release:        8%{?dist}
 Summary:        Smart card library and applications
 
 License:        LGPLv2+
@@ -136,9 +136,6 @@ rm %{buildroot}%{_datadir}/applications/org.opensc.notify.desktop
 rm %{buildroot}%{_mandir}/man1/opensc-notify.1*
 
 
-%post -p /sbin/ldconfig
-%postun -p /sbin/ldconfig
-
 %files
 %doc COPYING NEWS README*
 
@@ -211,6 +208,9 @@ rm %{buildroot}%{_mandir}/man1/opensc-notify.1*
 
 
 %changelog
+* Wed Aug 19 2020 Igor Raits <ignatenkobrain@fedoraproject.org> - 0.20.0-8
+- Drop useless ldconfig scriptlets
+
 * Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.20.0-7
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
 
