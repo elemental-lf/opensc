@@ -3,7 +3,7 @@
 
 Name:           opensc
 Version:        0.20.0
-Release:        8%{?dist}
+Release:        9%{?dist}
 Summary:        Smart card library and applications
 
 License:        LGPLv2+
@@ -19,6 +19,7 @@ Patch2:         opensc-0.20.0-no-common.patch
 Patch3:         opensc-0.20.0-cardos.patch
 # https://github.com/OpenSC/OpenSC/commit/8551e84d
 Patch4:         opensc-0.20.0-lto-build.patch
+Patch5:         %{name}-gcc11.patch
 
 BuildRequires:  pcsc-lite-devel
 BuildRequires:  readline-devel
@@ -58,6 +59,7 @@ every software/card that does so, too.
 %patch2 -p1 -b .no-common
 %patch3 -p1 -b .cardos
 %patch4 -p1 -b .lto-build
+%patch5 -p1 -b .gcc11
 
 cp %{SOURCE2} tests/
 # The test-pkcs11-tool-allowed-mechanisms already works in Fedora
@@ -208,6 +210,9 @@ rm %{buildroot}%{_mandir}/man1/opensc-notify.1*
 
 
 %changelog
+* Fri Oct 30 2020 Jeff Law <law@redhat.com> - 0.20.0-9
+- Fix potentially uninitialized array reference exposed by gcc-11
+
 * Wed Aug 19 2020 Igor Raits <ignatenkobrain@fedoraproject.org> - 0.20.0-8
 - Drop useless ldconfig scriptlets
 
