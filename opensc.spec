@@ -2,8 +2,8 @@
 %define nssdb %{_sysconfdir}/pki/nssdb
 
 Name:           opensc
-Version:        0.20.0
-Release:        9%{?dist}
+Version:        0.21.0
+Release:        1%{?dist}
 Summary:        Smart card library and applications
 
 License:        LGPLv2+
@@ -14,11 +14,6 @@ Source1:        opensc.module
 # https://github.com/OpenSC/OpenSC/blob/master/tests/common.sh
 Source2:        common.sh
 Patch1:         opensc-0.19.0-pinpad.patch
-Patch2:         opensc-0.20.0-no-common.patch
-# https://github.com/OpenSC/OpenSC/pull/1987
-Patch3:         opensc-0.20.0-cardos.patch
-# https://github.com/OpenSC/OpenSC/commit/8551e84d
-Patch4:         opensc-0.20.0-lto-build.patch
 Patch5:         %{name}-gcc11.patch
 
 BuildRequires:  pcsc-lite-devel
@@ -56,9 +51,6 @@ every software/card that does so, too.
 %prep
 %setup -q
 %patch1 -p1 -b .pinpad
-%patch2 -p1 -b .no-common
-%patch3 -p1 -b .cardos
-%patch4 -p1 -b .lto-build
 %patch5 -p1 -b .gcc11
 
 cp %{SOURCE2} tests/
@@ -132,6 +124,10 @@ rm -rf %{buildroot}%{_datadir}/bash-completion/
 rm -rf %{buildroot}%{_bindir}/npa-tool
 rm -rf %{buildroot}%{_mandir}/man1/npa-tool.1*
 
+# the pkcs11-register is not applicable to Fedora/RHEL where we use p11-kit
+rm -rf %{buildroot}%{_bindir}/pkcs11-register
+rm -rf %{buildroot}%{_mandir}/man1/pkcs11-register.1*
+
 # Remove the notification files
 rm %{buildroot}%{_bindir}/opensc-notify
 rm %{buildroot}%{_datadir}/applications/org.opensc.notify.desktop
@@ -177,7 +173,6 @@ rm %{buildroot}%{_mandir}/man1/opensc-notify.1*
 %{_bindir}/westcos-tool
 %{_bindir}/egk-tool
 %{_bindir}/goid-tool
-%{_bindir}/pkcs11-register
 %{_libdir}/lib*.so.*
 %{_libdir}/opensc-pkcs11.so
 %{_libdir}/pkcs11-spy.so
@@ -191,6 +186,7 @@ rm %{buildroot}%{_mandir}/man1/opensc-notify.1*
 %{_mandir}/man1/cryptoflex-tool.1*
 %{_mandir}/man1/eidenv.1*
 %{_mandir}/man1/gids-tool.1*
+%{_mandir}/man1/goid-tool.1*
 %{_mandir}/man1/iasecc-tool.1*
 %{_mandir}/man1/netkey-tool.1*
 %{_mandir}/man1/openpgp-tool.1*
@@ -210,6 +206,9 @@ rm %{buildroot}%{_mandir}/man1/opensc-notify.1*
 
 
 %changelog
+* Tue Nov 24 2020 Jakub Jelen <jjelen@redhat.com> - 0.21.0-1
+- New upstream release (#1884886)
+
 * Fri Oct 30 2020 Jeff Law <law@redhat.com> - 0.20.0-9
 - Fix potentially uninitialized array reference exposed by gcc-11
 
