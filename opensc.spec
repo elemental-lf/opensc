@@ -16,6 +16,7 @@ Source2:        common.sh
 Patch1:         opensc-0.19.0-pinpad.patch
 Patch5:         %{name}-gcc11.patch
 
+BuildRequires: make
 BuildRequires:  pcsc-lite-devel
 BuildRequires:  readline-devel
 BuildRequires:  openssl-devel
