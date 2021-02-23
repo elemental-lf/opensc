@@ -14,6 +14,7 @@ Source1:        opensc.module
 # https://github.com/OpenSC/OpenSC/blob/master/tests/common.sh
 Source2:        common.sh
 Patch1:         opensc-0.19.0-pinpad.patch
+# https://github.com/OpenSC/OpenSC/pull/2241/
 Patch5:         %{name}-gcc11.patch
 
 BuildRequires: make
