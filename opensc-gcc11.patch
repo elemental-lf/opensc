@@ -154,3 +154,174 @@ index 18803b83..c65ec3ed 100644
  
  	return rv;
  }
+diff --git a/src/libopensc/pkcs15-westcos.c b/src/libopensc/pkcs15-westcos.c
+index 885abd37..9277061b 100644
+--- a/src/libopensc/pkcs15-westcos.c
++++ b/src/libopensc/pkcs15-westcos.c
+@@ -124,18 +124,17 @@ static int sc_pkcs15emu_westcos_init(sc_pkcs15_card_t * p15card)
+ 		struct sc_pkcs15_pubkey_info pubkey_info;
+ 		struct sc_pkcs15_object pubkey_obj;
+ 		struct sc_pkcs15_pubkey *pkey = NULL;
++		sc_pkcs15_cert_t *cert = NULL;
++
+ 		memset(&cert_info, 0, sizeof(cert_info));
+ 		memset(&cert_obj, 0, sizeof(cert_obj));
+ 		cert_info.id.len = 1;
+ 		cert_info.id.value[0] = 0x45;
+ 		cert_info.authority = 0;
+ 		cert_info.path = path;
+-		r = sc_pkcs15_read_certificate(p15card, &cert_info,
+-					       (sc_pkcs15_cert_t
+-						**) (&cert_obj.data));
++		r = sc_pkcs15_read_certificate(p15card, &cert_info, &cert);
++		cert_obj.data = (void *) cert;
+ 		if (!r) {
+-			sc_pkcs15_cert_t *cert =
+-			    (sc_pkcs15_cert_t *) (cert_obj.data);
+ 			strlcpy(cert_obj.label, "User certificate",
+ 				sizeof(cert_obj.label));
+ 			cert_obj.flags = SC_PKCS15_CO_FLAG_MODIFIABLE;
+diff --git a/src/pkcs11/framework-pkcs15.c b/src/pkcs11/framework-pkcs15.c
+index c65ec3ed..a5e6ff1f 100644
+--- a/src/pkcs11/framework-pkcs15.c
++++ b/src/pkcs11/framework-pkcs15.c
+@@ -673,6 +673,7 @@ __pkcs15_create_cert_object(struct pkcs15_fw_data *fw_data, struct sc_pkcs15_obj
+ 	struct pkcs15_any_object *any_object = NULL;
+ 	struct pkcs15_cert_object *object = NULL;
+ 	struct pkcs15_pubkey_object *obj2 = NULL;
++	struct pkcs15_any_object *any_object2 = NULL;
+ 	int rv;
+ 
+ 	p15_info = (struct sc_pkcs15_cert_info *) cert->data;
+@@ -700,10 +701,11 @@ __pkcs15_create_cert_object(struct pkcs15_fw_data *fw_data, struct sc_pkcs15_obj
+ 	object->cert_data = p15_cert;
+ 
+ 	/* Corresponding public key */
+-	rv = public_key_created(fw_data, &p15_info->id, (struct pkcs15_any_object **) &obj2);
++	rv = public_key_created(fw_data, &p15_info->id, &any_object2);
+ 	if (rv != SC_SUCCESS)
+-		rv = __pkcs15_create_object(fw_data, (struct pkcs15_any_object **) &obj2,
++		rv = __pkcs15_create_object(fw_data, &any_object2,
+ 				NULL, &pkcs15_pubkey_ops, sizeof(struct pkcs15_pubkey_object));
++	obj2 = (struct pkcs15_pubkey_object *) any_object2;
+ 	if (rv < 0)
+ 		return rv;
+ 
+@@ -2975,14 +2977,17 @@ set_gost3410_params(struct sc_pkcs15init_prkeyargs *prkey_args,
+ 	const CK_BYTE * gost_params_encoded_oid_from_template;
+ 	const CK_BYTE * gost_hash_params_encoded_oid_from_template;
+ 	size_t len, param_index, hash_index;
++	void *ptr = NULL;
+ 	CK_RV rv;
+ 
+ 	/* If template has CKA_GOSTR3410_PARAMS attribute, set param_index to
+ 	 * corresponding item's index in gostr3410_param_oid[] */
+-	if (pPrivTpl && ulPrivCnt)
+-		rv = attr_find_ptr2(pPubTpl, ulPubCnt, pPrivTpl, ulPrivCnt, CKA_GOSTR3410_PARAMS, (void **)&gost_params_encoded_oid_from_template, &len);
+-	else
+-		rv = attr_find_ptr(pPubTpl, ulPubCnt, CKA_GOSTR3410_PARAMS, (void **)&gost_params_encoded_oid_from_template, &len);
++	if (pPrivTpl && ulPrivCnt) {
++		rv = attr_find_ptr2(pPubTpl, ulPubCnt, pPrivTpl, ulPrivCnt, CKA_GOSTR3410_PARAMS, &ptr, &len);
++	} else {
++		rv = attr_find_ptr(pPubTpl, ulPubCnt, CKA_GOSTR3410_PARAMS, &ptr, &len);
++	}
++	gost_params_encoded_oid_from_template = (const CK_BYTE *) ptr;
+ 
+ 	if (rv == CKR_OK) {
+ 		size_t nn = sizeof(gostr3410_param_oid)/sizeof(gostr3410_param_oid[0]);
+@@ -3005,10 +3010,12 @@ set_gost3410_params(struct sc_pkcs15init_prkeyargs *prkey_args,
+ 
+ 	/* If template has CKA_GOSTR3411_PARAMS attribute, set hash_index to
+ 	 * corresponding item's index in gostr3410_hash_param_oid[] */
+-	if (pPrivTpl && ulPrivCnt)
+-		rv = attr_find_ptr2(pPubTpl, ulPubCnt, pPrivTpl, ulPrivCnt, CKA_GOSTR3411_PARAMS, (void **)&gost_hash_params_encoded_oid_from_template, &len);
+-	else
+-		rv = attr_find_ptr(pPubTpl, ulPubCnt, CKA_GOSTR3411_PARAMS, (void **)&gost_hash_params_encoded_oid_from_template, &len);
++	if (pPrivTpl && ulPrivCnt) {
++		rv = attr_find_ptr2(pPubTpl, ulPubCnt, pPrivTpl, ulPrivCnt, CKA_GOSTR3411_PARAMS, &ptr, &len);
++	} else {
++		rv = attr_find_ptr(pPubTpl, ulPubCnt, CKA_GOSTR3411_PARAMS, &ptr, &len);
++	}
++	gost_hash_params_encoded_oid_from_template = ptr;
+ 
+ 	if (rv == CKR_OK) {
+ 		size_t nn = sizeof(gostr3410_hash_param_oid)/sizeof(gostr3410_hash_param_oid[0]);
+@@ -3155,9 +3162,11 @@ pkcs15_gen_keypair(struct sc_pkcs11_slot *slot, CK_MECHANISM_PTR pMechanism,
+ 	}
+ 	else if (keytype == CKK_EC)   {
+ 		struct sc_lv_data *der = &keygen_args.prkey_args.key.u.ec.params.der;
++		void *ptr = NULL;
+ 
+ 		der->len = sizeof(struct sc_object_id);
+-		rv = attr_find_and_allocate_ptr(pPubTpl, ulPubCnt, CKA_EC_PARAMS, (void **)&der->value, &der->len);
++		rv = attr_find_and_allocate_ptr(pPubTpl, ulPubCnt, CKA_EC_PARAMS, &ptr, &der->len);
++		der->value = (unsigned char *) ptr;
+ 		if (rv != CKR_OK)   {
+ 			sc_unlock(p11card->card);
+ 			return sc_to_cryptoki_error(rc, "C_GenerateKeyPair");
+diff --git a/src/pkcs11/pkcs11-object.c b/src/pkcs11/pkcs11-object.c
+index 8fb3e5af..a6c91ce1 100644
+--- a/src/pkcs11/pkcs11-object.c
++++ b/src/pkcs11/pkcs11-object.c
+@@ -347,6 +347,7 @@ C_FindObjectsInit(CK_SESSION_HANDLE hSession,	/* the session's handle */
+ 	struct sc_pkcs11_object *object;
+ 	struct sc_pkcs11_find_operation *operation;
+ 	struct sc_pkcs11_slot *slot;
++	struct sc_pkcs11_operation *op = NULL;
+ 
+ 	if (pTemplate == NULL_PTR && ulCount > 0)
+ 		return CKR_ARGUMENTS_BAD;
+@@ -363,7 +364,8 @@ C_FindObjectsInit(CK_SESSION_HANDLE hSession,	/* the session's handle */
+ 	dump_template(SC_LOG_DEBUG_NORMAL, "C_FindObjectsInit()", pTemplate, ulCount);
+ 
+ 	rv = session_start_operation(session, SC_PKCS11_OPERATION_FIND,
+-				     &find_mechanism, (struct sc_pkcs11_operation **)&operation);
++				     &find_mechanism, &op);
++	operation = (struct sc_pkcs11_find_operation *) op;
+ 	if (rv != CKR_OK)
+ 		goto out;
+ 
+diff --git a/src/pkcs11/pkcs11-object.c b/src/pkcs11/pkcs11-object.c
+index a6c91ce1..603a6713 100644
+--- a/src/pkcs11/pkcs11-object.c
++++ b/src/pkcs11/pkcs11-object.c
+@@ -453,6 +453,7 @@ C_FindObjects(CK_SESSION_HANDLE hSession,	/* the session's handle */
+ 	CK_ULONG to_return;
+ 	struct sc_pkcs11_session *session;
+ 	struct sc_pkcs11_find_operation *operation;
++	struct sc_pkcs11_operation *op = NULL;
+ 
+ 	if (phObject == NULL_PTR || ulMaxObjectCount == 0 || pulObjectCount == NULL_PTR)
+ 		return CKR_ARGUMENTS_BAD;
+@@ -465,7 +466,8 @@ C_FindObjects(CK_SESSION_HANDLE hSession,	/* the session's handle */
+ 	if (rv != CKR_OK)
+ 		goto out;
+ 
+-	rv = session_get_operation(session, SC_PKCS11_OPERATION_FIND, (sc_pkcs11_operation_t **) & operation);
++	rv = session_get_operation(session, SC_PKCS11_OPERATION_FIND, &op);
++	operation = (struct sc_pkcs11_find_operation *) op;
+ 	if (rv != CKR_OK)
+ 		goto out;
+ 
+diff --git a/src/tools/pkcs11-register.c b/src/tools/pkcs11-register.c
+index 007ff1ae..873ebcba 100644
+--- a/src/tools/pkcs11-register.c
++++ b/src/tools/pkcs11-register.c
+@@ -123,13 +123,15 @@ add_module_pkcs11_txt(const char *profile_dir,
+ 	char pkcs11_txt_path[PATH_MAX];
+ 	char *pkcs11_txt = NULL;
+ 	size_t pkcs11_txt_len = 0;
++	unsigned char *txt = NULL;
++
+ 	if (!profile_dir
+ 			|| snprintf(pkcs11_txt_path, sizeof pkcs11_txt_path,
+ 				"%s%c%s", profile_dir, path_sep, "pkcs11.txt") < 0
+-			|| !fread_to_eof(pkcs11_txt_path,
+-				(unsigned char **) &pkcs11_txt, &pkcs11_txt_len)) {
++			|| !fread_to_eof(pkcs11_txt_path, &txt, &pkcs11_txt_len)) {
+ 		goto err;
+ 	}
++	pkcs11_txt = (char *)txt;
+ 	char *p = realloc(pkcs11_txt, pkcs11_txt_len+1);
+ 	if (!p)
+ 		goto err;
