@@ -3,7 +3,7 @@
 
 Name:           opensc
 Version:        0.21.0
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        Smart card library and applications
 
 License:        LGPLv2+
@@ -210,6 +210,9 @@ rm %{buildroot}%{_mandir}/man1/opensc-notify.1*
 
 
 %changelog
+* Thu Feb 25 2021 Jakub Jelen <jjelen@redhat.com> - 0.21.0-4
+- Couple of more issues of strict aliasing (#1930652)
+
 * Tue Feb 23 2021 Jakub Jelen <jjelen@redhat.com> - 0.21.0-3
 - Unbreak with gcc11 (#1930652)
 
