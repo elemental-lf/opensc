@@ -3,7 +3,7 @@
 
 Name:           opensc
 Version:        0.21.0
-Release:        4%{?dist}
+Release:        5%{?dist}
 Summary:        Smart card library and applications
 
 License:        LGPLv2+
@@ -210,6 +210,9 @@ rm %{buildroot}%{_mandir}/man1/opensc-notify.1*
 
 
 %changelog
+* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.21.0-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+
 * Thu Feb 25 2021 Jakub Jelen <jjelen@redhat.com> - 0.21.0-4
 - Couple of more issues of strict aliasing (#1930652)
 
