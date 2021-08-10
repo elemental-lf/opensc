@@ -2,8 +2,8 @@
 %define nssdb %{_sysconfdir}/pki/nssdb
 
 Name:           opensc
-Version:        0.21.0
-Release:        5%{?dist}
+Version:        0.22.0
+Release:        1%{?dist}
 Summary:        Smart card library and applications
 
 License:        LGPLv2+
@@ -56,11 +56,6 @@ every software/card that does so, too.
 %patch5 -p1 -b .gcc11
 
 cp %{SOURCE2} tests/
-# The test-pkcs11-tool-allowed-mechanisms already works in Fedora
-sed -i -e '/XFAIL_TESTS/,$ {
-  s/XFAIL_TESTS.*/XFAIL_TESTS=test-pkcs11-tool-test.sh/
-  q
-}' tests/Makefile.am
 
 cp -p src/pkcs15init/README ./README.pkcs15init
 cp -p src/scconf/README.scconf .
@@ -210,6 +205,9 @@ rm %{buildroot}%{_mandir}/man1/opensc-notify.1*
 
 
 %changelog
+* Tue Aug 10 2021 Jakub Jelen <jjelen@redhat.com> - 0.22.0-1
+- New upstream release (#1955837)
+
 * Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.21.0-5
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
 
