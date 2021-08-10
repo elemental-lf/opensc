@@ -16,6 +16,7 @@ Source2:        common.sh
 Patch1:         opensc-0.19.0-pinpad.patch
 # https://github.com/OpenSC/OpenSC/pull/2241/
 Patch5:         %{name}-gcc11.patch
+Patch6:         %{name}-32b-arch.patch
 
 BuildRequires: make
 BuildRequires:  pcsc-lite-devel
@@ -54,6 +55,7 @@ every software/card that does so, too.
 %setup -q
 %patch1 -p1 -b .pinpad
 %patch5 -p1 -b .gcc11
+%patch6 -p1 -b .32b
 
 cp %{SOURCE2} tests/
 
