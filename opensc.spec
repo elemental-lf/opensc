@@ -10,9 +10,6 @@ License:        LGPLv2+
 URL:            https://github.com/OpenSC/OpenSC/wiki
 Source0:        https://github.com/OpenSC/OpenSC/releases/download/%{version}/%{name}-%{version}.tar.gz
 Source1:        opensc.module
-# Missing from release tarball
-# https://github.com/OpenSC/OpenSC/blob/master/tests/common.sh
-Source2:        common.sh
 Patch1:         opensc-0.19.0-pinpad.patch
 # https://github.com/OpenSC/OpenSC/pull/2241/
 Patch5:         %{name}-gcc11.patch
@@ -63,7 +60,6 @@ every software/card that does so, too.
 %patch8 -p1 -b .file-cache
 %patch9 -p1 -b .detect-empty
 
-cp %{SOURCE2} tests/
 
 cp -p src/pkcs15init/README ./README.pkcs15init
 cp -p src/scconf/README.scconf .
