@@ -3,7 +3,7 @@
 
 Name:           opensc
 Version:        0.22.0
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Smart card library and applications
 
 License:        LGPLv2+
@@ -215,6 +215,12 @@ rm %{buildroot}%{_mandir}/man1/opensc-notify.1*
 
 
 %changelog
+* Mon Oct 11 2021 Jakub Jelen <jjelen@redhat.com> - 0.22.0-3
++ Use file caching by default
+- Detect empty cards in ESC
+- Build with OpenSSL 3.0
+- Remove unused source file
+
 * Tue Sep 14 2021 Sahana Prasad <sahana@redhat.com> - 0.22.0-2
 - Rebuilt with OpenSSL 3.0.0
 
