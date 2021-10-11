@@ -74,7 +74,7 @@ sed -i -e 's/opensc.conf/opensc-%{_arch}.conf/g' src/libopensc/Makefile.in
 %endif
 sed -i -e 's|"/lib /usr/lib\b|"/%{_lib} %{_libdir}|' configure # lib64 rpaths
 %set_build_flags
-CFLAGS="$CFLAGS -Wstrict-aliasing=2"
+CFLAGS="$CFLAGS -Wstrict-aliasing=2 -Wno-deprecated-declarations"
 %configure  --disable-static \
   --disable-autostart-items \
   --disable-notify \
