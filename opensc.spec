@@ -60,6 +60,12 @@ every software/card that does so, too.
 %patch8 -p1 -b .file-cache
 %patch9 -p1 -b .detect-empty
 
+# The test-pkcs11-tool-allowed-mechanisms already works in Fedora
+sed -i -e '/XFAIL_TESTS/,$ {
+  s/XFAIL_TESTS.*/XFAIL_TESTS=test-pkcs11-tool-test-threads.sh/
+  q
+}' tests/Makefile.am
+
 
 cp -p src/pkcs15init/README ./README.pkcs15init
 cp -p src/scconf/README.scconf .
