@@ -3,7 +3,7 @@
 
 Name:           opensc
 Version:        0.22.0
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        Smart card library and applications
 
 License:        LGPLv2+
@@ -215,6 +215,9 @@ rm %{buildroot}%{_mandir}/man1/opensc-notify.1*
 
 
 %changelog
+* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.22.0-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
 * Mon Oct 11 2021 Jakub Jelen <jjelen@redhat.com> - 0.22.0-3
 + Use file caching by default
 - Detect empty cards in ESC
