@@ -18,6 +18,8 @@ Patch6:         %{name}-32b-arch.patch
 Patch8:         %{name}-%{version}-file-cache.patch
 # https://github.com/OpenSC/OpenSC/pull/2414 (#2007029)
 Patch9:         %{name}-%{version}-detect-empty.patch
+# https://github.com/OpenSC/OpenSC/pull/2512 (#2046792)
+Patch10:        %{name}-%{version}-realloc-pointer.patch
 
 BuildRequires: make
 BuildRequires:  pcsc-lite-devel
@@ -59,6 +61,7 @@ every software/card that does so, too.
 %patch6 -p1 -b .32b
 %patch8 -p1 -b .file-cache
 %patch9 -p1 -b .detect-empty
+%patch10 -p1 -b .realloc-pointer
 
 # The test-pkcs11-tool-allowed-mechanisms already works in Fedora
 sed -i -e '/XFAIL_TESTS/,$ {
