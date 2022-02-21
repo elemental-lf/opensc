@@ -1,0 +1,27 @@
+From bd8269ed0afd24da2fc0c5350640f66f0641d4d4 Mon Sep 17 00:00:00 2001
+From: Veronika Hanulikova <vhanulik@redhat.com>
+Date: Mon, 21 Feb 2022 14:02:32 +0100
+Subject: [PATCH] base64: Initialize variables
+
+---
+ src/libopensc/base64.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/libopensc/base64.c b/src/libopensc/base64.c
+index 4fe79897..1aa1c941 100644
+--- a/src/libopensc/base64.c
++++ b/src/libopensc/base64.c
+@@ -150,8 +150,8 @@ int sc_base64_encode(const u8 *in, size_t len, u8 *out, size_t outlen, size_t li
+ 
+ int sc_base64_decode(const char *in, u8 *out, size_t outlen)
+ {
+-	int len = 0, r, skip;
+-	unsigned int i;
++	int len = 0, r = 0, skip = 0;
++	unsigned int i = 0;
+ 
+ 	while ((r = from_base64(in, &i, &skip)) > 0) {
+ 		int finished = 0, s = 16;
+-- 
+2.27.0
+
