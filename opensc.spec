@@ -3,7 +3,7 @@
 
 Name:           opensc
 Version:        0.22.0
-Release:        4%{?dist}
+Release:        5%{?dist}
 Summary:        Smart card library and applications
 
 License:        LGPLv2+
@@ -220,6 +220,10 @@ rm %{buildroot}%{_mandir}/man1/opensc-notify.1*
 
 
 %changelog
+* Fri Feb 11 2022 Veronika Hanulikova <vhanulik@redhat.com> - 0.22.0-5
+- Fix usage of pointer after realloc
+- Initialize maybe-uninitialized variables
+
 * Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.22.0-4
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
 
