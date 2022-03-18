@@ -1,6 +1,3 @@
-%define opensc_module "OpenSC PKCS #11 Module"
-%define nssdb %{_sysconfdir}/pki/nssdb
-
 Name:           opensc
 Version:        0.22.0
 Release:        5%{?dist}
@@ -22,7 +19,7 @@ Patch9:         %{name}-%{version}-detect-empty.patch
 Patch10:        %{name}-%{version}-realloc-pointer.patch
 Patch11:        %{name}-%{version}-init-var.patch
 
-BuildRequires: make
+BuildRequires:  make
 BuildRequires:  pcsc-lite-devel
 BuildRequires:  readline-devel
 BuildRequires:  openssl-devel
