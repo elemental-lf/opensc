@@ -1,6 +1,6 @@
 Name:           opensc
 Version:        0.22.0
-Release:        5%{?dist}
+Release:        6%{?dist}
 Summary:        Smart card library and applications
 
 License:        LGPLv2+
@@ -220,6 +220,10 @@ rm %{buildroot}%{_mandir}/man1/opensc-notify.1*
 
 
 %changelog
+* Mon May 02 2022 Veronika Hanulikova <vhanulik@redhat.com> - 0.22.0-6
+- Remove unused definitions
+- Add support for itacns v1.1 (key length 2048)
+
 * Fri Feb 11 2022 Veronika Hanulikova <vhanulik@redhat.com> - 0.22.0-5
 - Fix usage of pointer after realloc
 - Initialize maybe-uninitialized variables
