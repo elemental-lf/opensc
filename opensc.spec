@@ -1,6 +1,6 @@
 Name:           opensc
 Version:        0.22.0
-Release:        6%{?dist}
+Release:        7%{?dist}
 Summary:        Smart card library and applications
 
 License:        LGPLv2+
@@ -220,6 +220,9 @@ rm %{buildroot}%{_mandir}/man1/opensc-notify.1*
 
 
 %changelog
+* Fri Jul 22 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.22.0-7
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
 * Mon May 02 2022 Veronika Hanulikova <vhanulik@redhat.com> - 0.22.0-6
 - Remove unused definitions
 - Add support for itacns v1.1 (key length 2048)
