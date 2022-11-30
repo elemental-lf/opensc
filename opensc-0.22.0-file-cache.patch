@@ -5,8 +5,8 @@ diff -up opensc-0.22.0/etc/opensc.conf.file-cache opensc-0.22.0/etc/opensc.conf
  	# debug = 3;
  	# debug_file = opensc-debug.txt;
  	framework pkcs15 {
--		# use_file_caching = true;
-+		use_file_caching = true;
+-		# use_file_caching = public;
++		use_file_caching = public;
  	}
  	reader_driver pcsc {
  		# The pinpad is disabled by default,
