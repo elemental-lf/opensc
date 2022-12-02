@@ -1,6 +1,6 @@
 Name:           opensc
 Version:        0.23.0
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Smart card library and applications
 
 License:        LGPLv2+
@@ -200,6 +200,10 @@ rm %{buildroot}%{_mandir}/man1/opensc-notify.1*
 
 
 %changelog
+* Fri Dec 02 2022 Jakub Jelen <jjelen@redhat.com> - 0.23.0-2
+- Remove needless configure option with hardcoded path to pcsclite
+- Fix import of RSA keys in pkcs11-tool (#2150010)
+
 * Wed Nov 30 2022 Jakub Jelen <jjelen@redhat.com> - 0.23.0-1
 - New upstream release (#2134076)
 
