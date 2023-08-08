@@ -12,6 +12,8 @@ Patch1:         opensc-0.19.0-pinpad.patch
 Patch8:         %{name}-0.22.0-file-cache.patch
 # https://github.com/OpenSC/OpenSC/pull/2656
 Patch9:         %{name}-0.23.0-pkcs11-tool-import.patch
+# https://github.com/OpenSC/OpenSC/pull/2787
+Patch10:        %{name}-0.23.0-cardos-buffer-overrun.patch
 
 BuildRequires:  make
 BuildRequires:  pcsc-lite-devel
@@ -52,6 +54,7 @@ every software/card that does so, too.
 %patch1 -p1 -b .pinpad
 %patch8 -p1 -b .file-cache
 %patch9 -p1 -b .pkcs11-tool-import
+%patch10 -p1 -b .cardos-buffer-overrun
 
 # The test-pkcs11-tool-allowed-mechanisms already works in Fedora
 sed -i -e '/XFAIL_TESTS/,$ {
