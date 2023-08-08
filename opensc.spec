@@ -1,6 +1,6 @@
 Name:           opensc
 Version:        0.23.0
-Release:        4%{?dist}
+Release:        5%{?dist}
 Summary:        Smart card library and applications
 
 License:        LGPL-2.1-or-later AND BSD 3-Clause
@@ -203,6 +203,9 @@ rm %{buildroot}%{_mandir}/man1/opensc-notify.1*
 
 
 %changelog
+* Tue Aug 08 2023 Veronika Hanulikova <vhanulik@redhat.com> - 0.23.0-5
+- Fix buffer overrun vulnerability (#2211088), fixes CVE-2023-2977
+
 * Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.23.0-4
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
 
