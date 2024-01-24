@@ -1,0 +1,345 @@
+From cd8fb80c0985a6cd9e3c28a1274b28de7b43e2dd Mon Sep 17 00:00:00 2001
+From: Yaakov Selkowitz <yselkowi@redhat.com>
+Date: Tue, 23 Jan 2024 19:45:48 -0500
+Subject: [PATCH] Fix GCC 14 calloc warnings
+
+For example:
+
+pkcs15-data.c: In function 'sc_pkcs15_read_data_object':
+pkcs15-data.c:64:37: error: 'calloc' sizes specified with 'sizeof' in the earlier argument and not in the later argument [-Werror=calloc-transposed-args]
+   64 |         data_object = calloc(sizeof(struct sc_pkcs15_data), 1);
+      |                                     ^~~~~~
+pkcs15-data.c:64:37: note: earlier argument should specify number of elements, later size of each element
+---
+ src/libopensc/card-authentic.c      |  2 +-
+ src/libopensc/card-openpgp.c        | 10 +++++-----
+ src/libopensc/pkcs15-algo.c         |  2 +-
+ src/libopensc/pkcs15-data.c         |  2 +-
+ src/libopensc/pkcs15-oberthur.c     |  4 ++--
+ src/libopensc/pkcs15-pubkey.c       |  2 +-
+ src/libopensc/pkcs15-sc-hsm.c       |  4 ++--
+ src/libopensc/pkcs15.c              |  2 +-
+ src/pkcs15init/pkcs15-lib.c         |  2 +-
+ src/pkcs15init/pkcs15-openpgp.c     |  8 ++++----
+ src/sm/sm-iso.c                     |  2 +-
+ src/tests/p11test/p11test_helpers.c |  2 +-
+ src/tools/goid-tool.c               |  6 +++---
+ src/tools/npa-tool.c                |  6 +++---
+ src/tools/openpgp-tool.c            |  4 ++--
+ src/tools/opensc-explorer.c         |  2 +-
+ src/tools/pkcs11-tool.c             |  2 +-
+ 17 files changed, 31 insertions(+), 31 deletions(-)
+
+diff --git a/src/libopensc/card-authentic.c b/src/libopensc/card-authentic.c
+index d72b1f30..64bf85ed 100644
+--- a/src/libopensc/card-authentic.c
++++ b/src/libopensc/card-authentic.c
+@@ -492,7 +492,7 @@ authentic_init(struct sc_card *card)
+ 		LOG_FUNC_RETURN(ctx, SC_ERROR_INVALID_CARD);
+ 
+ 	card->cla  = 0x00;
+-	card->drv_data = (struct authentic_private_data *) calloc(sizeof(struct authentic_private_data), 1);
++	card->drv_data = (struct authentic_private_data *) calloc(1, sizeof(struct authentic_private_data));
+ 	if (!card->drv_data)
+ 		LOG_FUNC_RETURN(ctx, SC_ERROR_OUT_OF_MEMORY);
+ 
+diff --git a/src/libopensc/card-openpgp.c b/src/libopensc/card-openpgp.c
+index d2bf2909..db693d2d 100644
+--- a/src/libopensc/card-openpgp.c
++++ b/src/libopensc/card-openpgp.c
+@@ -972,7 +972,7 @@ pgp_set_blob(pgp_blob_t *blob, const u8 *data, size_t len)
+ 	blob->status = 0;
+ 
+ 	if (len > 0) {
+-		void *tmp = calloc(len, 1);
++		void *tmp = calloc(1, len);
+ 
+ 		if (tmp == NULL)
+ 			return SC_ERROR_OUT_OF_MEMORY;
+@@ -2684,7 +2684,7 @@ pgp_calculate_and_store_fingerprint(sc_card_t *card, time_t ctime,
+ 	sc_log(card->ctx, "pk_packet_len is %"SC_FORMAT_LEN_SIZE_T"u", pk_packet_len);
+ 
+ 	fp_buffer_len = 3 + pk_packet_len;
+-	p = fp_buffer = calloc(fp_buffer_len, 1);
++	p = fp_buffer = calloc(1, fp_buffer_len);
+ 	if (p == NULL)
+ 		LOG_FUNC_RETURN(card->ctx, SC_ERROR_NOT_ENOUGH_MEMORY);
+ 
+@@ -3064,7 +3064,7 @@ pgp_gen_key(sc_card_t *card, sc_cardctl_openpgp_keygen_info_t *key_info)
+ 
+ 	/* buffer to receive response */
+ 	apdu.resplen = (resplen > 0) ? resplen : apdu_le;
+-	apdu.resp = calloc(apdu.resplen, 1);
++	apdu.resp = calloc(1, apdu.resplen);
+ 	if (apdu.resp == NULL) {
+ 		LOG_FUNC_RETURN(card->ctx, SC_ERROR_NOT_ENOUGH_MEMORY);
+ 	}
+@@ -3250,7 +3250,7 @@ pgp_build_extended_header_list(sc_card_t *card, sc_cardctl_openpgp_keystore_info
+ 		 * e.g. from '01 00 01' to '00 01 00 01' */
+ 		if (key_info->u.rsa.e_len < SC_OPENPGP_MAX_EXP_BITS) {
+ 			/* create new buffer */
+-			p = calloc(max_e_len_bytes, 1);
++			p = calloc(1, max_e_len_bytes);
+ 			if (!p)
+ 				LOG_FUNC_RETURN(ctx, SC_ERROR_NOT_ENOUGH_MEMORY);
+ 
+@@ -3324,7 +3324,7 @@ pgp_build_extended_header_list(sc_card_t *card, sc_cardctl_openpgp_keystore_info
+ 	/* data part's length for Extended Header list */
+ 	len = 2 + tlvlen_7f48 + tlvlen_5f48;
+ 	/* set data part content */
+-	data = calloc(len, 1);
++	data = calloc(1, len);
+ 	if (data == NULL)
+ 		LOG_TEST_GOTO_ERR(ctx, SC_ERROR_NOT_ENOUGH_MEMORY, "Not enough memory");
+ 
+diff --git a/src/libopensc/pkcs15-algo.c b/src/libopensc/pkcs15-algo.c
+index 32d31cb9..bd23552a 100644
+--- a/src/libopensc/pkcs15-algo.c
++++ b/src/libopensc/pkcs15-algo.c
+@@ -286,7 +286,7 @@ asn1_decode_ec_params(sc_context_t *ctx, void **paramp,
+ 	if (r < 0)
+ 		return r;
+ 
+-	ecp = calloc(sizeof(struct sc_ec_parameters), 1);
++	ecp = calloc(1, sizeof(struct sc_ec_parameters));
+ 	if (ecp == NULL)
+ 		return SC_ERROR_OUT_OF_MEMORY;
+ 
+diff --git a/src/libopensc/pkcs15-data.c b/src/libopensc/pkcs15-data.c
+index 63b6b900..f538a1ef 100644
+--- a/src/libopensc/pkcs15-data.c
++++ b/src/libopensc/pkcs15-data.c
+@@ -61,7 +61,7 @@ sc_pkcs15_read_data_object(struct sc_pkcs15_card *p15card,
+ 	r = sc_der_copy(&der, &info->data);
+ 	LOG_TEST_RET(ctx, r, "Cannot allocate memory for der value");
+ 
+-	data_object = calloc(sizeof(struct sc_pkcs15_data), 1);
++	data_object = calloc(1, sizeof(struct sc_pkcs15_data));
+ 	if (!data_object)   {
+ 		free(der.value);
+ 		LOG_TEST_RET(ctx, SC_ERROR_OUT_OF_MEMORY, "Cannot allocate memory for data object");
+diff --git a/src/libopensc/pkcs15-oberthur.c b/src/libopensc/pkcs15-oberthur.c
+index ab2aacb0..a85c982a 100644
+--- a/src/libopensc/pkcs15-oberthur.c
++++ b/src/libopensc/pkcs15-oberthur.c
+@@ -262,7 +262,7 @@ sc_oberthur_read_file(struct sc_pkcs15_card *p15card, const char *in_path,
+ 	else
+ 		sz = (file->record_length + 2) * file->record_count;
+ 
+-	*out = calloc(sz, 1);
++	*out = calloc(1, sz);
+ 	if (*out == NULL) {
+ 		sc_file_free(file);
+ 		LOG_TEST_RET(ctx, SC_ERROR_OUT_OF_MEMORY, "Cannot read oberthur file");
+@@ -419,7 +419,7 @@ sc_oberthur_parse_containers (struct sc_pkcs15_card *p15card,
+ 		if (*(buff + offs) != 'R')
+ 			return SC_ERROR_INVALID_DATA;
+ 
+-		cont = (struct container *)calloc(sizeof(struct container), 1);
++		cont = (struct container *)calloc(1, sizeof(struct container));
+ 		if (!cont)
+ 			return SC_ERROR_OUT_OF_MEMORY;
+ 
+diff --git a/src/libopensc/pkcs15-pubkey.c b/src/libopensc/pkcs15-pubkey.c
+index 49b51496..888fab3b 100644
+--- a/src/libopensc/pkcs15-pubkey.c
++++ b/src/libopensc/pkcs15-pubkey.c
+@@ -808,7 +808,7 @@ sc_pkcs15_encode_pubkey_as_spki(sc_context_t *ctx, struct sc_pkcs15_pubkey *pubk
+ 			if (!ec_params)
+ 				LOG_FUNC_RETURN(ctx, SC_ERROR_OUT_OF_MEMORY);
+ 			ec_params->type = 1;
+-			ec_params->der.value = calloc(pubkey->u.ec.params.der.len, 1);
++			ec_params->der.value = calloc(1, pubkey->u.ec.params.der.len);
+ 			if (!ec_params->der.value) {
+ 				free(ec_params);
+ 				LOG_FUNC_RETURN(ctx, SC_ERROR_OUT_OF_MEMORY);
+diff --git a/src/libopensc/pkcs15-sc-hsm.c b/src/libopensc/pkcs15-sc-hsm.c
+index 10e0548d..2279676f 100644
+--- a/src/libopensc/pkcs15-sc-hsm.c
++++ b/src/libopensc/pkcs15-sc-hsm.c
+@@ -894,7 +894,7 @@ static int sc_pkcs15emu_sc_hsm_get_ec_public_key(struct sc_context *ctx, sc_cvc_
+ 		return SC_ERROR_OUT_OF_MEMORY;
+ 
+ 	ecp->der.len = oid->len + 2;
+-	ecp->der.value = calloc(ecp->der.len, 1);
++	ecp->der.value = calloc(1, ecp->der.len);
+ 	if (!ecp->der.value) {
+ 		free(ecp);
+ 		return SC_ERROR_OUT_OF_MEMORY;
+@@ -1374,7 +1374,7 @@ static int sc_pkcs15emu_sc_hsm_init (sc_pkcs15_card_t * p15card)
+ 	len -= 5;
+ 
+ 	free(p15card->tokeninfo->serial_number);
+-	p15card->tokeninfo->serial_number = calloc(len + 1, 1);
++	p15card->tokeninfo->serial_number = calloc(1, len + 1);
+ 	if (p15card->tokeninfo->serial_number == NULL) {
+ 		sc_pkcs15_card_clear(p15card);
+ 		LOG_FUNC_RETURN(card->ctx, SC_ERROR_OUT_OF_MEMORY);
+diff --git a/src/libopensc/pkcs15.c b/src/libopensc/pkcs15.c
+index 7596d929..b8c7dffe 100644
+--- a/src/libopensc/pkcs15.c
++++ b/src/libopensc/pkcs15.c
+@@ -550,7 +550,7 @@ sc_pkcs15_get_lastupdate(struct sc_pkcs15_card *p15card)
+ 	size = file->size ? file->size : 1024;
+ 	sc_file_free(file);
+ 
+-	content = calloc(size, 1);
++	content = calloc(1, size);
+ 	if (!content)
+ 		return NULL;
+ 
+diff --git a/src/pkcs15init/pkcs15-lib.c b/src/pkcs15init/pkcs15-lib.c
+index cca11d1f..51fa2f09 100644
+--- a/src/pkcs15init/pkcs15-lib.c
++++ b/src/pkcs15init/pkcs15-lib.c
+@@ -3703,7 +3703,7 @@ sc_pkcs15init_update_certificate(struct sc_pkcs15_card *p15card,
+ 
+ 	/* Fill the remaining space in the EF (if any) with zeros */
+ 	if (certlen < file->size) {
+-		unsigned char *tmp = calloc(file->size - certlen, 1);
++		unsigned char *tmp = calloc(1, file->size - certlen);
+ 		if (tmp == NULL) {
+ 			r = SC_ERROR_OUT_OF_MEMORY;
+ 			goto done;
+diff --git a/src/pkcs15init/pkcs15-openpgp.c b/src/pkcs15init/pkcs15-openpgp.c
+index f4ff77d4..553c8ace 100644
+--- a/src/pkcs15init/pkcs15-openpgp.c
++++ b/src/pkcs15init/pkcs15-openpgp.c
+@@ -235,13 +235,13 @@ static int openpgp_generate_key_rsa(sc_card_t *card, sc_pkcs15_object_t *obj,
+ 
+ 	/* Prepare buffer */
+ 	key_info.u.rsa.modulus_len = required->modulus_length;
+-	key_info.u.rsa.modulus = calloc(BYTES4BITS(required->modulus_length), 1);
++	key_info.u.rsa.modulus = calloc(1, BYTES4BITS(required->modulus_length));
+ 	if (key_info.u.rsa.modulus == NULL)
+ 		LOG_FUNC_RETURN(ctx, SC_ERROR_NOT_ENOUGH_MEMORY);
+ 
+ 	/* The OpenPGP supports only 32-bit exponent. */
+ 	key_info.u.rsa.exponent_len = 32;
+-	key_info.u.rsa.exponent = calloc(BYTES4BITS(key_info.u.rsa.exponent_len), 1);
++	key_info.u.rsa.exponent = calloc(1, BYTES4BITS(key_info.u.rsa.exponent_len));
+ 	if (key_info.u.rsa.exponent == NULL) {
+ 		free(key_info.u.rsa.modulus);
+ 		LOG_FUNC_RETURN(ctx, SC_ERROR_NOT_ENOUGH_MEMORY);
+@@ -253,14 +253,14 @@ static int openpgp_generate_key_rsa(sc_card_t *card, sc_pkcs15_object_t *obj,
+ 	pubkey->algorithm = SC_ALGORITHM_RSA;
+ 	sc_log(ctx, "Set output modulus info");
+ 	pubkey->u.rsa.modulus.len = BYTES4BITS(key_info.u.rsa.modulus_len);
+-	pubkey->u.rsa.modulus.data = calloc(pubkey->u.rsa.modulus.len, 1);
++	pubkey->u.rsa.modulus.data = calloc(1, pubkey->u.rsa.modulus.len);
+ 	if (pubkey->u.rsa.modulus.data == NULL)
+ 		goto err;
+ 	memcpy(pubkey->u.rsa.modulus.data, key_info.u.rsa.modulus, BYTES4BITS(key_info.u.rsa.modulus_len));
+ 
+ 	sc_log(ctx, "Set output exponent info");
+ 	pubkey->u.rsa.exponent.len = BYTES4BITS(key_info.u.rsa.exponent_len);
+-	pubkey->u.rsa.exponent.data = calloc(pubkey->u.rsa.exponent.len, 1);
++	pubkey->u.rsa.exponent.data = calloc(1, pubkey->u.rsa.exponent.len);
+ 	if (pubkey->u.rsa.exponent.data == NULL)
+ 		goto err;
+ 	memcpy(pubkey->u.rsa.exponent.data, key_info.u.rsa.exponent, pubkey->u.rsa.exponent.len);
+diff --git a/src/sm/sm-iso.c b/src/sm/sm-iso.c
+index 226d1cee..4d4e3f59 100644
+--- a/src/sm/sm-iso.c
++++ b/src/sm/sm-iso.c
+@@ -482,7 +482,7 @@ static int sm_encrypt(const struct iso_sm_ctx *ctx, sc_card_t *card,
+ 		if (sm_apdu->resplen > SC_MAX_APDU_RESP_SIZE)
+ 			sm_apdu->resplen = SC_MAX_APDU_RESP_SIZE;
+ 	}
+-	resp_data = calloc(sm_apdu->resplen, 1);
++	resp_data = calloc(1, sm_apdu->resplen);
+ 	if (!resp_data) {
+ 		r = SC_ERROR_OUT_OF_MEMORY;
+ 		goto err;
+diff --git a/src/tests/p11test/p11test_helpers.c b/src/tests/p11test/p11test_helpers.c
+index 9a27ab69..69df47c1 100644
+--- a/src/tests/p11test/p11test_helpers.c
++++ b/src/tests/p11test/p11test_helpers.c
+@@ -105,7 +105,7 @@ void logfile_finalize(token_info_t *info)
+ 
+ int group_setup(void **state)
+ {
+-	token_info_t * info = calloc(sizeof(token_info_t), 1);
++	token_info_t * info = calloc(1, sizeof(token_info_t));
+ 
+ 	assert_non_null(info);
+ 
+diff --git a/src/tools/goid-tool.c b/src/tools/goid-tool.c
+index 4f16f014..c4a11475 100644
+--- a/src/tools/goid-tool.c
++++ b/src/tools/goid-tool.c
+@@ -583,9 +583,9 @@ int paccess_main(struct sc_context *ctx, sc_card_t *card, struct gengetopt_args_
+                     SC_ERROR_INVALID_ARGUMENTS, "Could not parse private key.\n");
+         }
+ 
+-        certs = calloc(sizeof *certs, cmdline->certificate_given + 1);
+-        certs_lens = calloc(sizeof *certs_lens,
+-                cmdline->certificate_given + 1);
++        certs = calloc(cmdline->certificate_given + 1, sizeof *certs);
++        certs_lens = calloc(cmdline->certificate_given + 1,
++                sizeof *certs_lens);
+         if (!certs || !certs_lens) {
+             SC_TEST_GOTO_ERR(ctx, SC_LOG_DEBUG_VERBOSE_TOOL, SC_ERROR_NOT_ENOUGH_MEMORY,
+                     "Internal error.");
+diff --git a/src/tools/npa-tool.c b/src/tools/npa-tool.c
+index 890cde2a..b7dbac64 100644
+--- a/src/tools/npa-tool.c
++++ b/src/tools/npa-tool.c
+@@ -575,9 +575,9 @@ main (int argc, char **argv)
+ 				exit(1);
+ 			}
+ 
+-			certs = calloc(sizeof *certs, cmdline.cv_certificate_given + 1);
+-			certs_lens = calloc(sizeof *certs_lens,
+-					cmdline.cv_certificate_given + 1);
++			certs = calloc(cmdline.cv_certificate_given + 1, sizeof *certs);
++			certs_lens = calloc(cmdline.cv_certificate_given + 1,
++					 sizeof *certs_lens);
+ 			if (!certs || !certs_lens) {
+ 				r = SC_ERROR_OUT_OF_MEMORY;
+ 				goto err;
+diff --git a/src/tools/openpgp-tool.c b/src/tools/openpgp-tool.c
+index 36c3e281..dfd72eab 100644
+--- a/src/tools/openpgp-tool.c
++++ b/src/tools/openpgp-tool.c
+@@ -534,9 +534,9 @@ int do_genkey(sc_card_t *card, u8 in_key_id, const char *keytype)
+ 		key_info.key_id = in_key_id;
+ 		key_info.algorithm = SC_OPENPGP_KEYALGO_RSA;
+ 		key_info.u.rsa.modulus_len = keylen;
+-		key_info.u.rsa.modulus = calloc(BYTES4BITS(keylen), 1);
++		key_info.u.rsa.modulus = calloc(1, BYTES4BITS(keylen));
+ 		key_info.u.rsa.exponent_len = expolen;
+-		key_info.u.rsa.exponent = calloc(BYTES4BITS(expolen), 1);
++		key_info.u.rsa.exponent = calloc(1, BYTES4BITS(expolen));
+ 		key_info.u.rsa.keyformat = keyformat;
+ 
+ 		r = sc_card_ctl(card, SC_CARDCTL_OPENPGP_GENERATE_KEY, &key_info);
+diff --git a/src/tools/opensc-explorer.c b/src/tools/opensc-explorer.c
+index 4e781db1..4aa58701 100644
+--- a/src/tools/opensc-explorer.c
++++ b/src/tools/opensc-explorer.c
+@@ -772,7 +772,7 @@ static int read_and_print_binary_file(sc_file_t *file)
+ 	size_t size = (file->size > 0) ? file->size : SC_MAX_EXT_APDU_RESP_SIZE;
+ 	int r, ret = -1;
+ 
+-	buf = calloc(size, 1);
++	buf = calloc(1, size);
+ 	if (buf == NULL)
+ 		return -1;
+ 
+diff --git a/src/tools/pkcs11-tool.c b/src/tools/pkcs11-tool.c
+index be572d01..18559f52 100644
+--- a/src/tools/pkcs11-tool.c
++++ b/src/tools/pkcs11-tool.c
+@@ -8251,7 +8251,7 @@ static CK_BYTE_PTR get_iv(const char *iv_input, size_t *iv_size)
+ 		return NULL;
+ 	}
+ 
+-	iv = calloc(sizeof(CK_BYTE), *iv_size);
++	iv = calloc(*iv_size, sizeof(CK_BYTE));
+ 	if (!iv) {
+ 		fprintf(stderr, "Warning, out of memory, IV will not be used.\n");
+ 		*iv_size = 0;
+-- 
+2.43.0
+
