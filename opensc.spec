@@ -1,6 +1,6 @@
 Name:           opensc
-Version:        0.24.0
-Release:        2%{?dist}
+Version:        0.25.0
+Release:        1%{?dist}
 Summary:        Smart card library and applications
 
 License:        LGPL-2.1-or-later AND BSD 3-Clause
@@ -10,8 +10,6 @@ Source1:        opensc.module
 Patch1:         opensc-0.19.0-pinpad.patch
 # File caching by default (#2000626)
 Patch8:         %{name}-0.22.0-file-cache.patch
-# https://github.com/OpenSC/OpenSC/pull/2996
-Patch9:         opensc-0.24.0-gcc14.patch
 
 BuildRequires:  make
 BuildRequires:  pcsc-lite-devel
@@ -51,7 +49,6 @@ every software/card that does so, too.
 %setup -q
 %patch1 -p1 -b .pinpad
 %patch8 -p1 -b .file-cache
-%patch -P9 -p1 -b .gcc14
 
 # The test-pkcs11-tool-allowed-mechanisms already works in Fedora
 sed -i -e '/XFAIL_TESTS/,$ {
@@ -167,6 +164,7 @@ rm %{buildroot}%{_mandir}/man1/opensc-notify.1*
 %{_bindir}/westcos-tool
 %{_bindir}/egk-tool
 %{_bindir}/goid-tool
+%{_bindir}/dtrust-tool
 %{_libdir}/lib*.so.*
 %{_libdir}/opensc-pkcs11.so
 %{_libdir}/pkcs11-spy.so
@@ -196,10 +194,14 @@ rm %{buildroot}%{_mandir}/man1/opensc-notify.1*
 %{_mandir}/man1/westcos-tool.1*
 %{_mandir}/man1/dnie-tool.1*
 %{_mandir}/man1/egk-tool.1*
+%{_mandir}/man1/dtrust-tool.1*
 %{_mandir}/man5/pkcs15-profile.5*
 
 
 %changelog
+* Thu Mar 07 2024 Veronika Hanulikova <vhanulik@redhat.com> - 0.25.0-1
+- New upstream release (#2265003), fixes CVE-2023-5992 and CVE-2024-1454 (#2263930)
+
 * Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.24.0-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
 
