@@ -18,7 +18,11 @@ BuildRequires:  openssl-devel
 BuildRequires:  /usr/bin/xsltproc
 BuildRequires:  docbook-style-xsl
 BuildRequires:  autoconf automake libtool gcc
+%if 0%{?fedora} > 40 || 0%{?rhel} > 10
+BuildRequires:  bash-completion-devel
+%else
 BuildRequires:  bash-completion
+%endif
 BuildRequires:  zlib-devel
 # For tests
 BuildRequires:  libcmocka-devel
