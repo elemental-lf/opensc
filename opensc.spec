@@ -1,5 +1,5 @@
 Name:           opensc
-Version:        0.25.0
+Version:        0.25.1
 Release:        1%{?dist}
 Summary:        Smart card library and applications
 
@@ -203,6 +203,9 @@ rm %{buildroot}%{_mandir}/man1/opensc-notify.1*
 
 
 %changelog
+* Thu Apr 11 2024 Veronika Hanulikova <vhanulik@redhat.com> - 0.25.1-1
+- New upstream release (#2273708)
+
 * Thu Mar 07 2024 Veronika Hanulikova <vhanulik@redhat.com> - 0.25.0-1
 - New upstream release (#2265003), fixes CVE-2023-5992 and CVE-2024-1454 (#2263930)
 
