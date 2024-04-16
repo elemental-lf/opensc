@@ -1,6 +1,6 @@
 Name:           opensc
 Version:        0.25.1
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Smart card library and applications
 
 License:        LGPL-2.1-or-later AND BSD-3-Clause
@@ -203,6 +203,9 @@ rm %{buildroot}%{_mandir}/man1/opensc-notify.1*
 
 
 %changelog
+* Tue Apr 16 2024 Veronika Hanulikova <vhanulik@redhat.com> - 0.25.1-2
+- Fix license identifier in spec file
+
 * Thu Apr 11 2024 Veronika Hanulikova <vhanulik@redhat.com> - 0.25.1-1
 - New upstream release (#2273708)
 
