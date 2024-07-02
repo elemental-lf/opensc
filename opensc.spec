@@ -33,6 +33,7 @@ BuildRequires:  vim-common
 BuildRequires:  softhsm
 %endif
 BuildRequires:  openssl
+BuildRequires:  openpace-devel
 Requires:       pcsc-lite-libs%{?_isa}
 Requires:       pcsc-lite
 Obsoletes:      mozilla-opensc-signer < 0.12.0
@@ -203,6 +204,10 @@ rm %{buildroot}%{_mandir}/man1/opensc-notify.1*
 %{_mandir}/man1/egk-tool.1*
 %{_mandir}/man1/dtrust-tool.1*
 %{_mandir}/man5/pkcs15-profile.5*
+
+# For OpenPACE
+%config(noreplace) %{_sysconfdir}/eac/cvc/DESCHSMCVCA00001
+%config(noreplace) %{_sysconfdir}/eac/cvc/DESRCACC100001
 
 
 %changelog
