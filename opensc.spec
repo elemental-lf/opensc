@@ -1,6 +1,6 @@
 Name:           opensc
 Version:        0.25.1
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        Smart card library and applications
 
 License:        LGPL-2.1-or-later AND BSD-3-Clause
@@ -211,6 +211,9 @@ rm %{buildroot}%{_mandir}/man1/opensc-notify.1*
 
 
 %changelog
+* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.25.1-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+
 * Tue Jul 09 2024 Veronika Hanulikova <vhanulik@redhat.com> - 0.25.1-3
 - Build OpenSC with OpenPACE
 - Allow OpenSSL engine header only for version <3.0
