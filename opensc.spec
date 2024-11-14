@@ -1,6 +1,6 @@
 Name:           opensc
-Version:        0.25.1
-Release:        5%{?dist}
+Version:        0.26.0
+Release:        1%{?dist}
 Summary:        Smart card library and applications
 
 License:        LGPL-2.1-or-later AND BSD-3-Clause
@@ -10,10 +10,6 @@ Source1:        opensc.module
 Patch1:         opensc-0.19.0-pinpad.patch
 # File caching by default (#2000626)
 Patch8:         %{name}-0.22.0-file-cache.patch
-# https://github.com/OpenSC/OpenSC/pull/3194
-Patch9:         %{name}-0.25.1-no-engine.patch
-# https://github.com/OpenSC/OpenSC/pull/3150
-Patch10:        %{name}-0.25.1-pcsc-reconnect.patch
 
 BuildRequires:  make
 BuildRequires:  pcsc-lite-devel
@@ -65,8 +61,6 @@ OpenSC libraries.
 %setup -q
 %patch 1 -p1 -b .pinpad
 %patch 8 -p1 -b .file-cache
-%patch 9 -p1 -b .no-engine
-%patch 10 -p1 -b .pcsc-reconnect
 
 XFAIL_TESTS="test-pkcs11-tool-test-threads.sh test-pkcs11-tool-test.sh"
 
@@ -239,6 +233,12 @@ rm %{buildroot}%{_mandir}/man1/opensc-notify.1*
 
 
 %changelog
+* Thu Nov 14 2024 Veronika Hanulikova <vhanulik@redhat.com> - 0.26.0-1
+- New upstream release (#2311896)
+- Separate OpenSC into libraries and binaries
+- Change expected test failures in FIPS mode
+- Do not build with OpenPACE on RHEL
+
 * Wed Oct 16 2024 Veronika Hanulikova <vhanulik@redhat.com> - 0.25.1-5
 - Fix unhandled error on reconnection in PCSC driver (#2316432)
 
