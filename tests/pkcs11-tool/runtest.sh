@@ -195,7 +195,14 @@ rlJournalStart
             done
         rlPhaseEnd
 
-        for HASH in "" "SHA1" "SHA224" "SHA256" "SHA384" "SHA512"; do
+        if rlIsFedora "<41"; then
+            HASHES=("" "SHA1" "SHA224" "SHA256" "SHA384" "SHA512")
+        else
+            # SHA1 is deprecated and removed from Fedora 41
+            HASHES=("" "SHA224" "SHA256" "SHA384" "SHA512")
+        fi
+
+        for HASH in ${HASHES[@]}; do
             for SIGN_KEY in "0001" "0002" "0003"; do
                 METHOD="RSA-PKCS"
                 if [[ ! -z $HASH ]]; then
