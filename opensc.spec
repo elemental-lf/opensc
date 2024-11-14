@@ -33,9 +33,9 @@ BuildRequires:  libcmocka-devel
 BuildRequires:  vim-common
 %if ! 0%{?rhel}
 BuildRequires:  softhsm
-%endif
 BuildRequires:  openssl
 BuildRequires:  openpace-devel
+%endif
 Requires:       %{name}-libs = %{version}-%{release}
 Requires:       pcsc-lite
 Obsoletes:      mozilla-opensc-signer < 0.12.0
@@ -138,9 +138,10 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libopensc.so
 rm -f $RPM_BUILD_ROOT%{_libdir}/pkgconfig/*.pc
 rm -f $RPM_BUILD_ROOT%{_libdir}/libsmm-local.so
 
-# the npa-tool builds to nothing since we do not have OpenPACE library
+%if 0%{?rhel}
 rm -rf %{buildroot}%{_bindir}/npa-tool
 rm -rf %{buildroot}%{_mandir}/man1/npa-tool.1*
+%endif
 
 # the pkcs11-register is not applicable to Fedora/RHEL where we use p11-kit
 rm -rf %{buildroot}%{_bindir}/pkcs11-register
@@ -163,6 +164,9 @@ rm %{buildroot}%{_mandir}/man1/opensc-notify.1*
 %{_bindir}/iasecc-tool
 %{_bindir}/gids-tool
 %{_bindir}/netkey-tool
+%if ! 0%{?rhel}
+%{_bindir}/npa-tool
+%endif
 %{_bindir}/openpgp-tool
 %{_bindir}/opensc-explorer
 %{_bindir}/opensc-tool
@@ -186,6 +190,9 @@ rm %{buildroot}%{_mandir}/man1/opensc-notify.1*
 %{_mandir}/man1/goid-tool.1*
 %{_mandir}/man1/iasecc-tool.1*
 %{_mandir}/man1/netkey-tool.1*
+%if ! 0%{?rhel}
+%{_mandir}/man1/npa-tool.1*
+%endif
 %{_mandir}/man1/openpgp-tool.1*
 %{_mandir}/man1/opensc-explorer.*
 %{_mandir}/man1/opensc-tool.1*
@@ -225,8 +232,10 @@ rm %{buildroot}%{_mandir}/man1/opensc-notify.1*
 %{_libdir}/pkcs11/pkcs11-spy.so
 
 # For OpenPACE
+%if ! 0%{?rhel}
 %config(noreplace) %{_sysconfdir}/eac/cvc/DESCHSMCVCA00001
 %config(noreplace) %{_sysconfdir}/eac/cvc/DESRCACC100001
+%endif
 
 
 %changelog
