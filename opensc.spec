@@ -68,12 +68,18 @@ OpenSC libraries.
 %patch 9 -p1 -b .no-engine
 %patch 10 -p1 -b .pcsc-reconnect
 
-# The test-pkcs11-tool-allowed-mechanisms already works in Fedora
-sed -i -e '/XFAIL_TESTS/,$ {
-  s/XFAIL_TESTS.*/XFAIL_TESTS=test-pkcs11-tool-test-threads.sh test-pkcs11-tool-test.sh/
-  q
-}' tests/Makefile.am
+XFAIL_TESTS="test-pkcs11-tool-test-threads.sh test-pkcs11-tool-test.sh"
 
+# In FIPS mode, OpenSSL doesn't allow RSA-PKCS, this is hardcoded into OpenSSL
+# and we cannot influence it. Hence, the test is expected to fail in FIPS mode.
+if [[ -f "/proc/sys/crypto/fips_enabled" && $(cat /proc/sys/crypto/fips_enabled) == "1" ]]; then
+	XFAIL_TESTS+=" test-pkcs11-tool-unwrap-wrap-test.sh test-p11test.sh"
+fi
+
+sed -i -e "/XFAIL_TESTS/,$ {
+  s/XFAIL_TESTS.*/XFAIL_TESTS=$XFAIL_TESTS/
+  q
+}" tests/Makefile.am
 
 cp -p src/pkcs15init/README ./README.pkcs15init
 cp -p src/scconf/README.scconf .
